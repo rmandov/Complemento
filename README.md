@@ -1,3 +1,20 @@
+# TopoJSON
+
+https://mapshaper.org/
+
+Verifica que esté en WGS84
+Antes de exportar en mapshaper.
+
+Asegúrate de hacer esto:
+Carga tu .shp
+En la consola de mapshaper (abajo), escribe:
+plain
+
+$ proj wgs84
+
+Luego exporta como GeoJSON
+Si no haces proj wgs84, el archivo seguirá con coordenadas proyectadas (en metros) y Leaflet no lo mostrará.
+
 # Complemento
 
 This template should help get you started developing with Vue 3 in Vite.
