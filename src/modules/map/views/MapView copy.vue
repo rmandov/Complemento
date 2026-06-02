@@ -30,7 +30,7 @@ onMounted(async () => {
 
   if (entidades && map.value) {
     // Añadir la capa GeoJSON al mapa existente
-    const estadosCapa = L.geoJSON(entidades, {
+    L.geoJSON(entidades, {
       style: { color: '#1565C0', weight: 1.2, fillColor: '#90CAF9', fillOpacity: 0.5 },
       onEachFeature: (feature, layer) => {
         const nombre = feature.properties.NOMGEO || 'Estado'
@@ -38,16 +38,7 @@ onMounted(async () => {
         layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }))
         layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }))
       },
-    });
-
-    estadosCapa.addTo(map.value);
-
-     requestAnimationFrame(() => {
-      estadosCapa.setStyle({
-        fillOpacity: 0.5,
-        opacity: 1,
-      })
-    })
+    }).addTo(map.value)
   }
 })
 </script>
@@ -63,9 +54,5 @@ onMounted(async () => {
 .map {
   width: 100%;
   height: 500px;
-}
-
-.fade-in-states .leaflet-interactive {
-  transition: fill-opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.6s ease-out;
 }
 </style>

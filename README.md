@@ -15,6 +15,14 @@ $ proj wgs84
 Luego exporta como GeoJSON
 Si no haces proj wgs84, el archivo seguirá con coordenadas proyectadas (en metros) y Leaflet no lo mostrará.
 
+/*
+const response = await fetch('/entidades.json')
+const topology = await response.json()
+
+topology.objects['00ent'].geometries[0].properties
+*/
+
+
 # Complemento
 
 This template should help get you started developing with Vue 3 in Vite.
