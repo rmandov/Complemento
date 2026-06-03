@@ -64,22 +64,24 @@ onMounted(async () => {
           const entidad_clickeada = layer.feature.properties.NOMGEO
 
           async function gestionEntidadClick(nombre_entidad) {
-            console.log('Entidad clickeada: \n', nombre_entidad)
+            const entidad_json = nombre_entidad.toLowerCase().replaceAll(' ', '_')
 
             // Esta carga de municipios le pertenecera a controlesMunicipio
-            //    1. Eliminar capa de estados
-            /* console.log('Layer: \n', layer) */
-            map.value.removeLayer(layer);
+            //    1. Eliminar de la capa de estados el polígono del estado que fue seleccionado, para poder aplicar sus municipios como nueva capa
+            map.value.removeLayer(layer)
             /* remove_entidades() */
-            //    2. Carga de municipios del estado seleecinado
-            const encuadre_entidad = layer.getBounds();
-            console.log("Este es el rectangulo que compone la entidad seleccionada: ", encuadre_entidad);
-            flyToBounds(encuadre_entidad);
-            console.log("Encuadre entidad: ", currentBounds);
 
+            //    2. Carga de municipios del estado
+            await carga_municipios(entidad_json)
 
-
-            /* const layer = ref(null); */
+            //    3. Carga de municipios del estado seleecinado
+            const encuadre_entidad = layer.getBounds()
+            console.log(
+              'Este es el rectangulo que compone la entidad seleccionada: ',
+              encuadre_entidad,
+            )
+            flyToBounds(encuadre_entidad)
+            console.log('Encuadre entidad: ', currentBounds)
           }
 
           gestionEntidadClick(entidad_clickeada)
@@ -87,21 +89,58 @@ onMounted(async () => {
       },
     })
 
-    console.log('estadosCapa: ', estadosCapa)
-
     estadosCapa.addTo(map.value)
 
     // Esta función puede incluirse en la carga de un estado seleccionado
     const remove_entidades = () => {
       if (estadosCapa) {
-        /* console.log("Este es el rectangulo que compone mexico: ", estadosCapa.getBounds()); */
         map.value.removeLayer(estadosCapa)
         estadosCapa.value = null
       }
     }
 
-    /* console.log('Esta es la capa de estados: ', estadosCapa)
-    console.log('Este es el encuadre actual: ', currentBounds.value) */
+    // Esta funcion se puede intregar en un composable para carga de municipios
+    const carga_municipios = async (estado) => {
+      try {
+        // 1. Carga de los poligonos del los municipios del estado seleccionado
+        const response = await fetch(`/municipios/${estado}.json`)
+        const geojson = await response.json()
+        console.log('Municipios: \n', geojson)
+
+        // 2. Crear layer
+        const municipiosCapa = L.geoJSON(
+          geojson,
+          {
+            style: {
+              color: '#D32F2F',
+              weight: 1,
+              fillColor: '#FFCDD2',
+              fillOpacity: 0.6,
+            },
+
+            onEachFeature: (feature, layer) => {
+              const municipio_nombre = feature.properties.NOMGEO || "Municipio";
+              layer.bindTooltip(municipio_nombre);
+
+            layer.on('mouseover',
+                      () => {
+                        layer.setStyle({
+                          fillOpacity: 0.9,
+                          weight: 1.5,
+                          color: '#B71C1C' })
+                      })
+            layer.on('mouseout',
+                      () => {
+                        layer.setStyle({ fillOpacity: 0.6, weight: 1, color: '#D32F2F' })
+                      })
+            }
+          });
+
+        municipiosCapa.addTo(map.value);
+      } catch (err) {
+        console.error('Error cargando municipios:', err)
+      }
+    }
 
     requestAnimationFrame(() => {
       estadosCapa.setStyle({
