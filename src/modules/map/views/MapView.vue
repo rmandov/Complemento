@@ -67,10 +67,17 @@ onMounted(async () => {
             console.log('Entidad clickeada: \n', nombre_entidad)
 
             // Esta carga de municipios le pertenecera a controlesMunicipio
+            //    1. Eliminar capa de estados
+            /* console.log('Layer: \n', layer) */
+            map.value.removeLayer(layer);
+            /* remove_entidades() */
+            //    2. Carga de municipios del estado seleecinado
+            const encuadre_entidad = layer.getBounds();
+            console.log("Este es el rectangulo que compone la entidad seleccionada: ", encuadre_entidad);
+            flyToBounds(encuadre_entidad);
+            console.log("Encuadre entidad: ", currentBounds);
 
-            // Eliminar capa de estados
-            console.log('Layer: \n', layer)
-            remove_entidades()
+
 
             /* const layer = ref(null); */
           }
@@ -84,15 +91,17 @@ onMounted(async () => {
 
     estadosCapa.addTo(map.value)
 
+    // Esta función puede incluirse en la carga de un estado seleccionado
     const remove_entidades = () => {
       if (estadosCapa) {
+        /* console.log("Este es el rectangulo que compone mexico: ", estadosCapa.getBounds()); */
         map.value.removeLayer(estadosCapa)
         estadosCapa.value = null
       }
     }
 
-    console.log('Esta es la capa de estados: ', estadosCapa)
-    console.log('Este es el encuadre actual: ', currentBounds.value)
+    /* console.log('Esta es la capa de estados: ', estadosCapa)
+    console.log('Este es el encuadre actual: ', currentBounds.value) */
 
     requestAnimationFrame(() => {
       estadosCapa.setStyle({

@@ -1,37 +1,37 @@
-import { ref } from 'vue'
-import L from 'leaflet'
+import { ref } from "vue";
+import L from "leaflet";
 
 export function useMap(containerRef) {
-  const map = ref(null)
-  const currentBounds = ref(null)
+  const map = ref(null);
+  const currentBounds = ref(null);
 
   const init = () => {
-    map.value = L.map(containerRef.value).setView([23.6345, -102.5528], 5)
+    map.value = L.map(containerRef.value).setView([23.6345, -102.5528], 5);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors | SHCP',
-    }).addTo(map.value)
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors | SHCP",
+    }).addTo(map.value);
 
-    return map.value
-  }
+    return map.value;
+  };
 
   const flyToBounds = (bounds, zoom = 8) => {
-    if (!map.value) return
+    if (!map.value) return;
     map.value.flyToBounds(bounds, {
-      padding: [50, 50],
-      duration: 1.2,
+      padding: [25, 25],
+      duration: 0.7,
       easeLinearity: 0.25,
-    })
-    currentBounds.value = bounds
-  }
+    });
+    currentBounds.value = bounds;
+  };
 
   const resetView = () => {
-    if (!map.value) return
+    if (!map.value) return;
     map.value.flyTo([23.6345, -102.5528], 5, {
       duration: 1.2,
-    })
-    currentBounds.value = null
-  }
+    });
+    currentBounds.value = null;
+  };
 
   return {
     map,
@@ -39,5 +39,5 @@ export function useMap(containerRef) {
     flyToBounds,
     resetView,
     currentBounds,
-  }
+  };
 }
