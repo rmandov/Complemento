@@ -11,22 +11,22 @@ const mapContainer = ref(null)
 const { map, initMap, resetView } = useMap(mapContainer)
 
 const geoJsonPromise = fetch('/entidades.json')
-  .then(res => res.json())
-  .catch(err => {
+  .then((res) => res.json())
+  .catch((err) => {
     console.error('Error cargando estados:', err)
     return null
   })
 
 async function goBack() {
-  resetView();
+  resetView()
 }
 
 onMounted(async () => {
   // Carga del mapa centrado en Mexico
-  initMap();
+  initMap()
 
   // Cargamos las entidades
-  const entidades = await geoJsonPromise;
+  const entidades = await geoJsonPromise
 
   if (entidades && map.value) {
     // Añadir la capa GeoJSON al mapa existente

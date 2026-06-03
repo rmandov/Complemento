@@ -9,7 +9,7 @@ onMounted(async () => {
   const map = L.map(mapContainer.value).setView([23.6345, -102.5528], 5)
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors | SHCP'
+    attribution: '&copy; OpenStreetMap contributors | SHCP',
   }).addTo(map)
 
   try {
@@ -22,13 +22,14 @@ onMounted(async () => {
         color: '#1565C0',
         weight: 1.5,
         fillColor: '#90CAF9',
-        fillOpacity: 0.5
+        fillOpacity: 0.5,
       },
       onEachFeature: (feature, layer) => {
-        const nombre = feature.properties.NOMGEO ||
-                        feature.properties.name ||
-                        feature.properties.estado ||
-                        'Estado'
+        const nombre =
+          feature.properties.NOMGEO ||
+          feature.properties.name ||
+          feature.properties.estado ||
+          'Estado'
         layer.bindTooltip(nombre)
 
         layer.on('mouseover', () => {
@@ -37,12 +38,11 @@ onMounted(async () => {
         layer.on('mouseout', () => {
           layer.setStyle({ fillOpacity: 0.5, weight: 1.5, color: '#1565C0' })
         })
-      }
+      },
     }).addTo(map)
 
     // Centra el mapa en los estados
     map.fitBounds(capa.getBounds())
-
   } catch (err) {
     console.error('Error cargando GeoJSON:', err)
   }
