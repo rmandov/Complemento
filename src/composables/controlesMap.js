@@ -1,10 +1,10 @@
-import { shallowRef, ref, onUnmounted } from "vue";
-import L from "leaflet";
+import { shallowRef, ref, onUnmounted } from 'vue'
+import L from 'leaflet'
 
 export function useMap(containerRef) {
   // shallowRef evita la reactividad profunda (más rápido)
-  const map = shallowRef(null);
-  const currentBounds = ref(null); // Encuadre actual
+  const map = shallowRef(null)
+  const currentBounds = ref(null) // Encuadre actual
 
   /* const mexicoBounds = [
     [14.5, -118.5], // Suroeste
@@ -12,13 +12,13 @@ export function useMap(containerRef) {
   ]; */
 
   const initMap = () => {
-    if (!containerRef.value || map.value) return;
+    if (!containerRef.value || map.value) return
     map.value = L.map(containerRef.value, {
       minZoom: 5,
       /*
       maxBounds: mexicoBounds,
       maxBoundsViscosity: 1, */
-    }).setView([23.6345, -102.5528], 5);
+    }).setView([23.6345, -102.5528], 5)
 
     // Se añade mapa de OpenStreetMap
     /*
@@ -32,19 +32,19 @@ export function useMap(containerRef) {
 
     */
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
+      subdomains: 'abcd',
       maxZoom: 20,
-    }).addTo(map.value);
-  };
+    }).addTo(map.value)
+  }
 
   // Me regresa al encuadre de Mexico
   const resetView = () => {
-    if (!map.value) return;
-    map.value.flyTo([23.6345, -102.5528], 5, { animate: true, duration: 0.8, easeLinearity: 0.1 });
-  };
+    if (!map.value) return
+    map.value.flyTo([23.6345, -102.5528], 5, { animate: true, duration: 0.8, easeLinearity: 0.1 })
+  }
 
   // Me desplazo al encuadre seleccionado
   /* const flyToBounds = (bounds, zoom = 5) => {
@@ -58,23 +58,23 @@ export function useMap(containerRef) {
   }; */
 
   const flyToBounds = (bounds) => {
-    if (!map.value || !bounds) return;
+    if (!map.value || !bounds) return
 
     map.value.flyToBounds(bounds, {
       padding: [0, 0],
-      duration: 0.7,
-    });
+      duration: 0.5,
+    })
 
-    currentBounds.value = bounds;
-  };
+    currentBounds.value = bounds
+  }
 
   // Limpieza para evitar fugas de memoria
   onUnmounted(() => {
     if (map.value) {
-      map.value.remove();
-      map.value = null;
+      map.value.remove()
+      map.value = null
     }
-  });
+  })
 
-  return { map, initMap, resetView, flyToBounds, currentBounds };
+  return { map, initMap, resetView, flyToBounds, currentBounds }
 }

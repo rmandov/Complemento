@@ -23,9 +23,7 @@ async function goBack() {
 
 onMounted(async () => {
   // Carga del mapa centrado en Mexico
-  /* console.log("Este es el mapa antes: ", map.value); */
   initMap()
-  /* console.log("Este es el mapa despues: ", map.value); */
 
   // Cargamos las entidades
   const entidades = await geoJsonPromise
@@ -39,9 +37,9 @@ onMounted(async () => {
         fillColor: '#90CAF9',
         fillOpacity: 0.5,
       },
+
       onEachFeature: (feature, layer) => {
         // Tooltip
-
         const nombre = feature.properties.NOMGEO || 'Estado'
         layer.bindTooltip(nombre)
 
@@ -64,7 +62,12 @@ onMounted(async () => {
           const entidad_clickeada = layer.feature.properties.NOMGEO
 
           async function gestionEntidadClick(nombre_entidad) {
-            const entidad_json = nombre_entidad.toLowerCase().replaceAll(' ', '_')
+            const entidad_json = nombre_entidad
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replaceAll(' ', '_')
+            console.log(entidad_json)
 
             // Esta carga de municipios le pertenecera a controlesMunicipio
             //    1. Eliminar de la capa de estados el polígono del estado que fue seleccionado, para poder aplicar sus municipios como nueva capa
@@ -88,7 +91,6 @@ onMounted(async () => {
         })
       },
     })
-
     estadosCapa.addTo(map.value)
 
     // Esta función puede incluirse en la carga de un estado seleccionado
@@ -108,46 +110,36 @@ onMounted(async () => {
         console.log('Municipios: \n', geojson)
 
         // 2. Crear layer
-        const municipiosCapa = L.geoJSON(
-          geojson,
-          {
-            style: {
-              color: '#D32F2F',
-              weight: 1,
-              fillColor: '#FFCDD2',
-              fillOpacity: 0.6,
-            },
+        const municipiosCapa = L.geoJSON(geojson, {
+          style: {
+            color: '#D32F2F',
+            weight: 1,
+            fillColor: '#FFCDD2',
+            fillOpacity: 0.6,
+          },
 
-            onEachFeature: (feature, layer) => {
-              const municipio_nombre = feature.properties.NOMGEO || "Municipio";
-              layer.bindTooltip(municipio_nombre);
+          onEachFeature: (feature, layer) => {
+            const municipio_nombre = feature.properties.NOMGEO || 'Municipio'
+            layer.bindTooltip(municipio_nombre)
 
-            layer.on('mouseover',
-                      () => {
-                        layer.setStyle({
-                          fillOpacity: 0.9,
-                          weight: 1.5,
-                          color: '#B71C1C' })
-                      })
-            layer.on('mouseout',
-                      () => {
-                        layer.setStyle({ fillOpacity: 0.6, weight: 1, color: '#D32F2F' })
-                      })
-            }
-          });
+            layer.on('mouseover', () => {
+              layer.setStyle({
+                fillOpacity: 0.9,
+                weight: 1.5,
+                color: '#B71C1C',
+              })
+            })
+            layer.on('mouseout', () => {
+              layer.setStyle({ fillOpacity: 0.6, weight: 1, color: '#D32F2F' })
+            })
+          },
+        })
 
-        municipiosCapa.addTo(map.value);
+        municipiosCapa.addTo(map.value)
       } catch (err) {
         console.error('Error cargando municipios:', err)
       }
     }
-
-    requestAnimationFrame(() => {
-      estadosCapa.setStyle({
-        fillOpacity: 0.5,
-        opacity: 1,
-      })
-    })
   }
 })
 </script>
@@ -163,11 +155,5 @@ onMounted(async () => {
 .map {
   width: 100%;
   height: 500px;
-}
-
-.fade-in-states .leaflet-interactive {
-  transition:
-    fill-opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1),
-    opacity 0.6s ease-out;
 }
 </style>
