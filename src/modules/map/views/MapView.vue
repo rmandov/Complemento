@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
 
 import { useMap } from '@/composables/controlesMap'
@@ -7,6 +7,17 @@ import { useMap } from '@/composables/controlesMap'
 import 'leaflet/dist/leaflet.css'
 
 const mapContainer = ref(null)
+
+/*
+Estado seleccionado, guardamos su valores:
+- Layer del estado
+- Nombre del estado
+
+Util en goBack function, al regresar a la vista de Mexico podemos volver a cargar el layer de la entidad y eliminar el layer del municipio
+*/
+const nombre_estado_seleccionado = ref(null)
+const layer_estado_seleccionado = shallowRef(null)
+const layer_municipios_seleccionado = shallowRef(null)
 
 const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContainer)
 
@@ -17,8 +28,16 @@ const geoJsonPromise = fetch('/entidades.json')
     return null
   })
 
+// Boton para regresa a la vista Mexico
 async function goBack() {
+  // 1. Se mueve a la vista completa de Mexico
   resetView()
+
+  // 2. Se elimina la capa de municipios
+  map.value.removeLayer(layer_municipios_seleccionado.value)
+
+  // 3. Se agrega la capa del estado completo
+  layer_estado_seleccionado.value.addTo(map.value)
 }
 
 onMounted(async () => {
@@ -58,8 +77,15 @@ onMounted(async () => {
         layer.on('click', (e) => {
           L.DomEvent.stopPropagation(e) // Evitar que el click llegue al mapa
 
+          // Resteo de styles
+          layer.setStyle({
+            fillOpacity: 0.5,
+            weight: 1.2,
+          })
+
           // Estado seleccionado
           const entidad_clickeada = layer.feature.properties.NOMGEO
+          console.log('Este es el estado clickeado: ', entidad_clickeada)
 
           async function gestionEntidadClick(nombre_entidad) {
             const entidad_json = nombre_entidad
@@ -71,6 +97,16 @@ onMounted(async () => {
 
             // Esta carga de municipios le pertenecera a controlesMunicipio
             //    1. Eliminar de la capa de estados el polígono del estado que fue seleccionado, para poder aplicar sus municipios como nueva capa
+
+            //      1.1. Primero se guarda la capa a eliminar
+            layer_estado_seleccionado.value = layer
+            console.log(
+              'Si se guardo bien este valor tendría que verse aquí: \n',
+              layer_estado_seleccionado.value,
+            )
+            console.log('voy a ver si este valor es igual al de arriba: ', layer)
+
+            //      1.2. Eliminar el layer del estado seleccionado
             map.value.removeLayer(layer)
             /* remove_entidades() */
 
@@ -130,12 +166,13 @@ onMounted(async () => {
               })
             })
             layer.on('mouseout', () => {
-              layer.setStyle({ fillOpacity: 0.6, weight: 1, color: '#D32F2F' })
+              layer.setStyle({ fillOpacity: 0.5, weight: 1, color: '#D32F2F' })
             })
           },
         })
 
         municipiosCapa.addTo(map.value)
+        layer_municipios_seleccionado.value = municipiosCapa
       } catch (err) {
         console.error('Error cargando municipios:', err)
       }
@@ -147,7 +184,7 @@ onMounted(async () => {
 <template>
   <div class="map-wraper">
     <div ref="mapContainer" class="map"></div>
-    <button class="back-button" @click="goBack">Esto es un boton</button>
+    <button class="back-button" @click="goBack">Enfocar a todo el pais</button>
   </div>
 </template>
 
