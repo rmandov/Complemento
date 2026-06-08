@@ -15,7 +15,7 @@ Estado seleccionado, guardamos su valores:
 
 Util en goBack function, al regresar a la vista de Mexico podemos volver a cargar el layer de la entidad y eliminar el layer del municipio
 */
-const nombre_estado_seleccionado = ref(null)
+
 const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
 
@@ -35,9 +35,11 @@ async function goBack() {
 
   // 2. Se elimina la capa de municipios
   map.value.removeLayer(layer_municipios_seleccionado.value)
+  layer_municipios_seleccionado.value = null;
 
   // 3. Se agrega la capa del estado completo
   layer_estado_seleccionado.value.addTo(map.value)
+  layer_estado_seleccionado.value = null;
 }
 
 onMounted(async () => {
@@ -86,6 +88,8 @@ onMounted(async () => {
           // Estado seleccionado
           const entidad_clickeada = layer.feature.properties.NOMGEO
           console.log('Este es el estado clickeado: ', entidad_clickeada)
+          console.log("Esta son sus propiedades: ", layer.feature.properties);
+
 
           async function gestionEntidadClick(nombre_entidad) {
             const entidad_json = nombre_entidad
@@ -94,6 +98,20 @@ onMounted(async () => {
               .replace(/[\u0300-\u036f]/g, '')
               .replaceAll(' ', '_')
             console.log(entidad_json)
+
+            // En esta etapa verificamos si ya no encontramos dentro de un estado seleccionado y nos estamos moviendo a otra entidad
+            // La forma de comprobarlo es verificando si ya existe una entidad layer guardada
+            if (layer_estado_seleccionado.value != null) {
+              console.log("Ya existe una entidad seleccionada");
+
+                // 2. Se elimina la capa de municipios
+  map.value.removeLayer(layer_municipios_seleccionado.value)
+  layer_municipios_seleccionado.value = null;
+
+  // 3. Se agrega la capa del estado completo
+  layer_estado_seleccionado.value.addTo(map.value)
+  layer_estado_seleccionado.value = null;
+            }
 
             // Esta carga de municipios le pertenecera a controlesMunicipio
             //    1. Eliminar de la capa de estados el polígono del estado que fue seleccionado, para poder aplicar sus municipios como nueva capa
