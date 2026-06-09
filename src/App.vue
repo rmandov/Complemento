@@ -3,8 +3,15 @@ import MapView from './modules/map/views/MapView.vue'
 </script>
 
 <template>
-  <h1>Complementario</h1>
+  <nav>Complementarios</nav>
   <MapView></MapView>
+  <div style="height: 400px; background-color: red;"></div>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+nav {
+  border: solid 1px purple;
+  height: var(--nav-height);
+}
+</style>

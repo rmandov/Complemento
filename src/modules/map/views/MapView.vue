@@ -15,6 +15,9 @@ const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContainer)
 
+// Capa para mostrar informacion
+
+
 // Promesas de datos
 const geoJsonPromise = fetch('/entidades.json')
   .then((res) => res.json())
@@ -101,18 +104,37 @@ const carga_municipios = async (estado) => {
         color: '#D32F2F',
         weight: 1,
         fillColor: '#FFCDD2',
-        fillOpacity: 0.6,
+        fillOpacity: 0.2,
+        dashArray: '3',
       },
       onEachFeature: (feature, layer) => {
         const municipio_nombre = feature.properties.NOMGEO || 'Municipio'
         layer.bindTooltip(municipio_nombre)
 
         layer.on('mouseover', () => {
-          layer.setStyle({ fillOpacity: 0.9, weight: 1.5, color: '#B71C1C' })
+          layer.setStyle({ fillOpacity: 0, weight: 1.5 })
         })
         layer.on('mouseout', () => {
-          layer.setStyle({ fillOpacity: 0.6, weight: 1, color: '#D32F2F' })
+          layer.setStyle({ fillOpacity: 0.2, weight: 1 })
         })
+
+          layer.on('click', async(e)=>{
+// Encuadrar la vista al municipio
+L.DomEvent.stopPropagation(e)
+
+// Si ya hay un municipio seleccionado, limpiar antes
+          if (layer_municipios_seleccionado.value) {
+            layer_municipios_seleccionado.value.setStyle({color: '#D32F2F' })
+          }
+
+
+layer.setStyle({ color: '#0000ff'})
+        const bounds = layer.getBounds()
+        console.log("Encuadre municipio", bounds);
+
+        flyToBounds(bounds)
+          })
+
       },
     })
 
@@ -140,10 +162,11 @@ onMounted(async () => {
     const estadosCapa = L.geoJSON(entidades, {
       pane: 'poligonosPane',
       style: {
-        color: '#1565C0',
         weight: 1.2,
-        fillColor: '#90CAF9',
+        fillColor: '#9295e4',
         fillOpacity: 0.5,
+        color: 'white',
+        dashArray: '3',
       },
       onEachFeature: (feature, layer) => {
         const nombre = feature.properties.NOMGEO || 'Estado'
@@ -205,15 +228,27 @@ onMounted(async () => {
 
 <template>
   <div class="map-wraper">
+    <div style="height: 100%; width: 300px; background-color: blue;"></div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
   </div>
 </template>
 
 <style scoped>
+.map-wraper{
+  display: flex;
+border: solid 1px blue;
+  width: calc(100dvw - (100dvw - 100%));
+ /*  height: 100dvh; */
+ height: calc(100dvh - var(--nav-height));
+ /* height: 100dvh; */
+  padding: 1rem;
+}
+
 .map {
+  border: solid 1px red;
   width: 100%;
-  height: 500px;
+  height: 100%;
 }
 .back-button {
   position: absolute;
@@ -225,4 +260,6 @@ onMounted(async () => {
   padding: 5px 10px;
   cursor: pointer;
 }
+
+
 </style>
