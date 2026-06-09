@@ -19,7 +19,7 @@ Util en goBack function, al regresar a la vista de Mexico podemos volver a carga
 
 const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
-const capaProyectos = shallowRef(null)  // ← guardar capa de proyectos
+const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 // Inicializar el mapa
 const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContainer)
@@ -50,7 +50,9 @@ async function cargarProyectos(proyectosData) {
   // Configuración de estilos por categoría
   const estilosPorCategoria = {
     'Infraestructura, Comunicaciones y Transportes': { fillColor: '#e74c3c' },
-    'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado': { fillColor: '#27ae60' }
+    'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado': {
+      fillColor: '#27ae60',
+    },
   }
   const estiloBase = { radius: 5, weight: 1, fillOpacity: 0.7, color: '#333' }
 
@@ -62,7 +64,7 @@ async function cargarProyectos(proyectosData) {
       const estiloPersonalizado = estilosPorCategoria[categoria] || { fillColor: '#3498db' }
       return L.circleMarker(latlng, {
         ...estiloBase,
-        ...estiloPersonalizado
+        ...estiloPersonalizado,
       })
     },
     onEachFeature: (feature, layer) => {
@@ -74,13 +76,12 @@ async function cargarProyectos(proyectosData) {
       layer.on('click', () => {
         console.log('Proyecto seleccionado:', nombre, feature.properties)
       })
-    }
+    },
   })
 
   proyectosLayer.addTo(map.value)
   capaProyectos.value = proyectosLayer
 }
-
 
 // Boton para regresa a la vista Mexico
 async function goBack() {
@@ -88,18 +89,18 @@ async function goBack() {
   resetView()
 
   // 2. Se elimina la capa de municipios
-    if (layer_municipios_seleccionado.value) {
+  if (layer_municipios_seleccionado.value) {
     map.value.removeLayer(layer_municipios_seleccionado.value)
     layer_municipios_seleccionado.value = null
   }
 
   // 3. Se agrega la capa del estado completo
- if (layer_estado_seleccionado.value) {
+  if (layer_estado_seleccionado.value) {
     layer_estado_seleccionado.value.addTo(map.value)
     layer_estado_seleccionado.value = null
   }
 
-   // Volver a mostrar los proyectos si estaban ocultos (opcional)
+  // Volver a mostrar los proyectos si estaban ocultos (opcional)
   if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
     capaProyectos.value.addTo(map.value)
   }
@@ -261,45 +262,45 @@ onMounted(async () => {
 
   // Carga de proyectos
 
- // Carga de proyectos (después de tener los datos resueltos)
-const proyectosData = await geoJsonProyectos;
+  // Carga de proyectos (después de tener los datos resueltos)
+  const proyectosData = await geoJsonProyectos
 
-// Configuración única
-const configProyectos = {
-  tooltipField: 'NOMBRE_CORTO',
-  tooltipFallback: 'PPI',
-  estiloBase: { radius: 5, weight: 1, fillOpacity: 0.7 },
-  estilosPorCategoria: {
-    'Infraestructura, Comunicaciones y Transportes': { fillColor: '#e74c3c' },
-    'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado': { fillColor: '#27ae60' }
-  },
-  onClick: (feature) => {
-    console.log('Proyecto seleccionado:', feature.properties.NOMBRE_CORTO);
+  // Configuración única
+  const configProyectos = {
+    tooltipField: 'NOMBRE_CORTO',
+    tooltipFallback: 'PPI',
+    estiloBase: { radius: 5, weight: 1, fillOpacity: 0.7 },
+    estilosPorCategoria: {
+      'Infraestructura, Comunicaciones y Transportes': { fillColor: '#e74c3c' },
+      'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado': {
+        fillColor: '#27ae60',
+      },
+    },
+    onClick: (feature) => {
+      console.log('Proyecto seleccionado:', feature.properties.NOMBRE_CORTO)
+    },
   }
-};
 
-const {
-  cargando: cargandoProyectos,
-  error: errorProyectos,
-  total: totalProyectos,
-  capa: capaProyectos,
-  seleccionado: proyectoSeleccionado,
-  cargar: cargarProyectos,
-  filtrarPorCategoria
-} = useProyectosLayer({
-  map,
-  data: proyectosData,   // ✅ Ahora son los datos ya resueltos
-  config: configProyectos
-});
+  const {
+    cargando: cargandoProyectos,
+    error: errorProyectos,
+    total: totalProyectos,
+    capa: capaProyectos,
+    seleccionado: proyectoSeleccionado,
+    cargar: cargarProyectos,
+    filtrarPorCategoria,
+  } = useProyectosLayer({
+    map,
+    data: proyectosData, // ✅ Ahora son los datos ya resueltos
+    config: configProyectos,
+  })
 
-// ✅ Agregar la capa de proyectos al mapa
-if (capaProyectos.value) {
-  capaProyectos.value.addTo(map.value);
-}
+  // ✅ Agregar la capa de proyectos al mapa
+  if (capaProyectos.value) {
+    capaProyectos.value.addTo(map.value)
+  }
 
-console.log(cargandoProyectos.value);
-
-
+  console.log(cargandoProyectos.value)
 })
 </script>
 

@@ -11,7 +11,7 @@ const mapContainer = ref(null)
 
 const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
-const capaProyectos = shallowRef(null)  // ← guardar capa de proyectos
+const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContainer)
 
@@ -39,23 +39,17 @@ async function cargarProyectos(proyectosData) {
     map.value.removeLayer(capaProyectos.value)
   }
 
-  // Configuración de estilos por categoría
-  const estilosPorCategoria = {
-    'Infraestructura, Comunicaciones y Transportes': { fillColor: '#e74c3c' },
-    'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado': { fillColor: '#27ae60' }
-  }
-  const estiloBase = { radius: 5, weight: 1, fillOpacity: 0.7, color: '#333' }
+  const estiloBase = { radius: 5, weight: 1, fillOpacity: 0.7, color: '#333', fillColor: '#3498db' }
 
   // Crear capa GeoJSON de proyectos
   const proyectosLayer = L.geoJSON(proyectosData, {
     pointToLayer: (feature, latlng) => {
       // Determinar estilo según categoría
-      const categoria = feature.properties.CATEGORIA || ''
-      const estiloPersonalizado = estilosPorCategoria[categoria] || { fillColor: '#3498db' }
-      return L.circleMarker(latlng, {
+      const marker = L.circleMarker(latlng, {
         ...estiloBase,
-        ...estiloPersonalizado
       })
+      marker.options.pane = 'proyectosPane' // forzar pane
+      return marker
     },
     onEachFeature: (feature, layer) => {
       // Tooltip con nombre corto o fallback
@@ -66,7 +60,8 @@ async function cargarProyectos(proyectosData) {
       layer.on('click', () => {
         console.log('Proyecto seleccionado:', nombre, feature.properties)
       })
-    }
+    },
+    pane: 'proyectosPane',
   })
 
   proyectosLayer.addTo(map.value)
@@ -101,6 +96,7 @@ const carga_municipios = async (estado) => {
     console.log('Municipios cargados:', geojson)
 
     const municipiosCapa = L.geoJSON(geojson, {
+      pane: 'poligonosPane',
       style: {
         color: '#D32F2F',
         weight: 1,
@@ -130,10 +126,19 @@ const carga_municipios = async (estado) => {
 onMounted(async () => {
   initMap()
 
+  // Crear pane para polígonos (estados y municipios) con z-index bajo
+  map.value.createPane('poligonosPane')
+  map.value.getPane('poligonosPane').style.zIndex = 400
+
+  // Crear pane para proyectos (puntos) con z-index alto
+  map.value.createPane('proyectosPane')
+  map.value.getPane('proyectosPane').style.zIndex = 700
+
   // 1. Cargar estados
   const entidades = await geoJsonPromise
   if (entidades && map.value) {
     const estadosCapa = L.geoJSON(entidades, {
+      pane: 'poligonosPane',
       style: {
         color: '#1565C0',
         weight: 1.2,
@@ -177,9 +182,9 @@ onMounted(async () => {
           await carga_municipios(entidad_json)
 
           // Opcional: ocultar proyectos mientras se ven municipios
-          if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
+          /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
             map.value.removeLayer(capaProyectos.value)
-          }
+          } */
 
           // Encuadrar la vista al estado
           const bounds = layer.getBounds()
