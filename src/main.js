@@ -1,6 +1,10 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 
+// CSS
+import "@/assets/main.css";
+import "@/assets/mapaControl.css";
+
 import App from "./App.vue";
 import router from "./router";
 

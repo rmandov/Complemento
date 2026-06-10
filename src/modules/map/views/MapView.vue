@@ -17,7 +17,6 @@ const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContai
 
 // Capa para mostrar informacion
 
-
 // Promesas de datos
 const geoJsonPromise = fetch('/entidades.json')
   .then((res) => res.json())
@@ -118,23 +117,21 @@ const carga_municipios = async (estado) => {
           layer.setStyle({ fillOpacity: 0.2, weight: 1 })
         })
 
-          layer.on('click', async(e)=>{
-// Encuadrar la vista al municipio
-L.DomEvent.stopPropagation(e)
+        layer.on('click', async (e) => {
+          // Encuadrar la vista al municipio
+          L.DomEvent.stopPropagation(e)
 
-// Si ya hay un municipio seleccionado, limpiar antes
+          // Si ya hay un municipio seleccionado, limpiar antes
           if (layer_municipios_seleccionado.value) {
-            layer_municipios_seleccionado.value.setStyle({color: '#D32F2F' })
+            layer_municipios_seleccionado.value.setStyle({ color: '#D32F2F' })
           }
 
+          layer.setStyle({ color: '#0000ff' })
+          const bounds = layer.getBounds()
+          console.log('Encuadre municipio', bounds)
 
-layer.setStyle({ color: '#0000ff'})
-        const bounds = layer.getBounds()
-        console.log("Encuadre municipio", bounds);
-
-        flyToBounds(bounds)
-          })
-
+          flyToBounds(bounds)
+        })
       },
     })
 
@@ -147,6 +144,42 @@ layer.setStyle({ color: '#0000ff'})
 
 onMounted(async () => {
   initMap()
+
+  // Creamos controladores y divs dentro del mapa
+  // 1. Abajo
+  var container_bl = L.control({
+    position: 'bottomleft'
+  });
+
+ /*  container_bl.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'descripcion'); // create a div with a class "info"
+    this.update();
+    return this._div;
+}; */
+
+container_bl.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'container_bl');
+
+    this._cuadrado = L.DomUtil.create('div', 'cuadrado', this._div);
+    this._descripcion = L.DomUtil.create('div', 'descripcion', this._div);
+
+    this._cuadrado.innerHTML = 'Título';
+    this._descripcion.innerHTML = 'Contenido';
+
+    this.update();
+
+    return this._div;
+}
+
+// method that we will use to update the control based on feature properties passed
+container_bl.update = function (props) {
+    this._descripcion.innerHTML = '<h4>Descripción</h4>' +  (props ?
+        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+        : 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. In obcaecati aliquam porro culpa dignissimos, exercitationem quam. Illum cumque perspiciatis asperiores maxime aliquam laborum qui impedit neque, corrupti veritatis, aut molestiae?');
+};
+
+container_bl.addTo(map.value);
+
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
@@ -222,26 +255,28 @@ onMounted(async () => {
   const proyectosData = await geoJsonProyectos
   if (proyectosData) {
     await cargarProyectos(proyectosData)
+
+
   }
 })
 </script>
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; background-color: blue;"></div>
+    <div style="height: 100%; width: 300px; border: solid 1px purple;"></div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
   </div>
 </template>
 
 <style scoped>
-.map-wraper{
+.map-wraper {
   display: flex;
-border: solid 1px blue;
+  border: solid 1px blue;
   width: calc(100dvw - (100dvw - 100%));
- /*  height: 100dvh; */
- height: calc(100dvh - var(--nav-height));
- /* height: 100dvh; */
+  /*  height: 100dvh; */
+  height: calc(100dvh - var(--nav-height));
+  /* height: 100dvh; */
   padding: 1rem;
 }
 
