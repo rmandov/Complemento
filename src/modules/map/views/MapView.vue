@@ -25,12 +25,17 @@ const geoJsonPromise = fetch('/entidades.json')
     return null
   })
 
-const geoJsonProyectos = fetch('/PPIs/PRUEBA_PPI_geojson.json')
+
+
+const geoJsonProyectos = fetch('/PPIs/Azul.json')
   .then((res) => res.json())
   .catch((err) => {
     console.error('Error cargando proyectos:', err)
     return null
   })
+
+
+
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
 async function cargarProyectos(proyectosData) {
@@ -254,6 +259,9 @@ container_bl.addTo(map.value);
   // 2. Cargar proyectos (directamente sin composable)
   const proyectosData = await geoJsonProyectos
   if (proyectosData) {
+
+    console.log("Aqui estan los proyectos de Azul :D, ", proyectosData);
+
     await cargarProyectos(proyectosData)
 
 
