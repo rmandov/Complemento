@@ -18,6 +18,8 @@ const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContai
 // Capa para mostrar informacion
 
 // Promesas de datos
+/* const geoJsonPromise = fetch('/work/models/PTP/NPTP/PTP_Complementario/entidades.json') */
+
 const geoJsonPromise = fetch('/entidades.json')
   .then((res) => res.json())
   .catch((err) => {
@@ -26,7 +28,7 @@ const geoJsonPromise = fetch('/entidades.json')
   })
 
 
-
+/* const geoJsonProyectos = fetch('/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json') */
 const geoJsonProyectos = fetch('/PPIs/Azul.json')
   .then((res) => res.json())
   .catch((err) => {
@@ -98,6 +100,7 @@ async function goBack() {
 // Función para cargar municipios (declarada antes de usarse)
 const carga_municipios = async (estado) => {
   try {
+    /* const response = await fetch(`/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`) */
     const response = await fetch(`/municipios/${estado}.json`)
     const geojson = await response.json()
     console.log('Municipios cargados:', geojson)
