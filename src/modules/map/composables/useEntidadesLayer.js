@@ -1,60 +1,66 @@
 // composables/useEntidadesLayer.js
-import { ref } from 'vue'
-import L from 'leaflet'
+import L from "leaflet";
 
-import { useGeoJson } from '../composables/useGeoJson'
+import { useGeoJson } from "./useGeoJson";
+import { useMap } from "./mapControler";
 
 export async function useEntidadesLayer(map) {
   // Para cargar los GeoJson
-  const { getGeoJson } = useGeoJson()
+  const { getGeoJson } = useGeoJson();
+  // Controles del mapa
+  const { flyToBounds } = useMap(map);
 
-  const entidades = await getGeoJson('/entidades.json')
+  const entidades = await getGeoJson("/entidades.json");
 
+  // Se verifica que se tenga le geojson de las entidades y el mapa
   if (entidades && map.value) {
-    const estadosCapa = L.geoJSON(entidades, {
-      pane: 'poligonosPane',
+    const entidadesLayer = L.geoJSON(entidades, {
+      pane: "poligonosPane",
       style: {
         weight: 1.2,
-        fillColor: '#9295e4',
+        fillColor: "#9295e4",
         fillOpacity: 0.5,
-        color: 'white',
-        dashArray: '3',
+        color: "white",
+        dashArray: "3",
       },
       onEachFeature: (feature, layer) => {
-        const nombre = feature.properties.NOMGEO || 'Estado'
-        layer.bindTooltip(nombre)
+        const nombre = feature.properties.NOMGEO || "Estado";
+        layer.bindTooltip(nombre);
 
-        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }))
-        layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }))
+        layer.on("mouseover", () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }));
+        layer.on("mouseout", () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }));
 
-        layer.on('click', async (e) => {
-          L.DomEvent.stopPropagation(e)
-          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+        layer.on("click", async (e) => {
+          L.DomEvent.stopPropagation(e);
+          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 
-          const entidad_clickeada = layer.feature.properties.NOMGEO
-          console.log('Estado clickeado:', entidad_clickeada)
+          const entidad_clickeada = layer.feature.properties.NOMGEO;
+          console.log("Estado clickeado:", entidad_clickeada);
 
           // Si ya hay un estado seleccionado, limpiar antes
           if (layer_estado_seleccionado.value) {
             if (layer_municipios_seleccionado.value) {
-              map.value.removeLayer(layer_municipios_seleccionado.value)
-              layer_municipios_seleccionado.value = null
+              map.value.removeLayer(layer_municipios_seleccionado.value);
+              layer_municipios_seleccionado.value = null;
             }
-            layer_estado_seleccionado.value.addTo(map.value)
-            layer_estado_seleccionado.value = null
+            layer_estado_seleccionado.value.addTo(map.value);
+            layer_estado_seleccionado.value = null;
           }
 
           // Guardar la capa del estado actual para poder regresar después
-          layer_estado_seleccionado.value = layer
-          map.value.removeLayer(layer)
+          layer_estado_seleccionado.value = layer;
+          map.value.removeLayer(layer);
 
           // Cargar municipios
           const entidad_json = entidad_clickeada
             .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replaceAll(' ', '_')
-          await carga_municipios(entidad_json)
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replaceAll(" ", "_");
+
+          console.log("Aqui se carga el layer de municipios!!!");
+
+          /* await carga_municipios(entidad_json); */
 
           // Opcional: ocultar proyectos mientras se ven municipios
           /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
@@ -62,11 +68,11 @@ export async function useEntidadesLayer(map) {
           } */
 
           // Encuadrar la vista al estado
-          const bounds = layer.getBounds()
-          flyToBounds(bounds)
-        })
+          const bounds = layer.getBounds();
+          flyToBounds(bounds);
+        });
       },
-    })
-    estadosCapa.addTo(map.value)
+    });
+    entidadesLayer.addTo(map.value);
   }
 }

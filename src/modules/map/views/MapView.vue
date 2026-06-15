@@ -17,9 +17,10 @@ const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 // Controles del mapa
 const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 // Para cargar los GeoJson
-const { getGeoJson } = useGeoJson()
+const { getGeoJson } = useGeoJson();
 // Información desplegada dentro del container map
-const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer()
+const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer();
+
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
 async function cargarProyectos(proyectosData) {
@@ -83,7 +84,7 @@ async function goBack() {
 const carga_municipios = async (estado) => {
   try {
     // `/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`
-    const geojson = await getGeoJson(`municipios/${estado}.json`)
+    const geojson = await getGeoJson(`municipios/${estado}.json`);
     /* console.log('Municipios cargados:', geojson) */
 
     const municipiosCapa = L.geoJSON(geojson, {
@@ -133,7 +134,7 @@ const carga_municipios = async (estado) => {
 
 const carga_entidades = async () => {
   // '/work/models/PTP/NPTP/PTP_Complementario/entidades.json'
-  const entidades = await getGeoJson('/entidades.json')
+  const entidades = await getGeoJson("/entidades.json");
 
   if (entidades && map.value) {
     const estadosCapa = L.geoJSON(entidades, {
@@ -211,13 +212,13 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  carga_entidades()
+  carga_entidades();
 
   // 2. Cargar proyectos (directamente sin composable)
-
   // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'
-  const proyectosData = await getGeoJson('PPIs/Azul.json')
+  const proyectosData = await getGeoJson("PPIs/Azul.json");
   await cargarProyectos(proyectosData)
+
 })
 </script>
 
