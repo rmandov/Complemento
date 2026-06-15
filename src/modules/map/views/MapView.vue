@@ -14,7 +14,7 @@ const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
-const { map, initMap, resetView, flyToBounds, currentBounds } = useMap(mapContainer)
+const { map, initMap, resetView, flyToBounds} = useMap(mapContainer)
 
 // Capa para mostrar informacion
 
