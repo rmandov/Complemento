@@ -3,6 +3,7 @@ import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
 
 import { useMap } from '@/modules/map/composables/mapControler'
+import { useGeoJson } from '../composables/useGeoJson'
 
 import 'leaflet/dist/leaflet.css'
 
@@ -13,26 +14,8 @@ const layer_municipios_seleccionado = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
+const { getGeoJson } = useGeoJson();
 
-// Capa para mostrar informacion
-
-// Promesas de datos
-/* const geoJsonPromise = fetch('/work/models/PTP/NPTP/PTP_Complementario/entidades.json') */
-
-const geoJsonPromise = fetch('/entidades.json')
-  .then((res) => res.json())
-  .catch((err) => {
-    console.error('Error cargando estados:', err)
-    return null
-  })
-
-/* const geoJsonProyectos = fetch('/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json') */
-const geoJsonProyectos = fetch('/PPIs/Azul.json')
-  .then((res) => res.json())
-  .catch((err) => {
-    console.error('Error cargando proyectos:', err)
-    return null
-  })
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
 async function cargarProyectos(proyectosData) {
@@ -95,10 +78,9 @@ async function goBack() {
 // Función para cargar municipios (declarada antes de usarse)
 const carga_municipios = async (estado) => {
   try {
-    /* const response = await fetch(`/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`) */
-    const response = await fetch(`/municipios/${estado}.json`)
-    const geojson = await response.json()
-    console.log('Municipios cargados:', geojson)
+    // `/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`
+    const geojson = await getGeoJson(`municipios/${estado}.json`);
+    /* console.log('Municipios cargados:', geojson) */
 
     const municipiosCapa = L.geoJSON(geojson, {
       pane: 'poligonosPane',
@@ -160,7 +142,7 @@ onMounted(async () => {
     return this._div;
 }; */
 
-  container_bl.onAdd = function (map) {
+  container_bl.onAdd = function () {
     this._div = L.DomUtil.create('div', 'container_bl')
 
     this._cuadrado = L.DomUtil.create('div', 'cuadrado', this._div)
@@ -194,7 +176,9 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  const entidades = await geoJsonPromise
+  // '/work/models/PTP/NPTP/PTP_Complementario/entidades.json'
+  const entidades = await getGeoJson("/entidades.json");
+
   if (entidades && map.value) {
     const estadosCapa = L.geoJSON(entidades, {
       pane: 'poligonosPane',
@@ -256,7 +240,10 @@ onMounted(async () => {
   }
 
   // 2. Cargar proyectos (directamente sin composable)
-  const proyectosData = await geoJsonProyectos
+
+  // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'
+  const proyectosData = await getGeoJson("PPIs/Azul.json");
+
   if (proyectosData) {
     console.log('Aqui estan los proyectos de Azul :D, ', proyectosData)
 
