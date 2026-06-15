@@ -14,7 +14,7 @@ const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
-const { map, initMap, resetView, flyToBounds} = useMap(mapContainer)
+const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 
 // Capa para mostrar informacion
 
@@ -28,7 +28,6 @@ const geoJsonPromise = fetch('/entidades.json')
     return null
   })
 
-
 /* const geoJsonProyectos = fetch('/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json') */
 const geoJsonProyectos = fetch('/PPIs/Azul.json')
   .then((res) => res.json())
@@ -36,9 +35,6 @@ const geoJsonProyectos = fetch('/PPIs/Azul.json')
     console.error('Error cargando proyectos:', err)
     return null
   })
-
-
-
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
 async function cargarProyectos(proyectosData) {
@@ -157,38 +153,39 @@ onMounted(async () => {
   // Creamos controladores y divs dentro del mapa
   // 1. Abajo
   var container_bl = L.control({
-    position: 'bottomleft'
-  });
+    position: 'bottomleft',
+  })
 
- /*  container_bl.onAdd = function (map) {
+  /*  container_bl.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'descripcion'); // create a div with a class "info"
     this.update();
     return this._div;
 }; */
 
-container_bl.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'container_bl');
+  container_bl.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'container_bl')
 
-    this._cuadrado = L.DomUtil.create('div', 'cuadrado', this._div);
-    this._descripcion = L.DomUtil.create('div', 'descripcion', this._div);
+    this._cuadrado = L.DomUtil.create('div', 'cuadrado', this._div)
+    this._descripcion = L.DomUtil.create('div', 'descripcion', this._div)
 
-    this._cuadrado.innerHTML = 'Título';
-    this._descripcion.innerHTML = 'Contenido';
+    this._cuadrado.innerHTML = 'Título'
+    this._descripcion.innerHTML = 'Contenido'
 
-    this.update();
+    this.update()
 
-    return this._div;
-}
+    return this._div
+  }
 
-// method that we will use to update the control based on feature properties passed
-container_bl.update = function (props) {
-    this._descripcion.innerHTML = '<h4>Descripción</h4>' +  (props ?
-        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-        : 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. In obcaecati aliquam porro culpa dignissimos, exercitationem quam. Illum cumque perspiciatis asperiores maxime aliquam laborum qui impedit neque, corrupti veritatis, aut molestiae?');
-};
+  // method that we will use to update the control based on feature properties passed
+  container_bl.update = function (props) {
+    this._descripcion.innerHTML =
+      '<h4>Descripción</h4>' +
+      (props
+        ? '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+        : 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. In obcaecati aliquam porro culpa dignissimos, exercitationem quam. Illum cumque perspiciatis asperiores maxime aliquam laborum qui impedit neque, corrupti veritatis, aut molestiae?')
+  }
 
-container_bl.addTo(map.value);
-
+  container_bl.addTo(map.value)
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
@@ -263,19 +260,16 @@ container_bl.addTo(map.value);
   // 2. Cargar proyectos (directamente sin composable)
   const proyectosData = await geoJsonProyectos
   if (proyectosData) {
-
-    console.log("Aqui estan los proyectos de Azul :D, ", proyectosData);
+    console.log('Aqui estan los proyectos de Azul :D, ', proyectosData)
 
     await cargarProyectos(proyectosData)
-
-
   }
 })
 </script>
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; border: solid 1px purple;"></div>
+    <div style="height: 100%; width: 300px; border: solid 1px purple"></div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
   </div>
@@ -307,6 +301,4 @@ container_bl.addTo(map.value);
   padding: 5px 10px;
   cursor: pointer;
 }
-
-
 </style>

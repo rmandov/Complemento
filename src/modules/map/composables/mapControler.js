@@ -1,12 +1,11 @@
-import { shallowRef, ref, onUnmounted } from "vue";
+import { shallowRef, onUnmounted } from "vue";
 import L from "leaflet";
 
 import { useMapStore } from "@/stores/map";
-const mapStore = useMapStore();
 
 export function useMap(containerRef) {
   const map = shallowRef(null);
-  const currentBounds = ref(null);
+  const mapStore = useMapStore();
 
   // Mexico bounds
   const defaultView = {
@@ -78,5 +77,5 @@ export function useMap(containerRef) {
     }
   });
 
-  return { map, initMap, resetView, flyToBounds, currentBounds };
+  return { map, initMap, resetView, flyToBounds };
 }

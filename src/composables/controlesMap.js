@@ -6,7 +6,7 @@ export function useMap(containerRef) {
   const map = shallowRef(null);
   const currentBounds = ref(null); // Encuadre actual
 
-  const mexicoBounds = [
+  const _mexicoBounds = [
     [14.5, -118.5], // Suroeste
     [32.8, -86.5], // Noreste
   ];
