@@ -4,6 +4,7 @@ import L from 'leaflet'
 
 import { useMap } from '@/modules/map/composables/mapControler'
 import { useGeoJson } from '../composables/useGeoJson'
+import { useInfoLayer } from '../composables/useInfoLayer'
 
 import 'leaflet/dist/leaflet.css'
 
@@ -13,8 +14,12 @@ const layer_estado_seleccionado = shallowRef(null)
 const layer_municipios_seleccionado = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
+// Controles del mapa
 const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
+// Para cargar los GeoJson
 const { getGeoJson } = useGeoJson();
+// Información desplegada dentro del container map
+const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer();
 
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
@@ -130,42 +135,8 @@ const carga_municipios = async (estado) => {
 onMounted(async () => {
   initMap()
 
-  // Creamos controladores y divs dentro del mapa
-  // 1. Abajo
-  var container_bl = L.control({
-    position: 'bottomleft',
-  })
-
-  /*  container_bl.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'descripcion'); // create a div with a class "info"
-    this.update();
-    return this._div;
-}; */
-
-  container_bl.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'container_bl')
-
-    this._cuadrado = L.DomUtil.create('div', 'cuadrado', this._div)
-    this._descripcion = L.DomUtil.create('div', 'descripcion', this._div)
-
-    this._cuadrado.innerHTML = 'Título'
-    this._descripcion.innerHTML = 'Contenido'
-
-    this.update()
-
-    return this._div
-  }
-
-  // method that we will use to update the control based on feature properties passed
-  container_bl.update = function (props) {
-    this._descripcion.innerHTML =
-      '<h4>Descripción</h4>' +
-      (props
-        ? '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-        : 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. In obcaecati aliquam porro culpa dignissimos, exercitationem quam. Illum cumque perspiciatis asperiores maxime aliquam laborum qui impedit neque, corrupti veritatis, aut molestiae?')
-  }
-
-  container_bl.addTo(map.value)
+  // Capa de información dentro del mapa
+  infoLayer.addTo(map.value)
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
