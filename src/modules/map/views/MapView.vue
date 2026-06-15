@@ -2,9 +2,7 @@
 import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
 
-/* import { useMap } from '@/composables/controlesMap' */
 import { useMap } from '@/modules/map/composables/mapControler'
-// Eliminamos import de useProyectosLayer
 
 import 'leaflet/dist/leaflet.css'
 
