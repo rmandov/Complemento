@@ -49,14 +49,14 @@ async function goBack() {
 
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
-  const proyectosData = await getGeoJson('PPIs/Azul.geojson')
+  const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
   await cargarProyectos(proyectosData)
 }
 
 // Carga de entidades
 const carga_entidades = async () => {
   // '/work/models/PTP/NPTP/PTP_Complementario/entidades.json'
-  const entidades = await getGeoJson('/entidades.json')
+  const entidades = await getGeoJson('entidades.json')
 
   if (entidades && map.value) {
     const estadosCapa = L.geoJSON(entidades, {
