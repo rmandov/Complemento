@@ -77,8 +77,8 @@ const carga_entidades = async () => {
 
         layer.on('click', async (e) => {
           L.DomEvent.stopPropagation(e)
-
-layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
+          // Reset de los estilos
+          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 
           const nombre_entidad = layer.feature.properties.NOMGEO
 
