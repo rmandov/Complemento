@@ -47,16 +47,26 @@ async function goBack() {
   }
 }
 
+<<<<<<< HEAD
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
   const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
+=======
+// Botón para mostrat TODOS los proyectos - coords
+async function goProyectos() {
+  const proyectosData = await getGeoJson('PPIs/Azul.json')
+>>>>>>> main
   await cargarProyectos(proyectosData)
 }
 
 // Carga de entidades
 const carga_entidades = async () => {
   // '/work/models/PTP/NPTP/PTP_Complementario/entidades.json'
+<<<<<<< HEAD
   const entidades = await getGeoJson('entidades.json')
+=======
+  const entidades = await getGeoJson('/entidades.json')
+>>>>>>> main
 
   if (entidades && map.value) {
     const estadosCapa = L.geoJSON(entidades, {
@@ -77,7 +87,11 @@ const carga_entidades = async () => {
 
         layer.on('click', async (e) => {
           L.DomEvent.stopPropagation(e)
+<<<<<<< HEAD
 
+=======
+          // Reset de los estilos
+>>>>>>> main
           layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 
           const nombre_entidad = layer.feature.properties.NOMGEO
