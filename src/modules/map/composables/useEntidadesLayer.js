@@ -36,9 +36,6 @@ export async function useEntidadesLayer(map) {
         const nombreEntidad = feature.properties.NOMGEO;
         console.log("Entidad clickeada:", nombreEntidad);
 
-        // Determinar si ya estamos en nivel de estados (nivel 1)
-        const yaEnNivelEstado = mapLayers.nivelActual >= 1;
-
         // Cargar municipios del estado clickeado
         const entidad_json = nombreEntidad
           .toLowerCase()
@@ -51,26 +48,6 @@ export async function useEntidadesLayer(map) {
         // Aquí cargarías el GeoJSON de municipios
         // const municipios = await getGeoJson(`/municipios/${entidad_json}.json`);
         // const capaMunicipios = L.geoJSON(municipios, { ... });
-
-        if (yaEnNivelEstado) {
-          // Ya estamos viendo un estado → cambiar a OTRO estado (mismo nivel)
-          console.log("Cambiando de estado (mismo nivel)");
-          mapLayers.cambiarMismoNivel(
-            layer,
-            map.value,
-            nombreEntidad,
-            // capaMunicipios  // nueva capa extra
-          );
-        } else {
-          // Primera vez que entramos a nivel estado
-          console.log("Entrando a nivel estado");
-          mapLayers.bajarNivel(
-            layer,
-            map.value,
-            nombreEntidad,
-            // capaMunicipios
-          );
-        }
 
         // Encuadrar vista
         const bounds = layer.getBounds();

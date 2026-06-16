@@ -161,7 +161,7 @@ const carga_entidades = async () => {
 
         layer.on('click', async (e) => {
           L.DomEvent.stopPropagation(e)
-          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+          /* layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }) */
 
           const entidad_clickeada = layer.feature.properties.NOMGEO
           console.log('Estado clickeado:', entidad_clickeada)
@@ -222,9 +222,9 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  await useEntidadesLayer(map);
+  /* await useEntidadesLayer(map); */
   /* const entidades = await getGeoJson("/entidades.json"); */
-  /* carga_entidades(); */
+  carga_entidades();
 
   // 2. Cargar proyectos (directamente sin composable)
   // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'

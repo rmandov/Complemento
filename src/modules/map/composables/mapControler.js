@@ -56,7 +56,7 @@ export function useMap(containerRef) {
   };
 
   // Movernos al encuadre que querramos
-  const flyToBounds = (map, bounds) => {
+  const flyToBounds = (bounds) => {
     if (!map.value || !bounds) return console.log("No se tiene bounds o mapa");
 
     map.value.flyToBounds(bounds, {
