@@ -32,37 +32,13 @@ export async function useEntidadesLayer(map) {
         L.DomEvent.stopPropagation(e);
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 
-        const nombreEntidad = layer.feature.properties.NOMGEO;
+        const nombreEntidad = feature.properties.NOMGEO;
         console.log("Entidad clickeada:", nombreEntidad);
 
-        // 🔑 DECISIÓN: ¿Primer estado o cambiando de estado?
-        if (mapLayers.estadoActual && mapLayers.estadoActual !== nombreEntidad) {
-          // Ya hay un estado seleccionado y es DIFERENTE → cambiar de estado
-          console.log("Cambiando de estado...");
+        // Determinar si ya estamos en nivel de estados (nivel 1)
+        const yaEnNivelEstado = mapLayers.nivelActual >= 1;
 
-          // Aquí cargarías los municipios del nuevo estado
-          // const capaMunicipios = await cargarMunicipios(nombreEntidad);
-
-          mapLayers.cambiarEstado(
-            layer,
-            map.value,
-            nombreEntidad,
-            // capaMunicipios  // nueva capa de municipios
-          );
-        } else if (!mapLayers.estadoActual) {
-          // Primer estado seleccionado
-          console.log("Primer estado seleccionado...");
-
-          mapLayers.bajarNivel(
-            layer,
-            map.value,
-            nombreEntidad,
-            // capaMunicipios
-          );
-        }
-        // Si es el mismo estado, no hacer nada (ya está seleccionado)
-
-        // Cargar municipios del estado
+        // Cargar municipios del estado clickeado
         const entidad_json = nombreEntidad
           .toLowerCase()
           .normalize("NFD")
@@ -70,7 +46,30 @@ export async function useEntidadesLayer(map) {
           .replaceAll(" ", "_");
 
         console.log("Cargando municipios para:", entidad_json);
-        // await carga_municipios(entidad_json);
+
+        // Aquí cargarías el GeoJSON de municipios
+        // const municipios = await getGeoJson(`/municipios/${entidad_json}.json`);
+        // const capaMunicipios = L.geoJSON(municipios, { ... });
+
+        if (yaEnNivelEstado) {
+          // Ya estamos viendo un estado → cambiar a OTRO estado (mismo nivel)
+          console.log("Cambiando de estado (mismo nivel)");
+          mapLayers.cambiarMismoNivel(
+            layer,
+            map.value,
+            nombreEntidad,
+            // capaMunicipios  // nueva capa extra
+          );
+        } else {
+          // Primera vez que entramos a nivel estado
+          console.log("Entrando a nivel estado");
+          mapLayers.bajarNivel(
+            layer,
+            map.value,
+            nombreEntidad,
+            // capaMunicipios
+          );
+        }
 
         // Encuadrar vista
         const bounds = layer.getBounds();
