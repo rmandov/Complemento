@@ -78,9 +78,7 @@ const carga_entidades = async () => {
         layer.on('click', async (e) => {
           L.DomEvent.stopPropagation(e)
 
-          // Encuadrar la vista a la entidad clickeada
-          const bounds = layer.getBounds()
-          flyToBounds(bounds)
+
 
           const nombre_entidad = layer.feature.properties.NOMGEO
 
@@ -123,6 +121,10 @@ const carga_entidades = async () => {
           /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
             map.value.removeLayer(capaProyectos.value)
           } */
+
+          // Encuadrar la vista a la entidad clickeada
+          const bounds = layer.getBounds()
+          flyToBounds(bounds)
         })
       },
     })
