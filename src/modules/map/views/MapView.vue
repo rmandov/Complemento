@@ -13,7 +13,10 @@ import 'leaflet/dist/leaflet.css'
 
 const mapContainer = ref(null)
 
-const layer_estado_seleccionado = shallowRef(null)
+// Alamcena la capa que fue clickeada
+const layer_entidad_click = shallowRef(null)
+
+
 const layer_municipios_seleccionado = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
@@ -73,9 +76,9 @@ async function goBack() {
     layer_municipios_seleccionado.value = null
   }
 
-  if (layer_estado_seleccionado.value) {
-    layer_estado_seleccionado.value.addTo(map.value)
-    layer_estado_seleccionado.value = null
+  if (layer_entidad_click.value) {
+    layer_entidad_click.value.addTo(map.value)
+    layer_entidad_click.value = null
   }
 
   // Volver a mostrar los proyectos si estaban ocultos (opcional)
@@ -91,10 +94,10 @@ async function goProyectos() {
 }
 
 // Función para cargar municipios (declarada antes de usarse)
-const carga_municipios = async (estado) => {
+const carga_municipios = async (entidad_seleccionada) => {
   try {
     // `/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`
-    const geojson = await getGeoJson(`municipios/${estado}.json`)
+    const geojson = await getGeoJson(`municipios/${entidad_seleccionada}.json`)
     /* console.log('Municipios cargados:', geojson) */
 
     const municipiosCapa = L.geoJSON(geojson, {
@@ -174,41 +177,52 @@ const carga_entidades = async () => {
 
         layer.on('click', async (e) => {
           L.DomEvent.stopPropagation(e)
-          /* layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }) */
 
-          const entidad_clickeada = layer.feature.properties.NOMGEO
-          console.log('Estado clickeado:', entidad_clickeada)
+          // Encuadrar la vista a la entidad clickeada
+          const bounds = layer.getBounds()
+          flyToBounds(bounds)
+
+          const nombre_entidad = layer.feature.properties.NOMGEO
 
           // Si ya hay un estado seleccionado, limpiar antes
-          if (layer_estado_seleccionado.value) {
+          if (layer_entidad_click.value) {
             if (layer_municipios_seleccionado.value) {
+              // Borro los muncipios del mapa
               map.value.removeLayer(layer_municipios_seleccionado.value)
+
+              // Y tambien borro la capa de la variable donde la guardé
               layer_municipios_seleccionado.value = null
             }
-            layer_estado_seleccionado.value.addTo(map.value)
-            layer_estado_seleccionado.value = null
+            layer_entidad_click.value.addTo(map.value)
+            layer_entidad_click.value = null
           }
 
-          // Guardar la capa del estado actual para poder regresar después
-          layer_estado_seleccionado.value = layer
+          /*
+          1. Elimino la capa de la entidad a la que le dí click. Esto para dejar espacio y poner la capa de los municipios
+          2. Guardo la capa de la entidad para en futuro volverla a colocar en su lugar, cuando otra entidad sea clickeada.
+          */
+          layer_entidad_click.value = layer
+          console.log("Despues de dar click: ",layer_entidad_click);
+
           map.value.removeLayer(layer)
 
           // Cargar municipios
-          const entidad_json = entidad_clickeada
+          const entidad_json = nombre_entidad
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .replaceAll(' ', '_')
+
+          //Aqui sería mejor retornar la capa de municipios y desde carga_etnidades gestionar el addTo(map.value)
           await carga_municipios(entidad_json)
+
 
           // Opcional: ocultar proyectos mientras se ven municipios
           /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
             map.value.removeLayer(capaProyectos.value)
           } */
 
-          // Encuadrar la vista al estado
-          const bounds = layer.getBounds()
-          flyToBounds(bounds)
+
         })
       },
     })
