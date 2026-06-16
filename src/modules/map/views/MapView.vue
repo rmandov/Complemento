@@ -6,6 +6,9 @@ import { useMap } from '@/modules/map/composables/mapControler'
 import { useGeoJson } from '../composables/useGeoJson'
 import { useInfoLayer } from '../composables/useInfoLayer'
 
+// Entidades
+import { useEntidadesLayer } from '../composables/useEntidadesLayer'
+
 import 'leaflet/dist/leaflet.css'
 
 const mapContainer = ref(null)
@@ -20,6 +23,8 @@ const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 const { getGeoJson } = useGeoJson();
 // Información desplegada dentro del container map
 const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer();
+// Capa entidades
+
 
 
 // Función para cargar y mostrar proyectos (se ejecutará después de tener datos)
@@ -212,7 +217,9 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  carga_entidades();
+  await useEntidadesLayer(map);
+  /* const entidades = await getGeoJson("/entidades.json"); */
+  /* carga_entidades(); */
 
   // 2. Cargar proyectos (directamente sin composable)
   // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'

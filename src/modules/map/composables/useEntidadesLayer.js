@@ -1,78 +1,83 @@
-// composables/useEntidadesLayer.js
 import L from "leaflet";
-
 import { useGeoJson } from "./useGeoJson";
 import { useMap } from "./mapControler";
+import { useMapLayersStore } from "@/stores/mapLayers";
 
 export async function useEntidadesLayer(map) {
-  // Para cargar los GeoJson
   const { getGeoJson } = useGeoJson();
-  // Controles del mapa
+  const mapLayers = useMapLayersStore();
   const { flyToBounds } = useMap(map);
 
   const entidades = await getGeoJson("/entidades.json");
 
-  // Se verifica que se tenga le geojson de las entidades y el mapa
-  if (entidades && map.value) {
-    const entidadesLayer = L.geoJSON(entidades, {
-      pane: "poligonosPane",
-      style: {
-        weight: 1.2,
-        fillColor: "#9295e4",
-        fillOpacity: 0.5,
-        color: "white",
-        dashArray: "3",
-      },
-      onEachFeature: (feature, layer) => {
-        const nombre = feature.properties.NOMGEO || "Estado";
-        layer.bindTooltip(nombre);
+  if (!entidades || !map.value) return;
 
-        layer.on("mouseover", () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }));
-        layer.on("mouseout", () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }));
+  const entidadesLayer = L.geoJSON(entidades, {
+    pane: "poligonosPane",
+    style: {
+      weight: 1.2,
+      fillColor: "#9295e4",
+      fillOpacity: 0.5,
+      color: "white",
+      dashArray: "3",
+    },
+    onEachFeature: (feature, layer) => {
+      const nombre = feature.properties.NOMGEO || "Estado";
+      layer.bindTooltip(nombre);
 
-        layer.on("click", async (e) => {
-          L.DomEvent.stopPropagation(e);
-          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
+      layer.on("mouseover", () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }));
+      layer.on("mouseout", () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }));
 
-          const entidad_clickeada = layer.feature.properties.NOMGEO;
-          console.log("Estado clickeado:", entidad_clickeada);
+      layer.on("click", async (e) => {
+        L.DomEvent.stopPropagation(e);
+        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 
-          // Si ya hay un estado seleccionado, limpiar antes
-          if (layer_estado_seleccionado.value) {
-            if (layer_municipios_seleccionado.value) {
-              map.value.removeLayer(layer_municipios_seleccionado.value);
-              layer_municipios_seleccionado.value = null;
-            }
-            layer_estado_seleccionado.value.addTo(map.value);
-            layer_estado_seleccionado.value = null;
-          }
+        const nombreEntidad = layer.feature.properties.NOMGEO;
+        console.log("Entidad clickeada:", nombreEntidad);
 
-          // Guardar la capa del estado actual para poder regresar después
-          layer_estado_seleccionado.value = layer;
-          map.value.removeLayer(layer);
+        // 🔑 DECISIÓN: ¿Primer estado o cambiando de estado?
+        if (mapLayers.estadoActual && mapLayers.estadoActual !== nombreEntidad) {
+          // Ya hay un estado seleccionado y es DIFERENTE → cambiar de estado
+          console.log("Cambiando de estado...");
 
-          // Cargar municipios
-          const entidad_json = entidad_clickeada
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replaceAll(" ", "_");
+          // Aquí cargarías los municipios del nuevo estado
+          // const capaMunicipios = await cargarMunicipios(nombreEntidad);
 
-          console.log("Aqui se carga el layer de municipios!!!");
+          mapLayers.cambiarEstado(
+            layer,
+            map.value,
+            nombreEntidad,
+            // capaMunicipios  // nueva capa de municipios
+          );
+        } else if (!mapLayers.estadoActual) {
+          // Primer estado seleccionado
+          console.log("Primer estado seleccionado...");
 
-          /* await carga_municipios(entidad_json); */
+          mapLayers.bajarNivel(
+            layer,
+            map.value,
+            nombreEntidad,
+            // capaMunicipios
+          );
+        }
+        // Si es el mismo estado, no hacer nada (ya está seleccionado)
 
-          // Opcional: ocultar proyectos mientras se ven municipios
-          /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
-            map.value.removeLayer(capaProyectos.value)
-          } */
+        // Cargar municipios del estado
+        const entidad_json = nombreEntidad
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replaceAll(" ", "_");
 
-          // Encuadrar la vista al estado
-          const bounds = layer.getBounds();
-          flyToBounds(bounds);
-        });
-      },
-    });
-    entidadesLayer.addTo(map.value);
-  }
+        console.log("Cargando municipios para:", entidad_json);
+        // await carga_municipios(entidad_json);
+
+        // Encuadrar vista
+        const bounds = layer.getBounds();
+        flyToBounds(map, bounds);
+      });
+    },
+  });
+
+  entidadesLayer.addTo(map.value);
 }
