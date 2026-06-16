@@ -22,7 +22,8 @@ const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 // Para cargar los GeoJson
 const { getGeoJson } = useGeoJson();
 // Información desplegada dentro del container map
-const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer();
+/* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
+const { infoLayer } = useInfoLayer();
 // Capa entidades
 
 
@@ -211,6 +212,10 @@ onMounted(async () => {
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
   map.value.getPane('poligonosPane').style.zIndex = 400
+
+  // Pane para estados
+  map.value.createPane("entidadesPane");
+  map.value.getPane("entidadesPane").style.zIndex = 500
 
   // Crear pane para proyectos (puntos) con z-index alto
   map.value.createPane('proyectosPane')

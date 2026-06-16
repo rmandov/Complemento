@@ -10,10 +10,11 @@ export async function useEntidadesLayer(map) {
 
   const entidades = await getGeoJson("/entidades.json");
 
+  // Si no tengo el geojson y el mapda donde aplicarlo no hagas nada
   if (!entidades || !map.value) return;
 
   const entidadesLayer = L.geoJSON(entidades, {
-    pane: "poligonosPane",
+    pane: "entidadesPane",
     style: {
       weight: 1.2,
       fillColor: "#9295e4",
@@ -29,8 +30,8 @@ export async function useEntidadesLayer(map) {
       layer.on("mouseout", () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }));
 
       layer.on("click", async (e) => {
+        // El click solo ocurre en la capa, no le informa mas arriba del evento
         L.DomEvent.stopPropagation(e);
-        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 
         const nombreEntidad = feature.properties.NOMGEO;
         console.log("Entidad clickeada:", nombreEntidad);
