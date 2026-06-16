@@ -19,18 +19,22 @@ export function useMap(containerRef) {
     if (!containerRef.value || map.value) return;
 
     // Definimos el mapa y su encuadre
-    map.value = L.map(containerRef.value, {
-      minZoom: 5,
-    }).setView(defaultView.center, defaultView.zoom);
+    map.value = L.map(containerRef.value, { minZoom: 5 });
+    map.value.setView(defaultView.center, defaultView.zoom);
 
     // Agregamos capa de calles
     // Esta puede eliminarse y solo usarse las geometrias que nos da el geojson
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 20,
-    }).addTo(map.value);
+    const calles = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 20,
+      },
+    );
+
+    calles.addTo(map.value);
   };
 
   // Retorno al encuadre original - Mexico Bounds
