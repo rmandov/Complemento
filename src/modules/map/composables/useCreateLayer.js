@@ -65,13 +65,10 @@ export function createLayer(poligonos_json, options = {}) {
           newEntidad.setEPoligono(null)
 
           // ** INICIO - Gestion municipios
-          console.log('Municpios: ', newEntidad.municipiosLayer)
-
-          if (newEntidad.municipiosLayer) {
-            map.removeLayer(newEntidad.municipiosLayer) // ← .value porque es shallowRef
+          if (newEntidad.is_MLayer) {
+            map.removeLayer(newEntidad.municipiosLayer)
             newEntidad.clearMLayer()
           }
-
           // ** FIN - Gestion municipios
         }
         // Se almacena poligono clickeado y se elimina del mapa
@@ -88,17 +85,17 @@ export function createLayer(poligonos_json, options = {}) {
           .replaceAll(' ', '_')
 
         const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`)
+
         if (muncipios) {
-          newEntidad.municipiosLayer = createMunicipiosLayer(muncipios, {
+          const municipiosLayer = createMunicipiosLayer(muncipios, {
             map,
             pane: 'poligonosPane',
             name: 'NOMGEO',
           })
+
+          newEntidad.setMLayer(municipiosLayer)
           newEntidad.municipiosLayer.addTo(map)
         }
-
-        /* console.log("Municpios descargados:", muncipios); */
-
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
         map.flyToBounds(bounds)
@@ -155,8 +152,6 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         L.DomEvent.stopPropagation(e)
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-
-        console.log('Municipio clickeado!! :D')
         if (newEntidad.MPoligono) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
           newEntidad.MPoligono.addTo(map)

@@ -24,9 +24,9 @@ export const usePoligonoStore = defineStore('poligono', () => {
   }
 
   function clearMLayer() {
+    MPoligono.value = null
     municipiosLayer.value = null
     is_MLayer.value = false
-    MPoligono.value = null
   }
 
   return {
