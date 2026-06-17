@@ -289,7 +289,7 @@ onMounted(async () => {
   if (entidades) {
     const EntidadesMuncipiosLayer = createLayer(entidades, {
       map: map.value,
-      pane: 'poligonosPane',
+      pane: 'entidadesPane',
       name: 'NOMGEO',
     })
     EntidadesMuncipiosLayer.addTo(map.value)

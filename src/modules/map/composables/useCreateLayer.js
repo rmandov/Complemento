@@ -3,6 +3,7 @@ import { usePoligonoStore } from '@/stores/poligono'
 
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
+import { shallowRef } from 'vue'
 const { getGeoJson } = useGeoJson()
 
 // ¿Que valores cambian?, esos valores son los que se usan de input
@@ -21,6 +22,7 @@ const { getGeoJson } = useGeoJson()
 
 export function createLayer(poligonos_json, options = {}) {
   const newEntidad = usePoligonoStore()
+  /* const muncipiosLayer = shallowRef(null); */
 
   const {
     map,
@@ -53,7 +55,7 @@ export function createLayer(poligonos_json, options = {}) {
       layer.on('click', async (e) => {
         L.DomEvent.stopPropagation(e)
         const bounds = layer.getBounds()
-        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+        layer.setStyle(style)
 
         // ** INICIO - Gestion de poligono clickeado **
         // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
@@ -61,6 +63,16 @@ export function createLayer(poligonos_json, options = {}) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
           newEntidad.EPoligono.addTo(map)
           newEntidad.setEPoligono(null)
+
+          // ** INICIO - Gestion municipios
+          console.log('Municpios: ', newEntidad.municipiosLayer)
+
+          if (newEntidad.municipiosLayer) {
+            map.removeLayer(newEntidad.municipiosLayer) // ← .value porque es shallowRef
+            newEntidad.clearMLayer()
+          }
+
+          // ** FIN - Gestion municipios
         }
         // Se almacena poligono clickeado y se elimina del mapa
         newEntidad.setEPoligono(layer)
@@ -77,21 +89,19 @@ export function createLayer(poligonos_json, options = {}) {
 
         const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`)
         if (muncipios) {
-          const muncipiosLayer = createMunicipiosLayer(muncipios, {
+          newEntidad.municipiosLayer = createMunicipiosLayer(muncipios, {
             map,
             pane: 'poligonosPane',
             name: 'NOMGEO',
           })
-          muncipiosLayer.addTo(map)
+          newEntidad.municipiosLayer.addTo(map)
         }
 
         /* console.log("Municpios descargados:", muncipios); */
 
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
-        if (map && bounds.isValid()) {
-          map.flyToBounds(bounds)
-        }
+        map.flyToBounds(bounds)
       })
     },
   })
@@ -112,6 +122,7 @@ function mouseout(e) {
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
+  const newEntidad = usePoligonoStore()
   const {
     map,
     pane = '',
@@ -146,6 +157,14 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 
         console.log('Municipio clickeado!! :D')
+        if (newEntidad.MPoligono) {
+          // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
+          newEntidad.MPoligono.addTo(map)
+          newEntidad.setMPoligono(null)
+        }
+        // Se almacena poligono clickeado y se elimina del mapa
+        newEntidad.setMPoligono(layer)
+        map.removeLayer(layer)
 
         if (map && bounds.isValid()) {
           map.flyToBounds(bounds)

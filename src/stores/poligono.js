@@ -1,5 +1,5 @@
 // stores/handleLayers.js
-import { shallowRef } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 
 export const usePoligonoStore = defineStore('poligono', () => {
@@ -9,5 +9,34 @@ export const usePoligonoStore = defineStore('poligono', () => {
     EPoligono.value = newPoligono
   }
 
-  return { EPoligono, setEPoligono }
+  const MPoligono = shallowRef(null)
+
+  function setMPoligono(newPoligono) {
+    MPoligono.value = newPoligono
+  }
+
+  const municipiosLayer = shallowRef(null)
+  const is_MLayer = ref(false)
+
+  function setMLayer(newPoligono) {
+    municipiosLayer.value = newPoligono
+    is_MLayer.value = true
+  }
+
+  function clearMLayer() {
+    municipiosLayer.value = null
+    is_MLayer.value = false
+    MPoligono.value = null
+  }
+
+  return {
+    EPoligono,
+    setEPoligono,
+    MPoligono,
+    setMPoligono,
+    municipiosLayer,
+    is_MLayer,
+    setMLayer,
+    clearMLayer,
+  }
 })
