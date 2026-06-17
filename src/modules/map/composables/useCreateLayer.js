@@ -16,7 +16,7 @@ import { usePoligonoStore } from '@/stores/poligono'
 */
 
 export function createLayer(poligonos_json, options = {}) {
-  const poligonoStore = usePoligonoStore()
+  const newPoligono = usePoligonoStore()
 
   const {
     map,
@@ -40,10 +40,10 @@ export function createLayer(poligonos_json, options = {}) {
       const nombre_layer = feature.properties[name] || 'nombre del poligono'
       layer.bindTooltip(nombre_layer)
 
+      // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
       layer.on({
-        mouseover: event_mouseover,
-        mouseout: event_mouseout,
-        /* click: (e) => event_click(e, map, name, poligonoStore), */
+        mouseover,
+        mouseout,
       })
 
       layer.on('click', async (e) => {
@@ -51,7 +51,17 @@ export function createLayer(poligonos_json, options = {}) {
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 
-        poligonoStore.setPoligono(layer)
+        // ** INICIO - Gestion de poligono clickeado **
+        // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
+        if (newPoligono.poligono) {
+          // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
+          newPoligono.poligono.addTo(map)
+          newPoligono.setPoligono(null)
+        }
+        // Se almacena poligono clickeado y se elimina del mapa
+        newPoligono.setPoligono(layer)
+        map.removeLayer(layer)
+        // ** FIN - Gestion de poligono clickeado **
 
         if (map && bounds.isValid()) {
           map.flyToBounds(bounds)
@@ -64,32 +74,12 @@ export function createLayer(poligonos_json, options = {}) {
 }
 
 // Eventos
-function event_click(e, map, nameProp, poligonoStore) {
-  L.DomEvent.stopPropagation(e)
-  const layer = e.target
-
-  // 1. Usamos el nombre dinámico pasado desde options
-  const nombre_dinamico = layer?.feature?.properties?.[nameProp] || 'sin nombre'
-  console.log('Click en poligono: EVENTO', nombre_dinamico)
-  console.log(layer)
-
-  const bounds = layer.getBounds()
-  if (map && bounds.isValid()) {
-    map.flyToBounds(bounds)
-  }
-
-  poligonoStore.setPoligono(layer)
-  console.log(poligonoStore.poligono)
-
-  // 2. Enfocar al layer clickeado
-}
-
-function event_mouseover(e) {
+function mouseover(e) {
   const layer = e.target
   layer.setStyle({ fillOpacity: 0.8, weight: 2 })
 }
 
-function event_mouseout(e) {
+function mouseout(e) {
   const layer = e.target
   layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 }
