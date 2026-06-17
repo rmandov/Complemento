@@ -7,7 +7,7 @@ import { useGeoJson } from '../composables/useGeoJson'
 import { useInfoLayer } from '../composables/useInfoLayer'
 
 // Entidades
-import { useEntidadesLayer } from '../composables/useEntidadesLayer'
+/* import { useEntidadesLayer } from '../composables/useEntidadesLayer' */
 import { createLayer } from '../composables/useCreateLayer'
 
 import 'leaflet/dist/leaflet.css'
@@ -52,6 +52,7 @@ async function goBack() {
 async function goProyectos() {
   const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
   await cargarProyectos(proyectosData)
+
 }
 
 // Carga de entidades
@@ -131,7 +132,8 @@ const carga_entidades = async () => {
     })
 
     // Creación de Layer personalizado !!
-    /* const entidadesLayer = createLayer(entidades, {
+    /* const entidadesLayer = createLayer( entidades, {
+    map: map.value,
       pane: 'poligonosPane',
       name: 'NOMGEO',
     })

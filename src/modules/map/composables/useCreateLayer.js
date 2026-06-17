@@ -1,4 +1,6 @@
-import L from 'leaflet'
+import L from "leaflet";
+
+import { useMap } from "./mapControler";
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
 1. poligonos.json => const [entidad, municipio, localida, etc] = await getGeoJson('[entidad, municipio, localida, etc].json')
@@ -13,52 +15,62 @@ import L from 'leaflet'
 2. Indicar que hay una capa mas de profundida e iniciar otro procesos de carga de poligonos
 */
 
-function event_mouseover(e) {
-  const layer = e.target
-  layer.setStyle({ fillOpacity: 0.8, weight: 2 })
-}
-
-function event_mouseout(e) {
-  L.DomEvent.stopPropagation(e)
-
-  const layer = e.target
-  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-}
-
-function event_click(e) {
-  const layer = e.target
-  console.log('Aqui se gestionan los eventos click')
-}
-
 export function createLayer(poligonos_json, options = {}) {
   const {
-    pane = '',
-    name = 'NOMGEO',
+    map,
+    pane = "",
+    name = "NOMGEO",
     style = {
       weight: 1.2,
-      fillColor: 'rgb(251, 95, 16)',
+      fillColor: "rgb(251, 95, 16)",
       fillOpacity: 0.5,
-      color: 'white',
-      dashArray: '3',
+      color: "white",
+      dashArray: "3",
     },
-  } = options
+  } = options;
 
-  if (!poligonos_json) return
+  if (!poligonos_json) return;
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
-      const nombre_layer = feature.properties[name] || 'nombre del poligono'
-      layer.bindTooltip(nombre_layer)
+      const nombre_layer = feature.properties[name] || "nombre del poligono";
+      layer.bindTooltip(nombre_layer);
 
       layer.on({
         mouseover: event_mouseover,
         mouseout: event_mouseout,
-        click: event_click,
-      })
+        click: (e) => event_click(e, map, name),
+      });
     },
-  })
+  });
 
-  return newLayer
+  return newLayer;
+}
+
+// Eventos
+function event_click(e, map, nameProp) {
+  L.DomEvent.stopPropagation(e);
+  const layer = e.target;
+
+  // 1. Usamos el nombre dinámico pasado desde options
+  const nombre_dinamico = layer?.feature?.properties?.[nameProp] || "sin nombre";
+  console.log("Click en poligono:", nombre_dinamico);
+
+  // 2. Enfocar al layer clickeado
+  const bounds = layer.getBounds();
+  if (map && bounds.isValid()) {
+    map.flyToBounds(bounds);
+  }
+}
+
+function event_mouseover(e) {
+  const layer = e.target;
+  layer.setStyle({ fillOpacity: 0.8, weight: 2 });
+}
+
+function event_mouseout(e) {
+  const layer = e.target;
+  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 }
