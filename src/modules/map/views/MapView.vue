@@ -1,32 +1,24 @@
 <script setup>
 import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
-import { useMap } from '@/modules/map/composables/mapControler'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
 
-import { useInfoLayer } from '../composables/useInfoLayer'
-
-// Entidades
+// Capas
+import { useMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
+import { useInfoLayer } from '../composables/useInfoLayer'
 
 import { usePoligonoStore } from '@/stores/poligono'
 const newEntidad = usePoligonoStore()
 
-import 'leaflet/dist/leaflet.css'
-
 const mapContainer = ref(null)
-
-// Alamcena la capa que fue clickeada
-
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
-// Controles del mapa
-const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
-
-// Información desplegada dentro del container map
+const { map, initMap, resetView } = useMap(mapContainer)
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
 const { infoLayer } = useInfoLayer()
 
