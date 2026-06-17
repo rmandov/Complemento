@@ -25,7 +25,7 @@ const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 const { getGeoJson } = useGeoJson()
 // Información desplegada dentro del container map
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
-const { infoLayer } = useInfoLayer()
+const { infoLayer, nameLayer } = useInfoLayer()
 
 // Botón para regresar a vista México
 async function goBack() {
@@ -247,6 +247,7 @@ onMounted(async () => {
 
   // Capa de información dentro del mapa
   infoLayer.addTo(map.value)
+  nameLayer.addTo(map.value)
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
@@ -288,8 +289,8 @@ onMounted(async () => {
 
 .map {
   border: solid 1px red;
-  width: 100%;
-  height: 100%;
+  width: 70%;
+  height: 75%;
 }
 .back-button {
   position: absolute;
