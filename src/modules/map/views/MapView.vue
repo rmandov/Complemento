@@ -52,7 +52,6 @@ async function goBack() {
 async function goProyectos() {
   const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
   await cargarProyectos(proyectosData)
-
 }
 
 // Carga de entidades
@@ -132,8 +131,8 @@ const carga_entidades = async () => {
     })
 
     // Creación de Layer personalizado !!
-    const entidadesLayer = createLayer( entidades, {
-    map: map.value,
+    const entidadesLayer = createLayer(entidades, {
+      map: map.value,
       pane: 'poligonosPane',
       name: 'NOMGEO',
     })
