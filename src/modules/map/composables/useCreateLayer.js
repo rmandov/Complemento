@@ -3,7 +3,8 @@ import { usePoligonoStore } from '@/stores/poligono'
 
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
-import { shallowRef } from 'vue'
+import { useMap } from './mapControler'
+
 const { getGeoJson } = useGeoJson()
 
 // ¿Que valores cambian?, esos valores son los que se usan de input
@@ -22,7 +23,7 @@ const { getGeoJson } = useGeoJson()
 
 export function createLayer(poligonos_json, options = {}) {
   const newEntidad = usePoligonoStore()
-  /* const muncipiosLayer = shallowRef(null); */
+  const { flyToBounds } = useMap()
 
   const {
     map,
@@ -98,7 +99,11 @@ export function createLayer(poligonos_json, options = {}) {
         }
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
-        map.flyToBounds(bounds)
+        /* map.flyToBounds(bounds); */
+        console.log(bounds)
+        console.log(map)
+
+        flyToBounds(map, bounds)
       })
     },
   })
@@ -120,6 +125,7 @@ function mouseout(e) {
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
   const newEntidad = usePoligonoStore()
+  const { flyToBounds } = useMap()
   const {
     map,
     pane = '',
@@ -162,7 +168,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         map.removeLayer(layer)
 
         if (map && bounds.isValid()) {
-          map.flyToBounds(bounds)
+          flyToBounds(map, bounds)
         }
       })
     },

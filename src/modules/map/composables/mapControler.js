@@ -56,18 +56,18 @@ export function useMap(containerRef) {
   }
 
   // Movernos al encuadre que querramos
-  const flyToBounds = (bounds) => {
-    if (!map.value || !bounds) return console.log('No se tiene bounds o mapa')
+  const flyToBounds = (map, bounds) => {
+    if (!map || !bounds) return console.log('No se tiene bounds o mapa')
 
-    map.value.flyToBounds(bounds, {
+    map.flyToBounds(bounds, {
       padding: [0, 0],
       duration: 0.5,
     })
 
-    map.value.once('moveend', () => {
+    map.once('moveend', () => {
       mapStore.setView({
-        center: map.value.getCenter(),
-        zoom: map.value.getZoom(),
+        center: map.getCenter(),
+        zoom: map.getZoom(),
         bounds: bounds,
       })
     })
