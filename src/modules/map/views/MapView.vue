@@ -161,6 +161,7 @@ const carga_municipios = async (entidad_seleccionada) => {
         layer.on('click', async (e) => {
           // Encuadrar la vista al municipio
           L.DomEvent.stopPropagation(e)
+          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 
           // Si ya hay un municipio seleccionado, limpiar antes
           if (municipio_click.value) {
@@ -300,4 +301,9 @@ onMounted(async () => {
   padding: 5px 10px;
   cursor: pointer;
 }
+
+:deep(.leaflet-interactive:focus) {
+  outline: none;
+}
+
 </style>
