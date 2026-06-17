@@ -132,14 +132,14 @@ const carga_entidades = async () => {
     })
 
     // Creación de Layer personalizado !!
-    /* const entidadesLayer = createLayer( entidades, {
+    const entidadesLayer = createLayer( entidades, {
     map: map.value,
       pane: 'poligonosPane',
       name: 'NOMGEO',
     })
-    entidadesLayer.addTo(map.value) */
+    entidadesLayer.addTo(map.value)
 
-    estadosCapa.addTo(map.value)
+    /* estadosCapa.addTo(map.value) */
   }
 }
 

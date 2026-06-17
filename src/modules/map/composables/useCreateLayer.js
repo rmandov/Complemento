@@ -1,6 +1,6 @@
 import L from "leaflet";
+import { usePoligonoStore } from "@/stores/poligono";
 
-import { useMap } from "./mapControler";
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
 1. poligonos.json => const [entidad, municipio, localida, etc] = await getGeoJson('[entidad, municipio, localida, etc].json')
@@ -16,6 +16,8 @@ import { useMap } from "./mapControler";
 */
 
 export function createLayer(poligonos_json, options = {}) {
+  const poligonoStore = usePoligonoStore();
+
   const {
     map,
     pane = "",
@@ -41,8 +43,22 @@ export function createLayer(poligonos_json, options = {}) {
       layer.on({
         mouseover: event_mouseover,
         mouseout: event_mouseout,
-        click: (e) => event_click(e, map, name),
+        click: (e) => event_click(e, map, name, poligonoStore),
       });
+
+      /* layer.on("click", async (e) => {
+        L.DomEvent.stopPropagation(e);
+        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
+
+        const nombre_dinamico = layer?.feature?.properties?.[name] || "sin nombre";
+        console.log("Click en poligono CLICK!!:", nombre_dinamico);
+        console.log(layer);
+
+        const bounds = layer.getBounds();
+        if (map && bounds.isValid()) {
+          map.flyToBounds(bounds);
+        }
+      }); */
     },
   });
 
@@ -50,19 +66,24 @@ export function createLayer(poligonos_json, options = {}) {
 }
 
 // Eventos
-function event_click(e, map, nameProp) {
+function event_click(e, map, nameProp, poligonoStore) {
   L.DomEvent.stopPropagation(e);
   const layer = e.target;
 
   // 1. Usamos el nombre dinámico pasado desde options
   const nombre_dinamico = layer?.feature?.properties?.[nameProp] || "sin nombre";
-  console.log("Click en poligono:", nombre_dinamico);
+  console.log("Click en poligono: EVENTO", nombre_dinamico);
+  console.log(layer);
 
-  // 2. Enfocar al layer clickeado
   const bounds = layer.getBounds();
   if (map && bounds.isValid()) {
     map.flyToBounds(bounds);
   }
+
+  poligonoStore.setPoligono(layer);
+  console.log(poligonoStore.poligono);
+
+  // 2. Enfocar al layer clickeado
 }
 
 function event_mouseover(e) {
