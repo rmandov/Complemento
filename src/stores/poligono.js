@@ -29,6 +29,13 @@ export const usePoligonoStore = defineStore('poligono', () => {
     is_MLayer.value = false
   }
 
+  function clear() {
+    EPoligono.value = null
+    MPoligono.value = null
+    municipiosLayer.value = null
+    is_MLayer.value = false
+  }
+
   return {
     EPoligono,
     setEPoligono,
@@ -38,5 +45,6 @@ export const usePoligonoStore = defineStore('poligono', () => {
     is_MLayer,
     setMLayer,
     clearMLayer,
+    clear,
   }
 })

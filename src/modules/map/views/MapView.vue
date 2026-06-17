@@ -12,6 +12,9 @@ import { useInfoLayer } from '../composables/useInfoLayer'
 // Entidades
 import { createLayer } from '../composables/useCreateLayer'
 
+import { usePoligonoStore } from '@/stores/poligono'
+const newEntidad = usePoligonoStore()
+
 import 'leaflet/dist/leaflet.css'
 
 // INICIO - K
@@ -38,7 +41,7 @@ const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 const { infoLayer } = useInfoLayer()
 
 // Botón para regresar a vista México
-async function goBack() {
+/* async function goBack() {
   resetView()
 
   if (municipio_click.value) {
@@ -51,10 +54,19 @@ async function goBack() {
     entidad_click.value = null
   }
 
-  // Volver a mostrar los proyectos si estaban ocultos (opcional)
   if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
     capaProyectos.value.addTo(map.value)
   }
+} */
+
+async function goBack() {
+  if (newEntidad.MPoligono || newEntidad.EPoligono) {
+    map.value.removeLayer(newEntidad.municipiosLayer)
+    newEntidad.EPoligono.addTo(map.value)
+  }
+  newEntidad.clear()
+
+  resetView()
 }
 
 // Botón para mostrar TODOS los proyectos - coords
