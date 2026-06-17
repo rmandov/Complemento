@@ -8,6 +8,7 @@ import { useInfoLayer } from '../composables/useInfoLayer'
 
 // Entidades
 import { useEntidadesLayer } from '../composables/useEntidadesLayer'
+import { createLayer } from '../composables/useCreateLayer'
 
 import 'leaflet/dist/leaflet.css'
 
@@ -69,7 +70,8 @@ const carga_entidades = async () => {
         dashArray: '3',
       },
       onEachFeature: (feature, layer) => {
-        const nombre = feature.properties.NOMGEO || 'Estado'
+        const name = 'NOMGEO'
+        const nombre = feature.properties[name] || 'Estado'
         layer.bindTooltip(nombre)
 
         layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }))
@@ -127,6 +129,14 @@ const carga_entidades = async () => {
         })
       },
     })
+
+    // Creación de Layer personalizado !!
+    /* const entidadesLayer = createLayer(entidades, {
+      pane: 'poligonosPane',
+      name: 'NOMGEO',
+    })
+    entidadesLayer.addTo(map.value) */
+
     estadosCapa.addTo(map.value)
   }
 }
