@@ -17,20 +17,10 @@ const newEntidad = usePoligonoStore()
 
 import 'leaflet/dist/leaflet.css'
 
-// INICIO - K
-/* import { usePoligonoStore } from '@/stores/poligonoLevels'
-import { createCapaPoligono, regresarNivel } from '../composables/usePoligonoLayer'
-
-const store = usePoligonoStore() */
-
-// FIN - K
-
 const mapContainer = ref(null)
 
 // Alamcena la capa que fue clickeada
-const entidad_click = shallowRef(null)
 
-const municipio_click = shallowRef(null)
 const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 // Controles del mapa
@@ -39,25 +29,6 @@ const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
 // Información desplegada dentro del container map
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
 const { infoLayer } = useInfoLayer()
-
-// Botón para regresar a vista México
-/* async function goBack() {
-  resetView()
-
-  if (municipio_click.value) {
-    map.value.removeLayer(municipio_click.value)
-    municipio_click.value = null
-  }
-
-  if (entidad_click.value) {
-    entidad_click.value.addTo(map.value)
-    entidad_click.value = null
-  }
-
-  if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
-    capaProyectos.value.addTo(map.value)
-  }
-} */
 
 async function goBack() {
   if (newEntidad.MPoligono || newEntidad.EPoligono) {
@@ -73,147 +44,6 @@ async function goBack() {
 async function goProyectos() {
   const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
   await cargarProyectos(proyectosData)
-}
-
-// Carga de entidades
-const carga_entidades = async () => {
-  // '/work/models/PTP/NPTP/PTP_Complementario/entidades.json'
-  const entidades = await getGeoJson('entidades.json')
-
-  if (entidades && map.value) {
-    const estadosCapa = L.geoJSON(entidades, {
-      pane: 'poligonosPane',
-      style: {
-        weight: 1.2,
-        fillColor: '#9295e4',
-        fillOpacity: 0.5,
-        color: 'white',
-        dashArray: '3',
-      },
-      onEachFeature: (feature, layer) => {
-        const name = 'NOMGEO'
-        const nombre = feature.properties[name] || 'Estado'
-        layer.bindTooltip(nombre)
-
-        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8, weight: 2 }))
-        layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.5, weight: 1.2 }))
-
-        layer.on('click', async (e) => {
-          L.DomEvent.stopPropagation(e)
-          layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-
-          const nombre_entidad = layer.feature.properties.NOMGEO
-
-          // Si ya hay un estado seleccionado, limpiar antes
-          /*
-            A futuro estas capas no deben ser almacenadas en variables locales, si no guardarlo con Pinia. Esto para poder mover esta función de carga de entidades a un composable y solo hacer "return" de la capa que se va a guardar, pero de ahora de forma "global", para que desde fuera sea gestionado.
-          */
-          if (entidad_click.value) {
-            if (municipio_click.value) {
-              // Borro los muncipios del mapa
-              map.value.removeLayer(municipio_click.value)
-
-              // Y tambien borro la capa de la variable donde la guardé
-              municipio_click.value = null
-            }
-            entidad_click.value.addTo(map.value)
-            entidad_click.value = null
-          }
-
-          /*
-          1. Elimino la capa de la entidad a la que le dí click. Esto para dejar espacio y poner la capa de los municipios
-          2. Guardo la capa de la entidad para en futuro volverla a colocar en su lugar, cuando otra entidad sea clickeada.
-          */
-          entidad_click.value = layer
-          console.log('Despues de dar click: ', entidad_click)
-
-          map.value.removeLayer(layer)
-
-          // Cargar municipios
-          const entidad_json = nombre_entidad
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replaceAll(' ', '_')
-
-          //Aqui sería mejor retornar la capa de municipios y desde carga_etnidades gestionar el addTo(map.value)
-          await carga_municipios(entidad_json)
-
-          // Opcional: ocultar proyectos mientras se ven municipios
-          /* if (capaProyectos.value && map.value.hasLayer(capaProyectos.value)) {
-            map.value.removeLayer(capaProyectos.value)
-          } */
-
-          // Encuadrar la vista a la entidad clickeada
-          const bounds = layer.getBounds()
-          flyToBounds(bounds)
-        })
-      },
-    })
-
-    estadosCapa.addTo(map.value)
-  }
-}
-
-// Carga de municipios
-const carga_municipios = async (entidad_seleccionada) => {
-  try {
-    // `/work/models/PTP/NPTP/PTP_Complementario/municipios/${estado}.json`
-    const geojson = await getGeoJson(`municipios/${entidad_seleccionada}.json`)
-    /* console.log('Municipios cargados:', geojson) */
-
-    const municipiosLayer = L.geoJSON(geojson, {
-      pane: 'poligonosPane',
-      style: {
-        color: '#D32F2F',
-        weight: 1,
-        fillColor: '#FFCDD2',
-        fillOpacity: 0.2,
-        dashArray: '3',
-      },
-      onEachFeature: (feature, layer) => {
-        const municipio_nombre = feature.properties.NOMGEO || 'Municipio'
-        layer.bindTooltip(municipio_nombre)
-
-        layer.on('mouseover', () => {
-          layer.setStyle({ fillOpacity: 0, weight: 1.5 })
-        })
-        layer.on('mouseout', () => {
-          layer.setStyle({ fillOpacity: 0.2, weight: 1 })
-        })
-
-        layer.on('click', async (e) => {
-          // Encuadrar la vista al municipio
-          L.DomEvent.stopPropagation(e)
-
-          // Si ya hay un municipio seleccionado, limpiar antes
-          if (municipio_click.value) {
-            municipio_click.value.setStyle({ color: '#D32F2F' })
-          }
-
-          layer.setStyle({ color: '#0000ff' })
-          const bounds = layer.getBounds()
-          console.log('Encuadre municipio', bounds)
-
-          flyToBounds(bounds)
-        })
-      },
-    })
-
-    municipiosLayer.addTo(map.value)
-    municipio_click.value = municipiosLayer
-
-    // Cargar proyectos (directamente sin composable)
-    // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'
-
-    // Este de llamado de proyectos debe funcionar filtrado por municipio
-    // Y en alguna otra parte un boton que habilite la muestra de todos
-
-    /* const proyectosData = await getGeoJson('PPIs/Azul.json')
-    await cargarProyectos(proyectosData) */
-  } catch (err) {
-    console.error('Error cargando municipios:', err)
-  }
 }
 
 // Carga de proyectos - coords
@@ -265,16 +95,6 @@ async function cargarProyectos(proyectosData) {
   Va a necesitar conexión con el poligono de una entidad o un municpio porque el proyecto ya no es por coords ahora por área.
 */
 
-// INICIO - K
-
-/* function handleRegresar() {
-  if (map.value) {
-    regresarNivel(map.value, store)
-  }
-} */
-
-// FIN - K
-
 onMounted(async () => {
   initMap()
 
@@ -294,8 +114,6 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  /* carga_entidades() */
-  // Se valida la descarga de las entidades
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {
@@ -306,36 +124,12 @@ onMounted(async () => {
     })
     EntidadesMuncipiosLayer.addTo(map.value)
   }
-
-  // Creación de Layer personalizado. Returna el Layer creado y se aplica al mapa
-  // INICIO - K
-
-  /*  const capaEstados = createCapaPoligono(entidades, {
-    map: map.value,
-     pane: 'poligonosPane',
-    nivel: 0,
-    nameKey: 'NOMGEO',
-  })
-
-  if (capaEstados) {
-    capaEstados.addTo(map.value)
-    // Marcar como capa del sistema
-    capaEstados._esCapaPoligono = true
-    capaEstados._nivel = 0
-  } */
-
-  // FIN - K
 })
 </script>
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; border: solid 1px purple">
-      <!-- Botón de regresar -->
-      <!-- <button v-if="store.puedeRegresar" @click="handleRegresar" class="btn-regresar">
-        Regresar ({{ store.nivelActual }} niveles)
-      </button> -->
-    </div>
+    <div style="height: 100%; width: 300px; border: solid 1px purple"></div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="goProyectos">Proyectos</button>
