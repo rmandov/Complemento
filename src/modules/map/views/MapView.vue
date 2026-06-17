@@ -368,4 +368,8 @@ onMounted(async () => {
 .btn-regresar:hover {
   background: #f0f0f0;
 }
+
+:deep(.leaflet-interactive:focus) {
+  outline: none;
+}
 </style>
