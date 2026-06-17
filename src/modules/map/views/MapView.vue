@@ -3,14 +3,24 @@ import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
 
 import { useMap } from '@/modules/map/composables/mapControler'
+// Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
+const { getGeoJson } = useGeoJson()
+
 import { useInfoLayer } from '../composables/useInfoLayer'
 
 // Entidades
-/* import { useEntidadesLayer } from '../composables/useEntidadesLayer' */
 import { createLayer } from '../composables/useCreateLayer'
 
 import 'leaflet/dist/leaflet.css'
+
+// INICIO - K
+/* import { usePoligonoStore } from '@/stores/poligonoLevels'
+import { createCapaPoligono, regresarNivel } from '../composables/usePoligonoLayer'
+
+const store = usePoligonoStore() */
+
+// FIN - K
 
 const mapContainer = ref(null)
 
@@ -22,8 +32,7 @@ const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 // Controles del mapa
 const { map, initMap, resetView, flyToBounds } = useMap(mapContainer)
-// Para cargar los GeoJson
-const { getGeoJson } = useGeoJson()
+
 // Información desplegada dentro del container map
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
 const { infoLayer } = useInfoLayer()
@@ -130,15 +139,7 @@ const carga_entidades = async () => {
       },
     })
 
-    // Creación de Layer personalizado !!
-    const entidadesLayer = createLayer(entidades, {
-      map: map.value,
-      pane: 'poligonosPane',
-      name: 'NOMGEO',
-    })
-    entidadesLayer.addTo(map.value)
-
-    /* estadosCapa.addTo(map.value) */
+    estadosCapa.addTo(map.value)
   }
 }
 
@@ -149,7 +150,7 @@ const carga_municipios = async (entidad_seleccionada) => {
     const geojson = await getGeoJson(`municipios/${entidad_seleccionada}.json`)
     /* console.log('Municipios cargados:', geojson) */
 
-    const municipiosCapa = L.geoJSON(geojson, {
+    const municipiosLayer = L.geoJSON(geojson, {
       pane: 'poligonosPane',
       style: {
         color: '#D32F2F',
@@ -187,8 +188,8 @@ const carga_municipios = async (entidad_seleccionada) => {
       },
     })
 
-    municipiosCapa.addTo(map.value)
-    municipio_click.value = municipiosCapa
+    municipiosLayer.addTo(map.value)
+    municipio_click.value = municipiosLayer
 
     // Cargar proyectos (directamente sin composable)
     // '/work/models/PTP/NPTP/PTP_Complementario/PPIs/Azul.json'
@@ -252,6 +253,16 @@ async function cargarProyectos(proyectosData) {
   Va a necesitar conexión con el poligono de una entidad o un municpio porque el proyecto ya no es por coords ahora por área.
 */
 
+// INICIO - K
+
+/* function handleRegresar() {
+  if (map.value) {
+    regresarNivel(map.value, store)
+  }
+} */
+
+// FIN - K
+
 onMounted(async () => {
   initMap()
 
@@ -271,14 +282,48 @@ onMounted(async () => {
   map.value.getPane('proyectosPane').style.zIndex = 700
 
   // 1. Cargar estados
-  /* await useEntidadesLayer(map); */
-  carga_entidades()
+  /* carga_entidades() */
+  // Se valida la descarga de las entidades
+
+  const entidades = await getGeoJson('entidades.json')
+  if (entidades) {
+    const EntidadesMuncipiosLayer = createLayer(entidades, {
+      map: map.value,
+      pane: 'poligonosPane',
+      name: 'NOMGEO',
+    })
+    EntidadesMuncipiosLayer.addTo(map.value)
+  }
+
+  // Creación de Layer personalizado. Returna el Layer creado y se aplica al mapa
+  // INICIO - K
+
+  /*  const capaEstados = createCapaPoligono(entidades, {
+    map: map.value,
+     pane: 'poligonosPane',
+    nivel: 0,
+    nameKey: 'NOMGEO',
+  })
+
+  if (capaEstados) {
+    capaEstados.addTo(map.value)
+    // Marcar como capa del sistema
+    capaEstados._esCapaPoligono = true
+    capaEstados._nivel = 0
+  } */
+
+  // FIN - K
 })
 </script>
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; border: solid 1px purple"></div>
+    <div style="height: 100%; width: 300px; border: solid 1px purple">
+      <!-- Botón de regresar -->
+      <!-- <button v-if="store.puedeRegresar" @click="handleRegresar" class="btn-regresar">
+        Regresar ({{ store.nivelActual }} niveles)
+      </button> -->
+    </div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="goProyectos">Proyectos</button>
@@ -310,5 +355,17 @@ onMounted(async () => {
   border: 1px solid #ccc;
   padding: 5px 10px;
   cursor: pointer;
+}
+
+.btn-regresar {
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-regresar:hover {
+  background: #f0f0f0;
 }
 </style>

@@ -3,11 +3,11 @@ import { shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 
 export const usePoligonoStore = defineStore('poligono', () => {
-  const poligono = shallowRef(null)
+  const EPoligono = shallowRef(null)
 
-  function setPoligono(nuevoPoligono) {
-    poligono.value = nuevoPoligono
+  function setEPoligono(newPoligono) {
+    EPoligono.value = newPoligono
   }
 
-  return { poligono, setPoligono }
+  return { EPoligono, setEPoligono }
 })
