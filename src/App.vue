@@ -1,6 +1,6 @@
 <script setup>
-import MapView from './modules/map/views/MapView.vue';
-import TableMap from './modules/map/views/TableMap.vue';
+import MapView from './modules/map/views/MapView.vue'
+import TableMap from './modules/map/views/TableMap.vue'
 </script>
 
 <template>

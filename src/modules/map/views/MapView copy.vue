@@ -36,61 +36,58 @@ async function goBack() {
 }
 
 // Botón para mostrar TODOS los proyectos - coords
-let datosProyectos = null   // guardar los datos JSON para no volver a pedirlos
-const proyectosVisibles = ref(false)   // si usas Vue, o una variable normal let
-// Función que solo crea la capa (sin añadir al mapa)
-async function crearCapaProyectos() {
-  if (!datosProyectos) {
-    datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
-    console.log('Base ligera: ', datosProyectos)
-  }
-  if (!map.value || !datosProyectos) return
+async function goProyectos() {
+  const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
+  console.log("Base ligera: ", proyectosData);
 
-  // Si ya existe una capa, la removemos (por si acaso)
+  await cargarProyectos(proyectosData)
+}
+
+
+// Carga de proyectos - coords
+async function cargarProyectos(proyectosData) {
+  if (!map.value || !proyectosData) return
+
+  // Si ya existe una capa de proyectos, la removemos para evitar duplicados
   if (capaProyectos.value) {
     map.value.removeLayer(capaProyectos.value)
   }
 
-  const estiloBase = { radius: 4, weight: 1, fillOpacity: 0.7, color: 'rgb(255, 255, 255)', fillColor: '#3498db' }
+  const estiloBase = {
+    radius: 5,
+    weight: 1,
+    fillOpacity: 0.7,
+    color: '#333',
+    fillColor: '#3498db',
+  }
 
-  const proyectosLayer = L.geoJSON(datosProyectos, {
-    pointToLayer: (feature, latlng) => {const marker = L.circleMarker(latlng, {
+  // Crear capa GeoJSON de proyectos
+  const proyectosLayer = L.geoJSON(proyectosData, {
+    pointToLayer: (feature, latlng) => {
+      // Determinar estilo según categoría
+      const marker = L.circleMarker(latlng, {
         ...estiloBase,
       })
       marker.options.pane = 'proyectosPane' // forzar pane
-      return marker},
+      return marker
+    },
     onEachFeature: (feature, layer) => {
+      // Tooltip con nombre corto o fallback
       const nombre = feature.properties.NOMBRE_CORTO || feature.properties.NOMBRE || 'Proyecto'
       layer.bindTooltip(nombre)
-      layer.on('click', () => console.log('Proyecto seleccionado:', nombre, feature.properties))
+
+      // Evento click opcional
+      layer.on('click', () => {
+        console.log('Proyecto seleccionado:', nombre, feature.properties)
+      })
     },
     pane: 'proyectosPane',
   })
 
+  proyectosLayer.addTo(map.value)
   capaProyectos.value = proyectosLayer
-  // No la añadimos todavía; eso lo hará toggleProyectos
 }
 
-// Función toggle definitiva
-async function toggleProyectos() {
-  if (proyectosVisibles.value) {
-    // Ocultar
-    if (capaProyectos.value) {
-      map.value.removeLayer(capaProyectos.value)
-    }
-    proyectosVisibles.value = false
-  } else {
-    // Mostrar: asegurar que la capa está creada
-    if (!capaProyectos.value) {
-      await crearCapaProyectos()
-    }
-    // Añadir al mapa si no está ya
-    if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
-      capaProyectos.value.addTo(map.value)
-    }
-    proyectosVisibles.value = true
-  }
-}
 // Proximamente carga de proyectos por poligono
 /*
   Va a necesitar conexión con el poligono de una entidad o un municpio porque el proyecto ya no es por coords ahora por área.
@@ -145,7 +142,7 @@ onMounted(async () => {
     <div ref="mapContainer" class="map"></div>
 
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
-    <button class="back-button" @click="toggleProyectos">Proyectos</button>
+    <button class="back-button" @click="goProyectos">Proyectos</button>
   </div>
 </template>
 
