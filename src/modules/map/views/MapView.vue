@@ -108,17 +108,25 @@ onMounted(async () => {
   map.value.createPane('proyectosPane')
   map.value.getPane('proyectosPane').style.zIndex = 700
 
-  // 1. Cargar estados
-
+  // ** INICIO - Carga de entidades y municipios **
+  /*
+    El objetivo es que el layer reciba el json, cree la capa y la retorne.
+    Desde este .vue es donde se gestiona el aplicarse la capa al map.
+  */
+  // 1. Se descarga el json de las entidades
   const entidades = await getGeoJson('entidades.json')
+  // 2. Se comprueba que la descarga fue exitosa, despues se usa un composable para crear el layer
   if (entidades) {
+    // 3. El composable retorna el layer
     const EntidadesMuncipiosLayer = createLayer(entidades, {
       map: map.value,
       pane: 'entidadesPane',
       name: 'NOMGEO',
     })
+    /// 4. El layer creado se aplica en el mapa
     EntidadesMuncipiosLayer.addTo(map.value)
   }
+  // ** FIN - Carga de entidades y municipios **
 })
 </script>
 
