@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 
 // Components
 import InformationClick from "../components/InformationClick.vue";
+import InformationProjects from "../components/InformationProjects.vue";
 
 // Para cargar los GeoJson
 import { useGeoJson } from "../composables/useGeoJson";
@@ -24,7 +25,7 @@ const { map, initMap, resetView } = useMap(mapContainer);
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
 const { infoLayer, nameLayer } = useInfoLayer();
 
-const { cargarProyectos, cargarProyectosDesdeArchivo } = useTodos(map);
+const {cargarProyectosDesdeArchivo } = useTodos(map);
 
 // Regresa a la vista inicial
 async function goBack() {
@@ -89,7 +90,7 @@ onMounted(async () => {
     </div>
     <div class="info">
       <div ref="mapContainer" class="map"></div>
-      <div ref="infoContainer" class="overlay">EEEEhhhhh pude poner un texto encima del mapa</div>
+      <InformationProjects class="overlay"></InformationProjects>
     </div>
 
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>

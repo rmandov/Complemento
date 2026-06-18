@@ -1,47 +1,34 @@
 // stores/map.js
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from "vue";
+import { defineStore } from "pinia";
 
-export const useMapStore = defineStore('map', () => {
+export const useInfoStore = defineStore(() => {
   // State
-  const view = ref({
-    center: [23.6345, -102.5528],
-    zoom: 5,
-    bounds: null,
-  })
-
-  const CVE_ENT = ref('00')
+  const information = ref({
+    short_name: "texto",
+    id_municipio: "numero",
+  });
 
   // Actions
-  function setCenter(center) {
-    view.value.center = center
+  function setShortName(short_name) {
+    information.value.short_name = short_name;
   }
 
-  function setZoom(zoom) {
-    view.value.zoom = zoom
+  function setIdMunicipio(id_municipio) {
+    information.value.id_municipio = id_municipio;
   }
 
-  function setBounds(bounds) {
-    view.value.bounds = bounds
-  }
-
-  function setView({ center, zoom, bounds }) {
-    if (center) view.value.center = center
-    if (zoom !== undefined) view.value.zoom = zoom
-    if (bounds) view.value.bounds = bounds
-  }
-
-  function setCVE_ENT(newCVE_ENT) {
-    CVE_ENT.value = newCVE_ENT
+  function setInfo({ short_name, id_municipio }) {
+    if (short_name) information.value.short_name = short_name;
+    if (id_municipio !== undefined) {
+      information.value.id_municipio = id_municipio;
+    }
   }
 
   return {
-    view,
-    setCenter,
-    setZoom,
-    setBounds,
-    setView,
-    CVE_ENT,
-    setCVE_ENT,
-  }
-})
+    setShortName,
+    setIdMunicipio,
+    setInfo,
+    information,
+  };
+});

@@ -52,6 +52,8 @@ export function useTodos(map) {
   async function cargarProyectosDesdeArchivo(archivo = 'PPIs/Base_ligera.json') {
     const proyectosData = await getGeoJson(archivo)
     await cargarProyectos(proyectosData)
+    console.log("esta es la base ligera: ", proyectosData);
+    
   }
 
   function eliminarProyectos() {
