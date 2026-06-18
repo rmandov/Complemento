@@ -43,7 +43,7 @@ export function useMap(containerRef) {
 
     map.value.flyTo(defaultView.center, defaultView.zoom, {
       animate: true,
-      duration: 0.8,
+      duration: 0.5,
       easeLinearity: 0.1,
     })
 
@@ -74,12 +74,12 @@ export function useMap(containerRef) {
   }
 
   // Limpieza para evitar fugas de memoria
-  onUnmounted(() => {
+  /*   onUnmounted(() => {
     if (map.value) {
       map.value.remove()
       map.value = null
     }
-  })
+  }) */
 
   return { map, initMap, resetView, flyToBounds }
 }
