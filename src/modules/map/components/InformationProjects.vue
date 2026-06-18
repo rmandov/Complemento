@@ -1,20 +1,45 @@
 <script setup>
-import { useInfoStore } from '@/stores/info'
-import { storeToRefs } from 'pinia' // <-- Importa esto
+import { useInfoStore } from "@/stores/info";
+import { storeToRefs } from "pinia"; // <-- Importa esto
+import { useMapStore } from "@/stores/map";
+import { watch } from "vue";
 
 // ✅ Inicializa el store AQUÍ, fuera de onMounted
-const ppi = useInfoStore()
+const ppi = useInfoStore();
+const nombre = useMapStore();
+
+ppi.setInfo({
+  short_name: "hola",
+  id_municipio: "como estas?",
+});
 
 // ✅ Usa storeToRefs para mantener la reactividad
-const { information } = storeToRefs(ppi)
+const { information } = storeToRefs(ppi);
+
+const {entidad} = storeToRefs(nombre)
+
+const cambioMunicipio = () => {
+  ppi.setIdMunicipio("Municipio cambiado");
+};
+
+watch(entidad, () => {
+  
+  nombre.setMunicipio("")
+  console.log(nombre.entidad);
+});
+
+
 </script>
 
 <template>
   <div class="overlay">
     <!-- Puedes usar information directamente o xd -->
-    <p>Esta información viene de un component: {{ information.short_name }}</p>
-    <p>ID Municipio: {{ information.id_municipio }}</p>
+    <p>{{ information.short_name }}</p>
+    <p>{{ information.id_municipio }}</p>
+    <p>{{ nombre.entidad }}</p>
+    <p>{{ nombre.municipio }}</p>
   </div>
+  <button @click="cambioMunicipio">Puchame</button>
 </template>
 
 <style scoped>
@@ -31,6 +56,6 @@ const { information } = storeToRefs(ppi)
 }
 
 .overlay p {
-  font-size: 14px;
+  font-size: 20px;
 }
 </style>

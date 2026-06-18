@@ -10,6 +10,10 @@ export const useMapStore = defineStore('map', () => {
     bounds: null,
   })
 
+  const entidad = ref('entidad')
+
+  const municipio = ref('municipio')
+
   const CVE_ENT = ref('00')
 
   // Actions
@@ -23,6 +27,14 @@ export const useMapStore = defineStore('map', () => {
 
   function setBounds(bounds) {
     view.value.bounds = bounds
+  }
+
+  function setEntidad(newEntidad){
+    entidad.value = newEntidad
+  }
+
+  function setMunicipio(newMunicipio){
+    municipio.value = newMunicipio
   }
 
   function setView({ center, zoom, bounds }) {
@@ -43,5 +55,9 @@ export const useMapStore = defineStore('map', () => {
     setView,
     CVE_ENT,
     setCVE_ENT,
+    entidad,
+    setEntidad,
+    municipio,
+    setMunicipio
   }
 })

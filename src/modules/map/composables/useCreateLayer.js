@@ -1,5 +1,6 @@
 import L from 'leaflet'
 import { usePoligonoStore } from '@/stores/poligono'
+import { useMapStore } from '@/stores/map'
 
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
@@ -24,6 +25,7 @@ const { getGeoJson } = useGeoJson()
 // Carga Entidades
 export function createLayer(poligonos_json, options = {}) {
   const newEntidad = usePoligonoStore()
+  const datosEntidad = useMapStore()
   const { flyToBounds } = useMap()
 
   const {
@@ -101,8 +103,9 @@ export function createLayer(poligonos_json, options = {}) {
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
         /* map.flyToBounds(bounds); */
-        console.log(bounds)
-        console.log(map)
+
+        // Cambio de título de Entidad
+        datosEntidad.setEntidad(nombreEntidad)
 
         flyToBounds(map, bounds)
       })
@@ -125,6 +128,7 @@ function mouseout(e) {
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
+  const datosMunicipio = useMapStore()
   const newEntidad = usePoligonoStore()
   const { flyToBounds } = useMap()
   const {
@@ -167,6 +171,8 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         // Se almacena poligono clickeado y se elimina del mapa
         newEntidad.setMPoligono(layer)
         map.removeLayer(layer)
+
+        datosMunicipio.setMunicipio(nombreLayer)
 
         if (map && bounds.isValid()) {
           flyToBounds(map, bounds)

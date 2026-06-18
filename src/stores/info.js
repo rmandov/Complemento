@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-export const useInfoStore = defineStore('info', () => {
+export const useInfoStore = defineStore('santiago', () => {
   // State
   const information = ref({
     short_name: 'texto',

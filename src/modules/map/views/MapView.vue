@@ -41,6 +41,17 @@ async function goBack() {
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
   await cargarProyectosDesdeArchivo('PPIs/Base_ligera.json')
+
+  const proyectos = await getGeoJson('PPIs/Base_ligera.json')
+  if (proyectos) {
+    const ProyectosLayer = createLayer(proyectos, {
+      map: map.value,
+      pane: 'entidadesPane',
+      name: 'NOMGEO',
+    })
+    EntidadesMuncipiosLayer.addTo(map.value)
+  }
+
 }
 
 // Proximamente carga de proyectos por poligono
@@ -79,7 +90,6 @@ onMounted(async () => {
     EntidadesMuncipiosLayer.addTo(map.value)
   }
 
-  // 2. Carga de
 })
 </script>
 
