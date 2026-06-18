@@ -116,6 +116,8 @@ onMounted(async () => {
     })
     EntidadesMuncipiosLayer.addTo(map.value)
   }
+
+
 })
 </script>
 
