@@ -5,18 +5,18 @@ import { defineStore } from 'pinia'
 export const usePoligonoStore = defineStore('poligono', () => {
   const EPoligono = shallowRef(null)
 
+  const MPoligono = shallowRef(null)
+
+  const municipiosLayer = shallowRef(null)
+  const is_MLayer = ref(false)
+
   function setEPoligono(newPoligono) {
     EPoligono.value = newPoligono
   }
 
-  const MPoligono = shallowRef(null)
-
   function setMPoligono(newPoligono) {
     MPoligono.value = newPoligono
   }
-
-  const municipiosLayer = shallowRef(null)
-  const is_MLayer = ref(false)
 
   function setMLayer(newPoligono) {
     municipiosLayer.value = newPoligono

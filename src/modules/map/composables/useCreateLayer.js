@@ -1,9 +1,11 @@
 import L from 'leaflet'
 import { usePoligonoStore } from '@/stores/poligono'
+import { useMapStore } from '@/stores/map'
 
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 import { useMap } from './mapControler'
+import { mapStores } from 'pinia'
 
 const { getGeoJson } = useGeoJson()
 
@@ -18,11 +20,11 @@ const { getGeoJson } = useGeoJson()
 // ¿Que valores creo?, esos valores son los outputs
 /*
 1. Regreso la capa que se va a aplicar en el mapa. Con no debo mandar referencia del mapa.
-2. Indicar que hay una capa mas de profundida e iniciar otro procesos de carga de poligonos
 */
 
 export function createLayer(poligonos_json, options = {}) {
-  const newEntidad = usePoligonoStore()
+  const entidadStore = usePoligonoStore()
+  const mapStore = useMapStore()
   const { flyToBounds } = useMap()
 
   const {
@@ -44,7 +46,9 @@ export function createLayer(poligonos_json, options = {}) {
     pane,
     style,
     onEachFeature: (feature, layer) => {
-      const nombreEntidad = feature.properties[name] || 'nombre del poligono'
+      const props = feature.properties
+
+      const nombreEntidad = props[name] || 'nombre del poligono'
       layer.bindTooltip(nombreEntidad)
 
       // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
@@ -60,20 +64,27 @@ export function createLayer(poligonos_json, options = {}) {
 
         // ** INICIO - Gestion de poligono clickeado **
         // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
-        if (newEntidad.EPoligono) {
+        if (entidadStore.EPoligono) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.EPoligono.addTo(map)
-          newEntidad.setEPoligono(null)
+          entidadStore.EPoligono.addTo(map)
+          entidadStore.setEPoligono(null)
 
           // ** INICIO - Gestion municipios
-          if (newEntidad.is_MLayer) {
-            map.removeLayer(newEntidad.municipiosLayer)
-            newEntidad.clearMLayer()
+          if (entidadStore.is_MLayer) {
+            map.removeLayer(entidadStore.municipiosLayer)
+            entidadStore.clearMLayer()
           }
           // ** FIN - Gestion municipios
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setEPoligono(layer)
+
+        // ** INICIO - Se obtiene CVE_ENT **
+        entidadStore.setEPoligono(layer)
+        console.log('Entidad clickeada - CVE_ENT:', props['CVE_ENT'])
+        mapStore.setCVE_ENT(props['CVE_ENT'])
+        console.log('Entidad clickeada - CVE_ENT - PINIA:', mapStore.CVE_ENT)
+        // ** FIN - Se obtiene CVE_ENT  **
+
         map.removeLayer(layer)
         // ** FIN - Gestion de poligono clickeado **
 
@@ -94,14 +105,10 @@ export function createLayer(poligonos_json, options = {}) {
             name: 'NOMGEO',
           })
 
-          newEntidad.setMLayer(municipiosLayer)
-          newEntidad.municipiosLayer.addTo(map)
+          entidadStore.setMLayer(municipiosLayer)
+          entidadStore.municipiosLayer.addTo(map)
         }
         // ** FIN - Carga de muncipios de la entidad clickeada **
-
-        /* map.flyToBounds(bounds); */
-        console.log(bounds)
-        console.log(map)
 
         flyToBounds(map, bounds)
       })
@@ -124,7 +131,7 @@ function mouseout(e) {
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
-  const newEntidad = usePoligonoStore()
+  const municipioStore = usePoligonoStore()
   const { flyToBounds } = useMap()
   const {
     map,
@@ -145,7 +152,8 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
     pane,
     style,
     onEachFeature: (feature, layer) => {
-      const nombreLayer = feature.properties[name] || 'nombre del poligono'
+      const props = feature.properties
+      const nombreLayer = props[name] || 'nombre del poligono'
       layer.bindTooltip(nombreLayer)
 
       // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
@@ -158,13 +166,13 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         L.DomEvent.stopPropagation(e)
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-        if (newEntidad.MPoligono) {
+        if (municipioStore.MPoligono) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.MPoligono.addTo(map)
-          newEntidad.setMPoligono(null)
+          municipioStore.MPoligono.addTo(map)
+          municipioStore.setMPoligono(null)
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setMPoligono(layer)
+        municipioStore.setMPoligono(layer)
         map.removeLayer(layer)
 
         if (map && bounds.isValid()) {

@@ -10,6 +10,8 @@ export const useMapStore = defineStore('map', () => {
     bounds: null,
   })
 
+  const CVE_ENT = ref(null)
+
   // Actions
   function setCenter(center) {
     view.value.center = center
@@ -29,11 +31,17 @@ export const useMapStore = defineStore('map', () => {
     if (bounds) view.value.bounds = bounds
   }
 
+  function setCVE_ENT(newCVE_ENT) {
+    CVE_ENT.value = newCVE_ENT
+  }
+
   return {
     view,
     setCenter,
     setZoom,
     setBounds,
     setView,
+    CVE_ENT,
+    setCVE_ENT,
   }
 })
