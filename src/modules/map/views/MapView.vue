@@ -127,7 +127,9 @@ onMounted(async () => {
     <div style="height: 100%; width: 300px; border: solid 1px purple">
       <InformationClick></InformationClick>
     </div>
+
     <div ref="mapContainer" class="map"></div>
+
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="goProyectos">Proyectos</button>
   </div>
