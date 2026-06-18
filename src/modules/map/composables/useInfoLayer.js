@@ -32,7 +32,6 @@ export function useInfoLayer() {
   }
 
   nameLayer.onAdd = function () {
-    
     const nombre = L.DomUtil.create('div', 'nombre_bl')
 
     // Nombre del estado

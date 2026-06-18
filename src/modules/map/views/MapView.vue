@@ -1,45 +1,45 @@
 <script setup>
-import { ref, onMounted} from 'vue'
-import 'leaflet/dist/leaflet.css'
+import { ref, onMounted } from "vue";
+import "leaflet/dist/leaflet.css";
 
 // Components
-import InformationClick from '../components/InformationClick.vue'
+import InformationClick from "../components/InformationClick.vue";
 
 // Para cargar los GeoJson
-import { useGeoJson } from '../composables/useGeoJson'
-const { getGeoJson } = useGeoJson()
+import { useGeoJson } from "../composables/useGeoJson";
+const { getGeoJson } = useGeoJson();
 
 // Capas
-import { useMap } from '@/modules/map/composables/mapControler'
-import { createLayer } from '../composables/useCreateLayer'
-import { useInfoLayer } from '../composables/useInfoLayer'
-import { useTodos } from '../composables/useTodos'
+import { useMap } from "@/modules/map/composables/mapControler";
+import { createLayer } from "../composables/useCreateLayer";
+import { useInfoLayer } from "../composables/useInfoLayer";
+import { useTodos } from "../composables/useTodos";
 
-import { usePoligonoStore } from '@/stores/poligono'
-const newEntidad = usePoligonoStore()
+import { usePoligonoStore } from "@/stores/poligono";
+const newEntidad = usePoligonoStore();
 
-const mapContainer = ref(null)
+const mapContainer = ref(null);
 
-const { map, initMap, resetView } = useMap(mapContainer)
+const { map, initMap, resetView } = useMap(mapContainer);
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
-const { infoLayer, nameLayer } = useInfoLayer()
+const { infoLayer, nameLayer } = useInfoLayer();
 
-const { cargarProyectos, cargarProyectosDesdeArchivo } = useTodos(map)
+const { cargarProyectos, cargarProyectosDesdeArchivo } = useTodos(map);
 
 // Regresa a la vista inicial
 async function goBack() {
   if (newEntidad.MPoligono || newEntidad.EPoligono) {
-    map.value.removeLayer(newEntidad.municipiosLayer)
-    newEntidad.EPoligono.addTo(map.value)
+    map.value.removeLayer(newEntidad.municipiosLayer);
+    newEntidad.EPoligono.addTo(map.value);
   }
-  newEntidad.clear()
+  newEntidad.clear();
 
-  resetView()
+  resetView();
 }
 
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
-  await cargarProyectosDesdeArchivo('PPIs/Base_ligera.json')
+  await cargarProyectosDesdeArchivo("PPIs/Base_ligera.json");
 }
 
 // Proximamente carga de proyectos por poligono
@@ -48,39 +48,38 @@ async function goProyectos() {
 */
 
 onMounted(async () => {
-  initMap()
+  initMap();
 
   // Capa de información dentro del mapa
-  infoLayer.addTo(map.value)
-  nameLayer.addTo(map.value)
+  infoLayer.addTo(map.value);
+  nameLayer.addTo(map.value);
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
-  map.value.createPane('poligonosPane')
-  map.value.getPane('poligonosPane').style.zIndex = 400
+  map.value.createPane("poligonosPane");
+  map.value.getPane("poligonosPane").style.zIndex = 400;
 
   // Pane para estados
-  map.value.createPane('entidadesPane')
-  map.value.getPane('entidadesPane').style.zIndex = 500
+  map.value.createPane("entidadesPane");
+  map.value.getPane("entidadesPane").style.zIndex = 500;
 
   // Crear pane para proyectos (puntos) con z-index alto
-  map.value.createPane('proyectosPane')
-  map.value.getPane('proyectosPane').style.zIndex = 700
+  map.value.createPane("proyectosPane");
+  map.value.getPane("proyectosPane").style.zIndex = 700;
 
   // 1. Cargar estados
 
-  const entidades = await getGeoJson('entidades.json')
+  const entidades = await getGeoJson("entidades.json");
   if (entidades) {
     const EntidadesMuncipiosLayer = createLayer(entidades, {
       map: map.value,
-      pane: 'entidadesPane',
-      name: 'NOMGEO',
-    })
-    EntidadesMuncipiosLayer.addTo(map.value)
+      pane: "entidadesPane",
+      name: "NOMGEO",
+    });
+    EntidadesMuncipiosLayer.addTo(map.value);
   }
 
-// 2. Carga de 
-
-})
+  // 2. Carga de
+});
 </script>
 
 <template>
@@ -88,7 +87,11 @@ onMounted(async () => {
     <div style="height: 100%; width: 300px; border: solid 1px purple">
       <InformationClick></InformationClick>
     </div>
-    <div ref="mapContainer" class="map"></div>
+    <div class="info">
+      <div ref="mapContainer" class="map"></div>
+      <div ref="infoContainer" class="overlay">EEEEhhhhh pude poner un texto encima del mapa</div>
+    </div>
+
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="goProyectos">Proyectos</button>
   </div>
@@ -109,6 +112,7 @@ onMounted(async () => {
   border: solid 1px red;
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 .back-button {
   position: absolute;
@@ -131,6 +135,22 @@ onMounted(async () => {
 }
 .btn-regresar:hover {
   background: #f0f0f0;
+}
+
+.info {
+  position: relative;
+  border: solid 1px red;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+
+  pointer-events: none;
 }
 
 :deep(.leaflet-interactive:focus) {

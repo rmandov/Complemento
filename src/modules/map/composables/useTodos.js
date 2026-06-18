@@ -15,7 +15,6 @@ const estiloBase = {
 }
 
 export function useTodos(map) {
-  
   const capaProyectos = shallowRef(null)
 
   async function cargarProyectos(proyectosData) {
