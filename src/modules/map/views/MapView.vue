@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, shallowRef } from 'vue'
-import L from 'leaflet'
+import { ref, onMounted} from 'vue'
 import 'leaflet/dist/leaflet.css'
 
 // Para cargar los GeoJson
@@ -24,6 +23,7 @@ const { infoLayer, nameLayer } = useInfoLayer()
 
 const { cargarProyectos, cargarProyectosDesdeArchivo } = useTodos(map)
 
+// Regresa a la vista inicial
 async function goBack() {
   if (newEntidad.MPoligono || newEntidad.EPoligono) {
     map.value.removeLayer(newEntidad.municipiosLayer)
@@ -38,50 +38,6 @@ async function goBack() {
 async function goProyectos() {
   await cargarProyectosDesdeArchivo('PPIs/Base_ligera.json')
 }
-
-// Carga de proyectos - coords
-/* async function cargarProyectos(proyectosData) {
-  if (!map.value || !proyectosData) return
-
-  // Si ya existe una capa de proyectos, la removemos para evitar duplicados
-  if (capaProyectos.value) {
-    map.value.removeLayer(capaProyectos.value)
-  }
-
-  const estiloBase = {
-    radius: 5,
-    weight: 1,
-    fillOpacity: 0.7,
-    color: '#333',
-    fillColor: '#3498db',
-  }
-
-  // Crear capa GeoJSON de proyectos
-  const proyectosLayer = L.geoJSON(proyectosData, {
-    pointToLayer: (feature, latlng) => {
-      // Determinar estilo según categoría
-      const marker = L.circleMarker(latlng, {
-        ...estiloBase,
-      })
-      marker.options.pane = 'proyectosPane' // forzar pane
-      return marker
-    },
-    onEachFeature: (feature, layer) => {
-      // Tooltip con nombre corto o fallback
-      const nombre = feature.properties.NOMBRE_CORTO || feature.properties.NOMBRE || 'Proyecto'
-      layer.bindTooltip(nombre)
-
-      // Evento click opcional
-      layer.on('click', () => {
-        console.log('Proyecto seleccionado:', nombre, feature.properties)
-      })
-    },
-    pane: 'proyectosPane',
-  })
-
-  proyectosLayer.addTo(map.value)
-  capaProyectos.value = proyectosLayer
-} */
 
 // Proximamente carga de proyectos por poligono
 /*
@@ -146,8 +102,8 @@ onMounted(async () => {
 
 .map {
   border: solid 1px red;
-  width: 70%;
-  height: 75%;
+  width: 100%;
+  height: 100%;
 }
 .back-button {
   position: absolute;
