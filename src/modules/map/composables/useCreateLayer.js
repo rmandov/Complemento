@@ -77,7 +77,7 @@ export function createLayer(poligonos_json, options = {}) {
         map.removeLayer(layer)
         // ** FIN - Gestion de poligono clickeado **
 
-        // ** INCIO - Carga de muncipios de la entidad clickeada **
+        // ** INICIO - Carga de muncipios de la entidad clickeada **
         // 1. Tratamiento del nombre para buscar en json
         const nombreEntidad_json = nombreEntidad
           .toLowerCase()

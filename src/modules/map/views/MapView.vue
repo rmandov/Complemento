@@ -11,16 +11,18 @@ const { getGeoJson } = useGeoJson()
 import { useMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useInfoLayer } from '../composables/useInfoLayer'
+import { useTodos } from '../composables/useTodos'
 
 import { usePoligonoStore } from '@/stores/poligono'
 const newEntidad = usePoligonoStore()
 
 const mapContainer = ref(null)
-const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 const { map, initMap, resetView } = useMap(mapContainer)
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
 const { infoLayer, nameLayer } = useInfoLayer()
+
+const { cargarProyectos, cargarProyectosDesdeArchivo } = useTodos(map)
 
 async function goBack() {
   if (newEntidad.MPoligono || newEntidad.EPoligono) {
@@ -34,12 +36,11 @@ async function goBack() {
 
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
-  const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
-  await cargarProyectos(proyectosData)
+  await cargarProyectosDesdeArchivo('PPIs/Base_ligera.json')
 }
 
 // Carga de proyectos - coords
-async function cargarProyectos(proyectosData) {
+/* async function cargarProyectos(proyectosData) {
   if (!map.value || !proyectosData) return
 
   // Si ya existe una capa de proyectos, la removemos para evitar duplicados
@@ -80,7 +81,7 @@ async function cargarProyectos(proyectosData) {
 
   proyectosLayer.addTo(map.value)
   capaProyectos.value = proyectosLayer
-}
+} */
 
 // Proximamente carga de proyectos por poligono
 /*
@@ -117,6 +118,9 @@ onMounted(async () => {
     })
     EntidadesMuncipiosLayer.addTo(map.value)
   }
+
+// 2. Carga de 
+
 })
 </script>
 
