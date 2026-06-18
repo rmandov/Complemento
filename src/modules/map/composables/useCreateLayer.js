@@ -5,7 +5,6 @@ import { useMapStore } from '@/stores/map'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 import { useMap } from './mapControler'
-import { mapStores } from 'pinia'
 
 const { getGeoJson } = useGeoJson()
 
@@ -33,7 +32,8 @@ export function createLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(251, 95, 16)',
+      /* fillColor: "rgb(251, 95, 16)", */
+      fillColor: 'rgb(67, 16, 251)',
       fillOpacity: 0.5,
       color: 'white',
       dashArray: '3',
@@ -83,6 +83,7 @@ export function createLayer(poligonos_json, options = {}) {
         console.log('Entidad clickeada - CVE_ENT:', props['CVE_ENT'])
         mapStore.setCVE_ENT(props['CVE_ENT'])
         console.log('Entidad clickeada - CVE_ENT - PINIA:', mapStore.CVE_ENT)
+        console.log(typeof mapStore.CVE_ENT)
         // ** FIN - Se obtiene CVE_ENT  **
 
         map.removeLayer(layer)

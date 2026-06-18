@@ -10,7 +10,7 @@ export const useMapStore = defineStore('map', () => {
     bounds: null,
   })
 
-  const CVE_ENT = ref(null)
+  const CVE_ENT = ref('00')
 
   // Actions
   function setCenter(center) {

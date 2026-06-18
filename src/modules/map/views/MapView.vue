@@ -3,6 +3,9 @@ import { ref, onMounted, shallowRef } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+// Components
+import InformationClick from '../components/InformationClick.vue'
+
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -116,14 +119,14 @@ onMounted(async () => {
     })
     EntidadesMuncipiosLayer.addTo(map.value)
   }
-
-
 })
 </script>
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; border: solid 1px purple"></div>
+    <div style="height: 100%; width: 300px; border: solid 1px purple">
+      <InformationClick></InformationClick>
+    </div>
     <div ref="mapContainer" class="map"></div>
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="goProyectos">Proyectos</button>
