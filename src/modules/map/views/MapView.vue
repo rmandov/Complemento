@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, shallowRef } from 'vue'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 // Components
 import InformationClick from '../components/InformationClick.vue'
-import InformationProjects from '../components/InformationProjects.vue'
 
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
@@ -14,20 +14,17 @@ const { getGeoJson } = useGeoJson()
 import { useMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useInfoLayer } from '../composables/useInfoLayer'
-import { useTodos } from '../composables/useTodos'
 
 import { usePoligonoStore } from '@/stores/poligono'
 const newEntidad = usePoligonoStore()
 
 const mapContainer = ref(null)
+const capaProyectos = shallowRef(null) // ← guardar capa de proyectos
 
 const { map, initMap, resetView } = useMap(mapContainer)
 /* const { infoLayer, updateDescription, updateTitle, resetDescription } = useInfoLayer(); */
-const { infoLayer, nameLayer } = useInfoLayer()
+const { infoLayer } = useInfoLayer()
 
-const { cargarProyectosDesdeArchivo } = useTodos(map)
-
-// Regresa a la vista inicial
 async function goBack() {
   if (newEntidad.MPoligono || newEntidad.EPoligono) {
     map.value.removeLayer(newEntidad.municipiosLayer)
@@ -39,19 +36,39 @@ async function goBack() {
 }
 
 // Botón para mostrar TODOS los proyectos - coords
-async function goProyectos() {
-  await cargarProyectosDesdeArchivo('PPIs/Base_ligera.json')
+let datosProyectos = null   // guardar los datos JSON para no volver a pedirlos
+const proyectosVisibles = ref(false)   // si usas Vue, o una variable normal let
+// Función que solo crea la capa (sin añadir al mapa)
+async function crearCapaProyectos() {
+  if (!datosProyectos) {
+    datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
+    console.log('Base ligera: ', datosProyectos)
+  }
+  if (!map.value || !datosProyectos) return
 
-  const proyectos = await getGeoJson('PPIs/Base_ligera.json')
-  if (proyectos) {
-    const ProyectosLayer = createLayer(proyectos, {
-      map: map.value,
-      pane: 'entidadesPane',
-      name: 'NOMGEO',
-    })
-    EntidadesMuncipiosLayer.addTo(map.value)
+  // Si ya existe una capa, la removemos (por si acaso)
+  if (capaProyectos.value) {
+    map.value.removeLayer(capaProyectos.value)
   }
 
+  const estiloBase = { radius: 4, weight: 1, fillOpacity: 0.7, color: 'rgb(255, 255, 255)', fillColor: '#3498db' }
+
+  const proyectosLayer = L.geoJSON(datosProyectos, {
+    pointToLayer: (feature, latlng) => {const marker = L.circleMarker(latlng, {
+        ...estiloBase,
+      })
+      marker.options.pane = 'proyectosPane' // forzar pane
+      return marker},
+    onEachFeature: (feature, layer) => {
+      const nombre = feature.properties.NOMBRE_CORTO || feature.properties.NOMBRE || 'Proyecto'
+      layer.bindTooltip(nombre)
+      layer.on('click', () => console.log('Proyecto seleccionado:', nombre, feature.properties))
+    },
+    pane: 'proyectosPane',
+  })
+
+  capaProyectos.value = proyectosLayer
+  // No la añadimos todavía; eso lo hará toggleProyectos
 }
 
 // Función toggle definitiva
@@ -84,7 +101,6 @@ onMounted(async () => {
 
   // Capa de información dentro del mapa
   infoLayer.addTo(map.value)
-  nameLayer.addTo(map.value)
 
   // Crear pane para polígonos (estados y municipios) con z-index bajo
   map.value.createPane('poligonosPane')
@@ -116,6 +132,7 @@ onMounted(async () => {
     /// 4. El layer creado se aplica en el mapa
     EntidadesMuncipiosLayer.addTo(map.value)
   }
+  // ** FIN - Carga de entidades y municipios **
 })
 </script>
 
@@ -171,13 +188,6 @@ onMounted(async () => {
 }
 .btn-regresar:hover {
   background: #f0f0f0;
-}
-
-.info {
-  position: relative;
-  border: solid 1px red;
-  width: 100%;
-  height: 100%;
 }
 
 :deep(.leaflet-interactive:focus) {
