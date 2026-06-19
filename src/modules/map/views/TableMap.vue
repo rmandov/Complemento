@@ -1,35 +1,36 @@
-<!-- modules/map/views/TableMap.vue -->
 <script setup>
-import { shallowRef, onMounted } from 'vue';
+import { shallowRef, ref, watch } from 'vue';
 import { query } from '@/data/duckdb';
 
-const primeros10 = shallowRef([]);
+const resultados = shallowRef([]);
+const sqlQuery = ref(`SELECT COUNT(*) AS total FROM dataset`);
 
-onMounted(async () => {
+async function ejecutarConsulta() {
+  const result = await query(sqlQuery.value);
+  resultados.value = result.toArray();
+}
 
-  const consulta = `SELECT * FROM dataset WHERE ENTIDAD_FEDERATIVA_ID = '11'`
-
-
-  const result = await query(consulta);
-  primeros10.value = result.toArray();
-});
+// Se ejecuta al montar y cada vez que cambie el string del query
+watch(sqlQuery, ejecutarConsulta, { immediate: true });
 </script>
 
 <template>
   <section>
-    <h2>Tabla</h2>
-    <p v-if="primeros10.length === 0">Cargando datos...</p>
+    <h2>Consulta SQL</h2>
+
+    <textarea
+      v-model="sqlQuery"
+      rows="4"
+      cols="60"
+      placeholder="Escribe tu query SQL..."
+    ></textarea>
+
+    <p v-if="resultados.length === 0">Cargando...</p>
+
     <ul v-else>
-
-        <li class="base"  v-for="(item, idx) in primeros10" :key="idx" >{{ item }}</li>
-
+      <li v-for="(fila, idx) in resultados" :key="idx">
+        {{ fila }}
+      </li>
     </ul>
   </section>
 </template>
-
-<style scoped>
-
-.base{
-  margin-bottom: 1rem;
-}
-</style>

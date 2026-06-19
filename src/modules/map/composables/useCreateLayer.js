@@ -1,12 +1,12 @@
-import L from "leaflet";
-import { usePoligonoStore } from "@/stores/poligono";
-import { useMapStore } from "@/stores/map";
+import L from 'leaflet'
+import { usePoligonoStore } from '@/stores/poligono'
+import { useMapStore } from '@/stores/map'
 
 // Para cargar los GeoJson
-import { useGeoJson } from "../composables/useGeoJson";
-import { useMap } from "./mapControler";
+import { useGeoJson } from '../composables/useGeoJson'
+import { useMap } from './mapControler'
 
-const { getGeoJson } = useGeoJson();
+const { getGeoJson } = useGeoJson()
 
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
@@ -30,18 +30,18 @@ export function createLayer(poligonos_json, options = {}) {
 
   const {
     map,
-    pane = "",
-    name = "NOMGEO",
+    pane = '',
+    name = 'NOMGEO',
     style = {
       weight: 1.2,
       fillColor: 'rgb(251, 95, 16)',
       fillOpacity: 0.5,
-      color: "white",
-      dashArray: "3",
+      color: 'white',
+      dashArray: '3',
     },
-  } = options;
+  } = options
 
-  if (!poligonos_json) return;
+  if (!poligonos_json) return
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
@@ -54,12 +54,12 @@ export function createLayer(poligonos_json, options = {}) {
       layer.on({
         mouseover,
         mouseout,
-      });
+      })
 
-      layer.on("click", async (e) => {
-        L.DomEvent.stopPropagation(e);
-        const bounds = layer.getBounds();
-        layer.setStyle(style);
+      layer.on('click', async (e) => {
+        L.DomEvent.stopPropagation(e)
+        const bounds = layer.getBounds()
+        layer.setStyle(style)
 
         // ** INICIO - Gestion de poligono clickeado **
         // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
@@ -84,18 +84,18 @@ export function createLayer(poligonos_json, options = {}) {
         // 1. Tratamiento del nombre para buscar en json
         const nombreEntidad_json = nombreEntidad
           .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replaceAll(" ", "_");
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replaceAll(' ', '_')
 
-        const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`);
+        const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`)
 
         if (muncipios) {
           const municipiosLayer = createMunicipiosLayer(muncipios, {
             map,
-            pane: "poligonosPane",
-            name: "NOMGEO",
-          });
+            pane: 'poligonosPane',
+            name: 'NOMGEO',
+          })
 
           newEntidad.setMLayer(municipiosLayer)
           newEntidad.municipiosLayer.addTo(map)
@@ -110,20 +110,20 @@ export function createLayer(poligonos_json, options = {}) {
         flyToBounds(map, bounds)
       })
     },
-  });
+  })
 
-  return newLayer;
+  return newLayer
 }
 
 // Eventos
 function mouseover(e) {
-  const layer = e.target;
-  layer.setStyle({ fillOpacity: 0.8, weight: 2 });
+  const layer = e.target
+  layer.setStyle({ fillOpacity: 0.8, weight: 2 })
 }
 
 function mouseout(e) {
-  const layer = e.target;
-  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
+  const layer = e.target
+  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
 }
 
 // Carga municipios
@@ -133,18 +133,18 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
   const { flyToBounds } = useMap()
   const {
     map,
-    pane = "",
-    name = "NOMGEO",
+    pane = '',
+    name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: "rgb(30, 133, 248)",
+      fillColor: 'rgb(30, 133, 248)',
       fillOpacity: 0.5,
-      color: "white",
-      dashArray: "3",
+      color: 'white',
+      dashArray: '3',
     },
-  } = options;
+  } = options
 
-  if (!poligonos_json) return;
+  if (!poligonos_json) return
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
@@ -157,7 +157,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
       layer.on({
         mouseover,
         mouseout,
-      });
+      })
 
       layer.on('click', async (e) => {
         L.DomEvent.stopPropagation(e)
@@ -175,10 +175,10 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         datosMunicipio.setMunicipio(nombreLayer)
 
         if (map && bounds.isValid()) {
-          flyToBounds(map, bounds);
+          flyToBounds(map, bounds)
         }
-      });
+      })
     },
-  });
-  return newLayer;
+  })
+  return newLayer
 }

@@ -15,7 +15,6 @@ import { useMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useInfoLayer } from '../composables/useInfoLayer'
 
-
 import { usePoligonoStore } from '@/stores/poligono'
 const newEntidad = usePoligonoStore()
 
@@ -37,8 +36,8 @@ async function goBack() {
 }
 
 // Botón para mostrar TODOS los proyectos - coords
-let datosProyectos = null   // guardar los datos JSON para no volver a pedirlos
-const proyectosVisibles = ref(false)   // si usas Vue, o una variable normal let
+let datosProyectos = null // guardar los datos JSON para no volver a pedirlos
+const proyectosVisibles = ref(false) // si usas Vue, o una variable normal let
 // Función que solo crea la capa (sin añadir al mapa)
 async function crearCapaProyectos() {
   if (!datosProyectos) {
@@ -52,14 +51,22 @@ async function crearCapaProyectos() {
     map.value.removeLayer(capaProyectos.value)
   }
 
-  const estiloBase = { radius: 4, weight: 1, fillOpacity: 0.7, color: 'rgb(255, 255, 255)', fillColor: '#3498db' }
+  const estiloBase = {
+    radius: 4,
+    weight: 1,
+    fillOpacity: 0.7,
+    color: 'rgb(255, 255, 255)',
+    fillColor: '#3498db',
+  }
 
   const proyectosLayer = L.geoJSON(datosProyectos, {
-    pointToLayer: (feature, latlng) => {const marker = L.circleMarker(latlng, {
+    pointToLayer: (feature, latlng) => {
+      const marker = L.circleMarker(latlng, {
         ...estiloBase,
       })
       marker.options.pane = 'proyectosPane' // forzar pane
-      return marker},
+      return marker
+    },
     onEachFeature: (feature, layer) => {
       const nombre = feature.properties.NOMBRE_CORTO || feature.properties.NOMBRE || 'Proyecto'
       layer.bindTooltip(nombre)
