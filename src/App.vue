@@ -1,12 +1,14 @@
 <script setup>
-import MapView from './modules/map/views/MapView.vue'
-import TableMap from './modules/map/views/TableMap.vue'
+import { RouterView, RouterLink } from "vue-router";
 </script>
 
 <template>
   <nav>Complementarios</nav>
-  <MapView></MapView>
-  <TableMap></TableMap>
+  <RouterLink to="/">Inicio</RouterLink>
+  <RouterLink to="/mapa">Mapa</RouterLink>
+  <RouterLink to="/fichas">Fichas</RouterLink>
+
+  <RouterView />
 </template>
 
 <style scoped>
