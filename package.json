@@ -14,6 +14,7 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "1.33.1-dev45.0",
     "leaflet": "^1.9.4",
     "pinia": "^3.0.4",
     "vue": "^3.5.32",

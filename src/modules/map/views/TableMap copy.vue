@@ -1,16 +1,13 @@
 <!-- modules/map/views/TableMap.vue -->
 <script setup>
-import { ref, onMounted } from 'vue';
-import { getFirstN, getFiltered } from '@/data/duckdbService';
+import { shallowRef, onMounted } from 'vue';
+import { query } from '@/data/duckdb';
 
-const primeros10 = ref([]);
-const loading = ref(true);
+const primeros10 = shallowRef([]);
 
 onMounted(async () => {
-  await getFirstN(10).then(data => {
-    primeros10.value = data;
-    loading.value = false;
-  });
+  const result = await query('SELECT * FROM dataset LIMIT 10');
+  primeros10.value = result.toArray();
 });
 </script>
 
