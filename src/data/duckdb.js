@@ -26,7 +26,7 @@ export async function initDB() {
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
   // 5. Cargar el CSV desde el servidor
-  const csvResponse = await fetch("/data/BD_PPI_OPA_MAPA.csv");
+  const csvResponse = await fetch("/data/BD_PPI_OPA.csv");
   const csvText = await csvResponse.text();
   await db.registerFileText("datos.csv", csvText);
 
