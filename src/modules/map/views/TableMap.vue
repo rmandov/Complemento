@@ -1,10 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-import Papa from "papaparse";
 
-// Para cargar los GeoJson
-import { useGeoJson } from "../composables/useGeoJson";
-const { getGeoJson } = useGeoJson();
 
 
 onMounted(()=>{
