@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css'
 
 // Components
 import InformationClick from '../components/InformationClick.vue'
-
+import InformationProjects from '../components/InformationProjects.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -14,6 +14,7 @@ const { getGeoJson } = useGeoJson()
 import { useMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useInfoLayer } from '../composables/useInfoLayer'
+
 
 import { usePoligonoStore } from '@/stores/poligono'
 const newEntidad = usePoligonoStore()
@@ -188,6 +189,13 @@ onMounted(async () => {
 }
 .btn-regresar:hover {
   background: #f0f0f0;
+}
+
+.info {
+  position: relative;
+  border: solid 1px red;
+  width: 100%;
+  height: 100%;
 }
 
 :deep(.leaflet-interactive:focus) {
