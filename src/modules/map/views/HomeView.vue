@@ -3,21 +3,19 @@ import { RouterView, RouterLink } from "vue-router";
 </script>
 
 <template>
- <!--  <div class="hero-content">
+  <div class="hero-content">
     
     <div class="hero-text">
       <span class="hero-eyebrow">Portal de Transparencia</span>
-      <h1 class="hero-title">Datos Abiertos</h1>
+      <h1 class="hero-title">Complementariedades</h1>
       <p class="hero-description">
-        Explora, descarga y analiza la información pública presupuestaria de la Administración
-        Pública Federal. Aquí encontrarás datos históricos, estadísticas, reportes y recursos
-        descargables organizados por categorías para facilitar tu consulta.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta alias vitae culpa facere esse neque?
       </p>
     </div>
     <div class="hero-image-wrapper">
       
     </div>
-  </div> -->
+  </div>
   <RouterLink to="/mapa">Mapa</RouterLink>
   <RouterLink to="/fichas">Fichas</RouterLink>
   <RouterView />
