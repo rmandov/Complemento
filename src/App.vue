@@ -1,11 +1,12 @@
 <script setup>
 import MapView from './modules/map/views/MapView.vue'
+import TableMap from './modules/map/views/TableMap.vue'
 </script>
 
 <template>
   <nav>Complementarios</nav>
   <MapView></MapView>
-  <div style="height: 400px; background-color: red"></div>
+  <TableMap></TableMap>
 </template>
 
 <style scoped>
