@@ -29,11 +29,11 @@ export const useMapStore = defineStore('map', () => {
     view.value.bounds = bounds
   }
 
-  function setEntidad(newEntidad){
+  function setEntidad(newEntidad) {
     entidad.value = newEntidad
   }
 
-  function setMunicipio(newMunicipio){
+  function setMunicipio(newMunicipio) {
     municipio.value = newMunicipio
   }
 
@@ -58,6 +58,6 @@ export const useMapStore = defineStore('map', () => {
     entidad,
     setEntidad,
     municipio,
-    setMunicipio
+    setMunicipio,
   }
 })

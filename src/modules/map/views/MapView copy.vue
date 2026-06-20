@@ -38,11 +38,10 @@ async function goBack() {
 // Botón para mostrar TODOS los proyectos - coords
 async function goProyectos() {
   const proyectosData = await getGeoJson('PPIs/Base_ligera.json')
-  console.log("Base ligera: ", proyectosData);
+  console.log('Base ligera: ', proyectosData)
 
   await cargarProyectos(proyectosData)
 }
-
 
 // Carga de proyectos - coords
 async function cargarProyectos(proyectosData) {

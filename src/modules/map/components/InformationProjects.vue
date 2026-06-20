@@ -1,34 +1,31 @@
 <script setup>
-import { useInfoStore } from "@/stores/info";
-import { storeToRefs } from "pinia"; 
-import { useMapStore } from "@/stores/map";
-import { watch } from "vue";
+import { useInfoStore } from '@/stores/info'
+import { storeToRefs } from 'pinia'
+import { useMapStore } from '@/stores/map'
+import { watch } from 'vue'
 
 // Inicializa el store AQUÍ, fuera de onMounted
-const ppi = useInfoStore();
-const nombre = useMapStore();
+const ppi = useInfoStore()
+const nombre = useMapStore()
 
 ppi.setInfo({
-  short_name: "hola",
-  id_municipio: "como estas?",
-});
+  short_name: 'hola',
+  id_municipio: 'como estas?',
+})
 
 // Usa storeToRefs para mantener la reactividad
-const { information } = storeToRefs(ppi);
+const { information } = storeToRefs(ppi)
 
-const {entidad} = storeToRefs(nombre)
+const { entidad } = storeToRefs(nombre)
 
 const cambioMunicipio = () => {
-  ppi.setIdMunicipio("Municipio cambiado");
-};
+  ppi.setIdMunicipio('Municipio cambiado')
+}
 
 watch(entidad, () => {
-  
-  nombre.setMunicipio("")
-  console.log(nombre.entidad);
-});
-
-
+  nombre.setMunicipio('')
+  console.log(nombre.entidad)
+})
 </script>
 
 <template>
@@ -43,7 +40,7 @@ watch(entidad, () => {
 <style scoped>
 .overlay {
   position: absolute;
-  top: 10px; 
+  top: 10px;
   right: 10px;
   z-index: 1000; /* Más alto que todo */
   pointer-events: none;
