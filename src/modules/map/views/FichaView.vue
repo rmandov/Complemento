@@ -1,3 +1,3 @@
 <template>
-    <p>Soy una ficha</p>
+  <p>Soy una ficha</p>
 </template>

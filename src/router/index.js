@@ -5,9 +5,9 @@ import MapView from '@/modules/map/views/MapView.vue'
 import FichaView from '@/modules/map/views/FichaView.vue'
 
 const routes = [
-  {path: '/', component: HomeView},
-  {path: '/mapa', component: MapView},
-  {path: '/fichas', component: FichaView},
+  { path: '/', component: HomeView },
+  { path: '/mapa', component: MapView },
+  { path: '/fichas', component: FichaView },
 ]
 
 const router = createRouter({

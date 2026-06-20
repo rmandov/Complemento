@@ -1,20 +1,19 @@
 <script setup>
-import { RouterView, RouterLink } from "vue-router";
+import { RouterView, RouterLink } from 'vue-router'
 </script>
 
 <template>
   <div class="hero-content">
-    
     <div class="hero-text">
       <span class="hero-eyebrow">Portal de Transparencia</span>
       <h1 class="hero-title">Complementariedades</h1>
       <p class="hero-description">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta alias vitae culpa facere esse neque?
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
+        fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta
+        alias vitae culpa facere esse neque?
       </p>
     </div>
-    <div class="hero-image-wrapper">
-      
-    </div>
+    <div class="hero-image-wrapper"></div>
   </div>
   <RouterLink to="/mapa">Mapa</RouterLink>
   <RouterLink to="/fichas">Fichas</RouterLink>
@@ -22,7 +21,6 @@ import { RouterView, RouterLink } from "vue-router";
 </template>
 
 <style scoped>
-
 .hero-content {
   display: grid;
   grid-template-columns: 1fr;
