@@ -1,11 +1,34 @@
 <script setup>
-import { shallowRef, ref } from 'vue';
+import { shallowRef, ref, watch, computed } from 'vue';
 import { query } from '@/data/duckdb';
+import { useMapStore } from '@/stores/map';
+import { storeToRefs } from 'pinia';
+
+const mapStore = useMapStore();
+
+// ✅ Desestructurar la ref específica que necesitas
+const { CVE_ENT:entidad_clave } = storeToRefs(mapStore);
+
+// ✅ Valor por defecto si es null/undefined
+const entidadDefault = computed(() => entidad_clave.value || '01');
 
 const resultados = shallowRef([]);
 const cargando = ref(false);
 const error = ref('');
-const sqlQuery = ref(`SELECT COUNT(*) AS total FROM dataset`);
+
+// ✅ Query computada: se actualiza automáticamente cuando cambia entidadDefault
+const sqlQuery = computed(() => `SELECT
+  ID_PPI_ESPACIAL,
+  NOMBRE_CORTO,
+  FASE_DESC,
+  CASE
+    WHEN POBLACION_BENEFICIADA = 0 THEN 'SIN BENEFICIO'
+    WHEN POBLACION_BENEFICIADA < 1000 THEN 'BAJO'
+    WHEN POBLACION_BENEFICIADA < 10000 THEN 'MEDIO'
+    ELSE 'ALTO'
+  END AS nivel_impacto
+FROM dataset
+WHERE ENTIDAD_FEDERATIVA_ID = '${entidadDefault.value}';`);
 
 function toPlainObjects(arrowResult) {
   return arrowResult.toArray().map(row => {
@@ -33,7 +56,16 @@ async function ejecutar() {
   }
 }
 
-ejecutar();
+// ✅ Watcher: ejecuta automáticamente cuando cambia la entidad
+watch(entidadDefault, () => {
+  ejecutar();
+}, { immediate: true });
+
+// También puedes usar watchEffect si prefieres:
+// watchEffect(() => {
+//   sqlQuery.value; // dependencia
+//   ejecutar();
+// });
 </script>
 
 <template>
