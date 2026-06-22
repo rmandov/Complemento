@@ -6,10 +6,10 @@ import { storeToRefs } from 'pinia'
 
 const mapStore = useMapStore()
 
-// ✅ Desestructurar la ref específica que necesitas
+// Desestructurar la ref específica que necesitas
 const { CVE_ENT: entidad_clave } = storeToRefs(mapStore)
 
-// ✅ Valor por defecto si es null/undefined
+// Valor por defecto si es null/undefined
 const entidadDefault = computed(() => entidad_clave.value || '01')
 
 const resultados = shallowRef([])
@@ -58,7 +58,7 @@ async function ejecutar() {
   }
 }
 
-// ✅ Watcher: ejecuta automáticamente cuando cambia la entidad
+// Watcher: ejecuta automáticamente cuando cambia la entidad
 watch(
   entidadDefault,
   () => {
