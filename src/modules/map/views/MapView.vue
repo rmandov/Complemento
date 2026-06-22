@@ -47,6 +47,7 @@ const { center, register: registerClick, unregister: unregisterClick } = useMapI
 const filteredFeatures = shallowRef([])
 let rawFeatures = []
 let spatialIndex = null
+let radioCantidad = ref(0)
 
 // Construir el índice cuando las features estén listas
 watch(
@@ -90,9 +91,7 @@ function searchPoints() {
   }
   const radiusKm = radius.value / 1000
 
-
-
-/* rawFeatures = JSON.parse(
+  /* rawFeatures = JSON.parse(
   JSON.stringify(toRaw(features))
 )
  */
@@ -105,13 +104,14 @@ function searchPoints() {
   )
 
   // ✅ results son índices numéricos; usamos rawFeatures global
-  filteredFeatures.value = results
-    .map((idx) => rawFeatures[idx])
-    .filter(Boolean)          // defensa: elimina undefined por si acaso
+  filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean) // defensa: elimina undefined por si acaso
 
   console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
-  console.log(filteredFeatures.value);
 
+  // Se resta de la cantidad el proyecto mismo
+  radioCantidad.value = filteredFeatures.value.length - 1
+
+  console.log(filteredFeatures.value)
 }
 
 // Reaccionar a cambios de centro o radio
@@ -292,7 +292,7 @@ onUnmounted(() => {
 
       <RadiusControl
         v-model:radius="radius"
-        :count="filteredFeatures.value    "
+        :count="radioCantidad"
         style="
           position: absolute;
           bottom: 20px;
