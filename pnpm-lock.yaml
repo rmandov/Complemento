@@ -11,6 +11,12 @@ importers:
       '@duckdb/duckdb-wasm':
         specifier: 1.33.1-dev45.0
         version: 1.33.1-dev45.0
+      geokdbush:
+        specifier: ^2.1.0
+        version: 2.1.0
+      kdbush:
+        specifier: ^4.1.0
+        version: 4.1.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -1369,6 +1375,9 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
+  geokdbush@2.1.0:
+    resolution: {integrity: sha512-bMc7mu+SeUxtHwRpVvZ36qnZa/x8YAGuaPNeGDxd9bxp/jYuJ5GrUirUPz6UNiT+nn/79IQ4gCNan0y4alEUxw==}
+
   get-intrinsic@1.3.0:
     resolution: {integrity: sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==}
     engines: {node: '>= 0.4'}
@@ -1519,6 +1528,9 @@ packages:
 
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
+
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -1966,6 +1978,9 @@ packages:
   tinypool@2.1.0:
     resolution: {integrity: sha512-Pugqs6M0m7Lv1I7FtxN4aoyToKg1C4tu+/381vH35y8oENM/Ai7f7C4StcoK4/+BSw9ebcS8jRiVrORFKCALLw==}
     engines: {node: ^20.0.0 || >=22.0.0}
+
+  tinyqueue@3.0.0:
+    resolution: {integrity: sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g==}
 
   tinyrainbow@3.1.0:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
@@ -3476,6 +3491,10 @@ snapshots:
 
   gensync@1.0.0-beta.2: {}
 
+  geokdbush@2.1.0:
+    dependencies:
+      tinyqueue: 3.0.0
+
   get-intrinsic@1.3.0:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -3620,6 +3639,8 @@ snapshots:
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
+
+  kdbush@4.1.0: {}
 
   keyv@4.5.4:
     dependencies:
@@ -4061,6 +4082,8 @@ snapshots:
       picomatch: 4.0.4
 
   tinypool@2.1.0: {}
+
+  tinyqueue@3.0.0: {}
 
   tinyrainbow@3.1.0: {}
 
