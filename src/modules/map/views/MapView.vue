@@ -54,6 +54,7 @@ watch(
   (features) => {
     if (!features?.length) {
       spatialIndex = null
+      rawFeatures = []
       filteredFeatures.value = []
       return
     }
@@ -103,12 +104,14 @@ function searchPoints() {
     radiusKm,
   )
 
-  filteredFeatures.value = results.map(
-  idx => rawFeatures[idx]
-)
-  console.log(geokdbush.around(spatialIndex, center.value.lng, center.value.lat, 5))
-  filteredFeatures.value = results.map((r) => r.point) // r.point es la feature original
+  // ✅ results son índices numéricos; usamos rawFeatures global
+  filteredFeatures.value = results
+    .map((idx) => rawFeatures[idx])
+    .filter(Boolean)          // defensa: elimina undefined por si acaso
+
   console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
+  console.log(filteredFeatures.value);
+
 }
 
 // Reaccionar a cambios de centro o radio
@@ -262,11 +265,11 @@ onMounted(async () => {
       pane: 'entidadesPane',
       name: 'NOMGEO',
     })
-    /* EntidadesMuncipiosLayer.addTo(map.value) */
+    EntidadesMuncipiosLayer.addTo(map.value)
   }
 
-  await crearCapaProyectos()
-  capaProyectos.value.addTo(map.value)
+  /* await crearCapaProyectos()
+  capaProyectos.value.addTo(map.value) */
 })
 
 onUnmounted(() => {
@@ -303,7 +306,7 @@ onUnmounted(() => {
     </div>
 
     <button class="back-button" @click="goBack">Enfocar a todo el país</button>
-    <!-- <button class="back-button" @click="toggleProyectos">Proyectos</button> -->
+    <button class="back-button" @click="toggleProyectos">Proyectos</button>
   </div>
   <div>
     <TableMap></TableMap>
