@@ -1,6 +1,6 @@
 <template>
   <div class="radius-control">
-    <label>Radio: {{ radius }} m</label>
+    <label>Radio: {{ radius / 1000 }} Km</label>
     <input
       type="range"
       :min="min"
@@ -9,7 +9,7 @@
       :value="radius"
       @input="$emit('update:radius', Number($event.target.value))"
     />
-    <span>{{ count }} dentro</span>
+    <span>Proyectos en el área: {{ count }}</span>
   </div>
 </template>
 
@@ -23,3 +23,10 @@ defineProps({
 })
 defineEmits(['update:radius'])
 </script>
+
+<style scoped>
+input {
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+</style>
