@@ -90,6 +90,7 @@ import Slider from '@/modules/home/components/Slider.vue'
 <style scoped>
 .home {
   margin: 30px 50px;
+  font-family: NotoSans;
   /*   max-width: 1200px;
   margin-left: auto;
   margin-right: auto; */
@@ -109,11 +110,15 @@ import Slider from '@/modules/home/components/Slider.vue'
 }
 
 .hero-texto {
-  flex: 3; /* 2 partes */
+  flex: 3; /* 3 partes */
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.hero-title{
+  font-family: NotoSansBold;
 }
 
 .animacion {

@@ -14,3 +14,39 @@
 *::after {
   box-sizing: border-box;
 }
+
+
+/* TIPOGRAFÍAS */
+@font-face {
+  font-display: swap;
+  font-family: NotoSans;
+  src: url(./../assets/fonts/NotoSans/NotoSans-Regular.ttf);
+}
+@font-face {
+  font-display: swap;
+  font-family: NotoSansBold;
+  src: url(./../assets/fonts/NotoSans/NotoSans-Bold.ttf);
+}
+@font-face {
+  font-display: swap;
+  font-family: NotoSans-ExtraBold;
+  src: url(./../assets/fonts/NotoSans/NotoSans-ExtraBold.ttf);
+}
+
+@font-face {
+  font-display: swap;
+  font-family: NotoSans-Black;
+  src: url(./../assets/fonts/NotoSans/NotoSans-Black.ttf);
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Patria;
+  src: url(./../assets/fonts/Patria/Patria_Regular.otf);
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Patria-Bold;
+  src: url(./../assets/fonts/Patria/Patria_Bold.otf);
+}
