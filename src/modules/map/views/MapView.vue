@@ -323,7 +323,7 @@ onUnmounted(() => {
 }
 
 .map {
-  border: solid 1px red;
+  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
 }
