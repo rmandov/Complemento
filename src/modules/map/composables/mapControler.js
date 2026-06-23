@@ -19,7 +19,7 @@ export function useMap(containerRef) {
     if (!containerRef.value || map.value) return
 
     // Definimos el mapa y su encuadre
-    map.value = L.map(containerRef.value, { minZoom: 5 })
+    map.value = L.map(containerRef.value, { /* preferCanvas: true, */ minZoom: 5 })
     map.value.setView(defaultView.center, defaultView.zoom)
 
     // Agregamos capa de calles
