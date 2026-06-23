@@ -34,7 +34,6 @@ watch(entidad, () => {
     <p>{{ nombre.entidad }}</p>
     <p>{{ nombre.municipio }}</p>
   </div>
-  <button @click="cambioMunicipio">Puchame</button>
 </template>
 
 <style scoped>

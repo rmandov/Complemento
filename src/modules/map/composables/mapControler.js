@@ -19,8 +19,22 @@ export function useMap(containerRef) {
     if (!containerRef.value || map.value) return
 
     // Definimos el mapa y su encuadre
-    map.value = L.map(containerRef.value, { /* preferCanvas: true, */ minZoom: 5 })
+    map.value = L.map(containerRef.value, {
+      /* preferCanvas: true, */ minZoom: 5,
+      scrollWheelZoom: false,
+      zoomControl: false,
+    })
     map.value.setView(defaultView.center, defaultView.zoom)
+
+    /*     // Enable scroll zoom when the user clicks/focuses on the map
+    map.value.on("focus", () => {
+      map.value.scrollWheelZoom.enable();
+    });
+
+    // Disable it again when they click away
+    map.value.on("blur", () => {
+      map.value.scrollWheelZoom.disable();
+    }); */
 
     // Agregamos capa de calles
     // Esta puede eliminarse y solo usarse las geometrias que nos da el geojson
