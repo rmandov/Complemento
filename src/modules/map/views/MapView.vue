@@ -305,7 +305,7 @@ onUnmounted(() => {
       />
     </div>
 
-    <button class="back-button" @click="goBack">Enfocar a todo el país</button>
+    <button class="back-button shadow-2xs" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="toggleProyectos">Proyectos</button>
   </div>
   <div>
