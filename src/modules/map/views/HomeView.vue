@@ -72,7 +72,7 @@ import Slider from '@/modules/home/components/Slider.vue'
       </RouterLink>
     </section>
 
-    <!-- ==================== PROYECTOS ESTRATÉGICOS ==================== -->
+    <!-- Sección Proyectos -->
     <section class="proyectos-section">
       <h2>Proyectos estratégicos</h2>
       <p>
@@ -91,9 +91,9 @@ import Slider from '@/modules/home/components/Slider.vue'
 .home {
   margin: 30px 50px;
   font-family: NotoSans;
-  /*   max-width: 1200px;
+  max-width: 1800px;
   margin-left: auto;
-  margin-right: auto; */
+  margin-right: auto;
 }
 
 /* Distribución de 2/5 para la animación y 3/5 para el texto */
