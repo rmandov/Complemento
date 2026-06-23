@@ -123,7 +123,7 @@ import Slider from '@/modules/home/components/Slider.vue'
 
 .animacion {
   width: 100%;
-  height: 200px;
+  height: 100%;
   background-color: rgb(242, 242, 242);
   display: flex;
   align-items: center;
