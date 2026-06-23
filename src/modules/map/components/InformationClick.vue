@@ -12,7 +12,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="barra-lateral shadow-sm bg-white/80 backdrop-blur-sm">
+  <section class="barra-lateral shadow-sm bg-white/100 ">
     <div class="card flex flex-col h-full">
       <div class="title h-20 text-center">
         <h2 class="font-bold" v-if="entidad_clave !== '00'">{{ entidad_clave }}. {{ entidad }}</h2>
@@ -42,6 +42,7 @@ onMounted(() => {
   transition: all 0.3s ease;
   bottom: 15px;
   left: 15px;
+
   z-index: 1000; /* Más alto que todo */
   pointer-events: none;
   border-radius: 10px;
