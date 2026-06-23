@@ -53,7 +53,7 @@ import Slider from '@/modules/home/components/Slider.vue'
       <!-- Botón 2: Fichas -->
       <RouterLink class="boton" to="/mapa">
         <div class="boton-contenido">
-          <img class="boton-imagen" src="../../../assets/img/img_circle.png" alt="Fichas" />
+          <img class="boton-imagen" src="../../../assets/img/Mexico.png" alt="Fichas" />
           <span class="boton-texto">Territorio</span>
         </div>
         <svg
