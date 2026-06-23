@@ -15,6 +15,7 @@
   box-sizing: border-box;
 }
 
+@import "tailwindcss";
 
 /* TIPOGRAFÍAS */
 @font-face {
@@ -22,11 +23,13 @@
   font-family: NotoSans;
   src: url(./../assets/fonts/NotoSans/NotoSans-Regular.ttf);
 }
+
 @font-face {
   font-display: swap;
   font-family: NotoSansBold;
   src: url(./../assets/fonts/NotoSans/NotoSans-Bold.ttf);
 }
+
 @font-face {
   font-display: swap;
   font-family: NotoSans-ExtraBold;
