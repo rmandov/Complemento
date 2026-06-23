@@ -342,8 +342,9 @@ onUnmounted(() => {
       <RadiusControl v-model:radius="radius" :count="radioCantidad" />
       <InformationClick></InformationClick>
       <button class="focus-mexico shadow-lg" @click="goBack">
-        <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg" >
-          <path fill="rgb(251, 126, 62)"
+        <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
+          <path
+            fill="rgb(251, 126, 62)"
             d="M506.752,291.992h-28.989c-0.73,0-1.457,0.157-2.126,0.448l-25.459,11.32
 		c-1.895,0.841-3.114,2.722-3.114,4.788v17.583c0,0.791-0.178,1.574-0.524,2.286l-11.805,24.394h-12.946
 		c-0.68,0-1.353,0.135-1.98,0.392l-32.463,13.28c-1.706,0.698-3.65,0.449-5.126-0.662l-9.479-7.103
