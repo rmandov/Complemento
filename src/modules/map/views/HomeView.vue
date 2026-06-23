@@ -117,7 +117,7 @@ import Slider from '@/modules/home/components/Slider.vue'
   gap: 16px;
 }
 
-.hero-title{
+.hero-title {
   font-family: NotoSansBold;
 }
 
@@ -146,7 +146,7 @@ import Slider from '@/modules/home/components/Slider.vue'
   justify-content: space-between; /* contenido a la izq, flecha a la der */
   gap: 12px;
   padding: 16px 20px;
-/*   background-color: beige; */
+  /*   background-color: beige; */
   border-radius: 20px;
   border-width: 1px;
   border-style: solid;
