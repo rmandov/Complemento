@@ -293,7 +293,7 @@ onMounted(async () => {
   initMap()
   registerClick()
 
-  infoLayer.addTo(map.value)
+  /* infoLayer.addTo(map.value) */
 
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
@@ -324,6 +324,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Map-wrapper -->
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map"></div>
@@ -338,27 +339,15 @@ onUnmounted(() => {
         Usa Ctrl + rueda del ratón para hacer zoom
       </div>
 
-      <RadiusControl
-        v-model:radius="radius"
-        :count="radioCantidad"
-        style="
-          position: absolute;
-          bottom: 20px;
-          left: 20px;
-          z-index: 1000;
-          background: white;
-          padding: 8px;
-          border-radius: 6px;
-        "
-      />
+      <RadiusControl v-model:radius="radius" :count="radioCantidad" />
+      <InformationClick></InformationClick>
     </div>
 
     <button class="back-button shadow-2xs" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="toggleProyectos">Proyectos</button>
   </div>
-  <div style="height: 100%; width: 300px; border: solid 1px purple">
-    <InformationClick></InformationClick>
-  </div>
+  <!-- Informacion -->
+  <!-- tabla -->
   <div>
     <TableMap></TableMap>
   </div>
@@ -410,9 +399,11 @@ onUnmounted(() => {
 
 .info {
   position: relative;
-  border: solid 1px red;
+  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 :deep(.leaflet-interactive:focus) {

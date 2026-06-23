@@ -40,6 +40,16 @@ watch(
 </template>
 
 <style scoped>
+.radius-control {
+  position: absolute;
+  bottom: 20px;
+  right: 5px;
+  z-index: 1000;
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+}
+
 input {
   margin-right: 1rem;
   margin-left: 1rem;
