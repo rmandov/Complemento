@@ -1,9 +1,13 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
+import { RouterView, useRouter } from "vue-router";
+const router = useRouter()
+const goBackPage = () => {
+  router.go(-1) // o router.back()
+}
 </script>
 
 <template>
-  <nav>Complementarios</nav>
+  <nav><button @click="goBackPage">Regresar</button>Complementarios</nav>
   <RouterView />
 </template>
 
