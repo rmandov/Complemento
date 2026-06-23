@@ -20,7 +20,7 @@ const localRadius = ref(props.radius)
 
 watch(
   () => props.radius,
-  v => localRadius.value = v
+  (v) => (localRadius.value = v),
 )
 </script>
 <template>
@@ -38,7 +38,6 @@ watch(
     <span>Proyectos en el área: {{ count }}</span>
   </div>
 </template>
-
 
 <style scoped>
 input {

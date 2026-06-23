@@ -15,7 +15,7 @@
   box-sizing: border-box;
 }
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* TIPOGRAFÍAS */
 @font-face {

@@ -283,9 +283,6 @@ onUnmounted(() => {
 
 <template>
   <div class="map-wraper">
-    <div style="height: 100%; width: 300px; border: solid 1px purple">
-      <InformationClick></InformationClick>
-    </div>
     <div class="info">
       <div ref="mapContainer" class="map"></div>
       <InformationProjects></InformationProjects>
@@ -307,6 +304,9 @@ onUnmounted(() => {
 
     <button class="back-button shadow-2xs" @click="goBack">Enfocar a todo el país</button>
     <button class="back-button" @click="toggleProyectos">Proyectos</button>
+  </div>
+  <div style="height: 100%; width: 300px; border: solid 1px purple">
+    <InformationClick></InformationClick>
   </div>
   <div>
     <TableMap></TableMap>

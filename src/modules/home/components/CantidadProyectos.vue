@@ -1,21 +1,21 @@
 <script setup>
 /* Aquí se tendrá mandará a llamar un .json donde vendrá los números
 de los proyectos. Además la información actualizada (leyenda)*/
-import { ref, onMounted } from "vue";
-import { useGeoJson } from "@/modules/map/composables/useGeoJson";
+import { ref, onMounted } from 'vue'
+import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 
-const { getGeoJson } = useGeoJson();
-const cards = ref([]);
-const leyenda = ref("");
+const { getGeoJson } = useGeoJson()
+const cards = ref([])
+const leyenda = ref('')
 
 onMounted(async () => {
-  const data = await getGeoJson("proyectos.json");
+  const data = await getGeoJson('proyectos.json')
 
   if (data) {
-    cards.value = data.cards;
-    leyenda.value = data.leyenda;
+    cards.value = data.cards
+    leyenda.value = data.leyenda
   }
-});
+})
 </script>
 
 <template>
@@ -68,8 +68,8 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-    .cards {
-        flex-direction: column;
-    }
+  .cards {
+    flex-direction: column;
+  }
 }
 </style>
