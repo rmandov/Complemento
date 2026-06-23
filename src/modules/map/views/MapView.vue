@@ -328,7 +328,7 @@ onUnmounted(() => {
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map"></div>
-      <InformationProjects></InformationProjects>
+      <!-- <InformationProjects></InformationProjects> -->
 
       <!-- Mensaje flotante de advertencia (Google Maps Style) -->
       <div
