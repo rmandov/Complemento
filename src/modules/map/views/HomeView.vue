@@ -91,7 +91,7 @@ import Slider from '@/modules/home/components/Slider.vue'
 .home {
   margin: 30px 50px;
   font-family: NotoSans;
-  max-width: 1800px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
 }

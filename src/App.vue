@@ -2,7 +2,7 @@
 import { RouterView, useRouter } from "vue-router";
 const router = useRouter()
 const goBackPage = () => {
-  router.go(-1) // o router.back()
+  router.back()
 }
 </script>
 
