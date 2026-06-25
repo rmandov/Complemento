@@ -1,0 +1,95 @@
+[
+  {
+    "id": 1,
+    "label": "Inicio",
+    "href": "/",
+    "children": []
+  },
+  {
+    "id": 2,
+    "label": "Ciclo Presupuestario",
+    "href": "/ciclo-presupuestario",
+    "description": "Gestión integral del presupuesto público",
+    "children": [
+      {
+        "id": 21,
+        "label": "Programación",
+        "href": "/programacion",
+        "description": "Planificación y estructuración del presupuesto anual.",
+        "children": [
+          { "id": 211, "label": "Metas físicas", "href": "/metas-fisicas" },
+          { "id": 212, "label": "Metas financieras", "href": "/metas-financieras" },
+          { "id": 213, "label": "Indicadores de gestión", "href": "/indicadores" }
+        ]
+      },
+      {
+        "id": 22,
+        "label": "Aprobación",
+        "href": "/aprobacion",
+        "description": "Trámite legislativo y aprobación del presupuesto.",
+        "children": [
+          { "id": 221, "label": "Dictámenes", "href": "/dictamenes" },
+          { "id": 222, "label": "Decreto de presupuesto", "href": "/decreto" }
+        ]
+      },
+      {
+        "id": 23,
+        "label": "Ejecución",
+        "href": "/ejecucion",
+        "description": "Seguimiento y control de la ejecución presupuestaria.",
+        "children": [
+          { "id": 231, "label": "Reportes trimestrales", "href": "/reportes" },
+          { "id": 232, "label": "Modificaciones presupuestarias", "href": "/modificaciones" },
+          { "id": 233, "label": "Transferencias", "href": "/transferencias" },
+          { "id": 234, "label": "Compromisos", "href": "/compromisos" }
+        ]
+      },
+      {
+        "id": 24,
+        "label": "Evaluación",
+        "href": "/evaluacion",
+        "description": "Análisis de resultados y cumplimiento de metas.",
+        "children": []
+      },
+      {
+        "id": 25,
+        "label": "Seguimiento",
+        "href": "/seguimiento",
+        "description": "Monitoreo continuo de la gestión presupuestaria.",
+        "children": [
+          { "id": 251, "label": "Dashboard", "href": "/dashboard" },
+          { "id": 252, "label": "Alertas tempranas", "href": "/alertas" }
+        ]
+      },
+      {
+        "id": 26,
+        "label": "Rendición de Cuentas",
+        "href": "/rendicion",
+        "description": "Informes de rendición de cuentas al legislativo.",
+        "children": []
+      },
+      {
+        "id": 27,
+        "label": "Transparencia",
+        "href": "/transparencia",
+        "description": "Publicación activa de la información presupuestaria.",
+        "children": [
+          { "id": 271, "label": "Portal de transparencia", "href": "/portal" },
+          { "id": 272, "label": "Datos abiertos", "href": "/datos-abiertos" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "label": "Normatividad",
+    "href": "/normatividad",
+    "children": []
+  },
+  {
+    "id": 4,
+    "label": "Contacto",
+    "href": "/contacto",
+    "children": []
+  }
+]
