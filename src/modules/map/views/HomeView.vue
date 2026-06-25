@@ -72,7 +72,7 @@ onMounted(async () => {
         </svg>
       </RouterLink>
 
-      <!-- Botón 2: Fichas -->
+      <!-- Botón 2: Territorio -->
       <RouterLink class="boton" to="/mapa">
         <div class="boton-contenido">
           <img class="boton-imagen" src="../../../assets/img/Mexico.png" alt="Fichas" />
@@ -207,9 +207,6 @@ onMounted(async () => {
 
 .proyectos-section {
   margin-bottom: 32px;
-}
-.projects-section {
-  margin: 40px 0;
 }
 
 .section-title {

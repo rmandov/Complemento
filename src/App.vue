@@ -1,19 +1,11 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-const router = useRouter()
-const goBackPage = () => {
-  router.back()
-}
+import Navbar from './modules/nav/views/navbar.vue'
 </script>
 
 <template>
-  <nav><button @click="goBackPage">Regresar</button>Complementarios</nav>
+  <Navbar></Navbar>
   <RouterView />
 </template>
 
-<style scoped>
-nav {
-  border: solid 1px purple;
-  height: var(--nav-height);
-}
-</style>
+<style scoped></style>

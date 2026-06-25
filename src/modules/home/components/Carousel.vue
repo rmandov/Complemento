@@ -7,11 +7,7 @@
   </p>
   <div class="carousel-wrapper">
     <!-- Botón Izquierda -->
-    <button
-      class="carousel-btn carousel-btn--left"
-      @click="scrollLeft"
-      aria-label="Anterior proyecto"
-    >
+    <button class="carousel-btn" @click="scrollLeft">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6" />
       </svg>
@@ -43,11 +39,7 @@
     </div>
 
     <!-- Botón Derecha -->
-    <button
-      class="carousel-btn carousel-btn--right"
-      @click="scrollRight"
-      aria-label="Siguiente proyecto"
-    >
+    <button class="carousel-btn" @click="scrollRight">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="9 18 15 12 9 6" />
       </svg>
