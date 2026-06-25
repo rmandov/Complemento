@@ -1,7 +1,29 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
-import Slider from '@/modules/home/components/Slider.vue'
+import Carousel from '@/modules/home/components/Carousel.vue'
+import { useGeoJson } from '../composables/useGeoJson'
+const { getGeoJson } = useGeoJson()
+
+const projects = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const res = await getGeoJson('proyectos_carrusel.json')
+    // getGeoJson ya hace response.json(), así que res es el array directamente
+    if (res) {
+      projects.value = res
+    } else {
+      console.warn('El JSON no es un array:', res)
+    }
+  } catch (error) {
+    console.error('Error cargando proyectos:', error)
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -74,13 +96,19 @@ import Slider from '@/modules/home/components/Slider.vue'
 
     <!-- Sección Proyectos -->
     <section class="proyectos-section">
-      <h2>Proyectos estratégicos</h2>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
-        perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
-        mollitia blanditiis atque quidem aut!
-      </p>
-      <Slider />
+      <!-- Loading mientras carga -->
+      <div v-if="loading" class="loading-state">Cargando proyectos...</div>
+
+      <!-- Carrusel una vez cargado -->
+      <Carousel
+        v-else-if="projects.length"
+        :items="projects"
+        :autoplay="true"
+        :autoplay-speed="5000"
+      />
+
+      <!-- Estado vacío -->
+      <div v-else class="empty-state">No hay proyectos disponibles.</div>
     </section>
   </div>
 
@@ -180,7 +208,24 @@ import Slider from '@/modules/home/components/Slider.vue'
 .proyectos-section {
   margin-bottom: 32px;
 }
+.projects-section {
+  margin: 40px 0;
+}
 
+.section-title {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 1.75rem;
+  color: #1a1a1a;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 1.1rem;
+}
 /* ============================================
    RESPONSIVE: tablet y móvil
    ============================================ */

@@ -1,5 +1,5 @@
 <script setup>
-import { RouterView, useRouter } from "vue-router";
+import { RouterView, useRouter } from 'vue-router'
 const router = useRouter()
 const goBackPage = () => {
   router.back()
