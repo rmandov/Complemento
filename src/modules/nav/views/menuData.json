@@ -1,30 +1,28 @@
 [
   {
-    "id": 1,
-    "label": "Inicio",
-    "href": "/",
-    "children": []
-  },
-  {
     "id": 2,
     "label": "Ciclo Presupuestario",
-    "href": "/ciclo-presupuestario",
+    "href": "/Ciclo-Presupuestario",
     "description": "Gestión integral del presupuesto público",
     "children": [
       {
         "id": 21,
-        "label": "Programación",
-        "href": "/programacion",
+        "label": "Planeación",
+        "href": "/Planeacion-Nacional",
         "description": "Planificación y estructuración del presupuesto anual.",
         "children": [
-          { "id": 211, "label": "Metas físicas", "href": "/metas-fisicas" },
+          {
+            "id": 211,
+            "label": "Programas en Acción",
+            "href": "/Planeacion-Nacional#/programas-accion"
+          },
           { "id": 212, "label": "Metas financieras", "href": "/metas-financieras" },
           { "id": 213, "label": "Indicadores de gestión", "href": "/indicadores" }
         ]
       },
       {
         "id": 22,
-        "label": "Aprobación",
+        "label": "Programación",
         "href": "/aprobacion",
         "description": "Trámite legislativo y aprobación del presupuesto.",
         "children": [
@@ -34,7 +32,7 @@
       },
       {
         "id": 23,
-        "label": "Ejecución",
+        "label": "Presupuestación",
         "href": "/ejecucion",
         "description": "Seguimiento y control de la ejecución presupuestaria.",
         "children": [
@@ -46,7 +44,7 @@
       },
       {
         "id": 24,
-        "label": "Evaluación",
+        "label": "Ejercicio y Control",
         "href": "/evaluacion",
         "description": "Análisis de resultados y cumplimiento de metas.",
         "children": []
@@ -63,14 +61,14 @@
       },
       {
         "id": 26,
-        "label": "Rendición de Cuentas",
+        "label": "Evaluación",
         "href": "/rendicion",
         "description": "Informes de rendición de cuentas al legislativo.",
         "children": []
       },
       {
         "id": 27,
-        "label": "Transparencia",
+        "label": "Rendición de Cuentas",
         "href": "/transparencia",
         "description": "Publicación activa de la información presupuestaria.",
         "children": [
@@ -82,14 +80,14 @@
   },
   {
     "id": 3,
-    "label": "Normatividad",
-    "href": "/normatividad",
+    "label": "Datos Abiertos",
+    "href": "/Datos-Abiertos",
     "children": []
   },
   {
     "id": 4,
-    "label": "Contacto",
-    "href": "/contacto",
+    "label": "Capacitación",
+    "href": "/Capacitacion",
     "children": []
   }
 ]
