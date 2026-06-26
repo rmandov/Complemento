@@ -3,7 +3,7 @@ import { RouterView, RouterLink } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
 import Carousel from '@/modules/home/components/Carousel.vue'
-import { useGeoJson } from '../composables/useGeoJson'
+import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
 
 const projects = ref([])
@@ -103,7 +103,7 @@ onMounted(async () => {
       <Carousel
         v-else-if="projects.length"
         :items="projects"
-        :autoplay="true"
+        :autoplay="false"
         :autoplay-speed="5000"
       />
 

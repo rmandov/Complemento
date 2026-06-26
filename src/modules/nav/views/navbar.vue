@@ -286,16 +286,12 @@ onUnmounted(() => {
    ============================= */
 .navbar {
   position: relative;
-  background: #1a365d;
-  font-family:
-    'Segoe UI',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  background: #f5f5f5;
+  font-family: 'NotoSans';
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
@@ -328,7 +324,7 @@ onUnmounted(() => {
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 0.25rem;
+  gap: 1rem;
   margin: 0;
   padding: 0;
 }
@@ -342,17 +338,16 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.25rem;
   padding: 0.75rem 1rem;
-  color: #cbd5e1;
+  color: #575757;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1rem;
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .navbar-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  color: #000000;
+  background: rgba(180, 180, 180, 0.904);
 }
 
 .arrow {
@@ -406,20 +401,24 @@ onUnmounted(() => {
 .mega-menu {
   position: absolute;
   top: 100%;
-  left: 0;
-  width: 100%;
-  background: #fff;
+  left: 50%;                    
+  transform: translateX(-50%); 
+  width: 100%;                   
+  max-width: 700px;            
+  background: rgba(255, 255, 255);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid #7c7c7c;
   z-index: 1000;
+  border-radius: 0 0 12px 12px; 
 }
 
 .mega-menu-container {
-  max-width: 1200px;
+
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 280px 1fr;
   min-height: 380px;
+  padding: 0;
 }
 
 /* Columna 1 */
@@ -810,7 +809,7 @@ onUnmounted(() => {
    ============================= */
 @media (max-width: 767px) {
   .desktop-only {
-    display: none !important;
+    display: none;
   }
 
   .hamburger-btn {
@@ -829,7 +828,7 @@ onUnmounted(() => {
 
 @media (min-width: 768px) {
   .mobile-menu {
-    display: none !important;
+    display: none;
   }
 }
 </style>

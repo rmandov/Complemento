@@ -9,85 +9,81 @@
         "id": 21,
         "label": "Planeación",
         "href": "/Planeacion-Nacional",
-        "description": "Planificación y estructuración del presupuesto anual.",
+        "description": "El Plan Nacional de Desarrollo (PND) es la guía de los objetivos y acciones del Gobierno de México en los próximos años.",
         "children": [
           {
             "id": 211,
             "label": "Programas en Acción",
             "href": "/Planeacion-Nacional#/programas-accion"
           },
-          { "id": 212, "label": "Metas financieras", "href": "/metas-financieras" },
-          { "id": 213, "label": "Indicadores de gestión", "href": "/indicadores" }
+          { "id": 212, "label": "100 Compromisos", "href": "/Planeacion-Nacional#/compromisos" },
+          { "id": 213, "label": "Capacitación", "href": "/Planeacion-Nacional#/capacitacion" },
+          { "id": 214, "label": "Datos Abiertos", "href": "/Planeacion-Nacional#/datos-abiertos" }
         ]
       },
       {
         "id": 22,
         "label": "Programación",
-        "href": "/aprobacion",
-        "description": "Trámite legislativo y aprobación del presupuesto.",
-        "children": [
-          { "id": 221, "label": "Dictámenes", "href": "/dictamenes" },
-          { "id": 222, "label": "Decreto de presupuesto", "href": "/decreto" }
-        ]
+        "href": "/",
+        "description": "Es la etapa donde se desarrollan los Programas Presupuestarios bajo la Metodología de Marco Lógico (MML), lo que resulta en la construcción de Matrices de Indicadores para Resultados (MIR).",
+        "children": []
       },
       {
         "id": 23,
         "label": "Presupuestación",
-        "href": "/ejecucion",
-        "description": "Seguimiento y control de la ejecución presupuestaria.",
-        "children": [
-          { "id": 231, "label": "Reportes trimestrales", "href": "/reportes" },
-          { "id": 232, "label": "Modificaciones presupuestarias", "href": "/modificaciones" },
-          { "id": 233, "label": "Transferencias", "href": "/transferencias" },
-          { "id": 234, "label": "Compromisos", "href": "/compromisos" }
-        ]
+        "href": "/",
+        "description": "Es la etapa donde se asignan los recursos a los Programas Presupuestarios.",
+        "children": []
       },
       {
         "id": 24,
         "label": "Ejercicio y Control",
-        "href": "/evaluacion",
-        "description": "Análisis de resultados y cumplimiento de metas.",
+        "href": "/",
+        "description": "Es la etapa donde se gastan los recursos asignados a los Programas Presupuestarios para cumplir con los objetivos por los que fueron creados (entregar un servicio, construir una obra, regular una política, etc.).",
         "children": []
       },
       {
         "id": 25,
         "label": "Seguimiento",
-        "href": "/seguimiento",
-        "description": "Monitoreo continuo de la gestión presupuestaria.",
+        "href": "/",
+        "description": "Es la etapa donde se registra el avance del cumplimiento de las metas y objetivos establecidos en los Programas Presupuestarios.",
         "children": [
-          { "id": 251, "label": "Dashboard", "href": "/dashboard" },
-          { "id": 252, "label": "Alertas tempranas", "href": "/alertas" }
+          {
+            "id": 251,
+            "label": "Programas",
+            "href": "/Programas"
+          },
+          { "id": 252, "label": "Obra Pública Abierta", "href": "/Obra-Publica-Abierta" },
+          { "id": 213, "label": "Entidades Federativas", "href": "/Entidades-Federativas" }
         ]
       },
       {
         "id": 26,
         "label": "Evaluación",
-        "href": "/rendicion",
-        "description": "Informes de rendición de cuentas al legislativo.",
+        "href": "/Sistema-Evaluacion-Desempeno",
+        "description": "Forma en cómo se evalúa el cumplimiento de las metas y objetivos de los Programas presupuestarios y Políticas Públicas del Gobierno Federal",
         "children": []
       },
       {
         "id": 27,
         "label": "Rendición de Cuentas",
-        "href": "/transparencia",
-        "description": "Publicación activa de la información presupuestaria.",
-        "children": [
-          { "id": 271, "label": "Portal de transparencia", "href": "/portal" },
-          { "id": 272, "label": "Datos abiertos", "href": "/datos-abiertos" }
-        ]
+        "href": "/",
+        "description": "Es la etapa donde se presenta a la ciudadanía los logros alcanzados durante el año, a través de la Cuenta Pública y el Informe de Gobierno.",
+        "children": []
       }
     ]
   },
+
   {
     "id": 3,
-    "label": "Datos Abiertos",
-    "href": "/Datos-Abiertos",
+    "label": "Capacitación",
+    "href": "/Capacitacion",
     "children": []
   },
   {
     "id": 4,
-    "label": "Capacitación",
-    "href": "/Capacitacion",
+    "label": "Datos Abiertos",
+    "href": "/Datos-Abiertos",
     "children": []
   }
 ]
