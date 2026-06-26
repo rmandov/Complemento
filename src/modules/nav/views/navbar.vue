@@ -401,19 +401,18 @@ onUnmounted(() => {
 .mega-menu {
   position: absolute;
   top: 100%;
-  left: 50%;                    
-  transform: translateX(-50%); 
-  width: 100%;                   
-  max-width: 700px;            
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 700px;
   background: rgba(255, 255, 255);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border-top: 3px solid #7c7c7c;
   z-index: 1000;
-  border-radius: 0 0 12px 12px; 
+  border-radius: 0 0 12px 12px;
 }
 
 .mega-menu-container {
-
   margin: 0 auto;
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -434,7 +433,6 @@ onUnmounted(() => {
   letter-spacing: 0.08em;
   color: #64748b;
   margin: 0 0 1rem 0;
-  font-weight: 600;
 }
 
 .submenu-list {
@@ -447,7 +445,7 @@ onUnmounted(() => {
 }
 
 .submenu-item {
-  border-radius: 6px;
+  border-radius: 12px;
   transition: background 0.15s ease;
 }
 
@@ -467,7 +465,7 @@ onUnmounted(() => {
   color: #334155;
   text-decoration: none;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 0.95rem;
 }
 
