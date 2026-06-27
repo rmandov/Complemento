@@ -1,41 +1,111 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import { ref, onMounted } from 'vue'
-import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
-import Carousel from '@/modules/home/components/Carousel.vue'
-import { useGeoJson } from '@/modules/map/composables/useGeoJson'
-const { getGeoJson } = useGeoJson()
+import { RouterView, RouterLink } from "vue-router";
+import { ref, onMounted } from "vue";
+import gsap from "gsap";
+import CantidadProyectos from "../../home/components/CantidadProyectos.vue";
+import Carousel from "@/modules/home/components/Carousel.vue";
+import { useGeoJson } from "@/modules/map/composables/useGeoJson";
+const { getGeoJson } = useGeoJson();
 
-const projects = ref([])
-const loading = ref(true)
+const projects = ref([]);
+const loading = ref(true);
+
+// Configuración de los botones
+const botones = [
+  {
+    to: "/fichas",
+    img: new URL("../../../assets/img/img_circle.png", import.meta.url).href,
+    label: "Categorías",
+  },
+  {
+    to: "/mapa",
+    img: new URL("../../../assets/img/Mexico.png", import.meta.url).href,
+    label: "Territorio",
+  },
+];
+
+// Efecto magnético
+const handleMouseMove = (e) => {
+  const zone = e.currentTarget; // .magnetic-zone
+  const btn = zone.querySelector(".boton");
+  const text = zone.querySelector(".boton-texto");
+
+  if (!btn || !text) return;
+
+  const rect = zone.getBoundingClientRect();
+
+  const x = gsap.utils.mapRange(
+    rect.left,
+    rect.right,
+    -rect.width / 2,
+    rect.width / 2,
+    e.clientX,
+  );
+
+  const y = gsap.utils.mapRange(
+    rect.top,
+    rect.bottom,
+    -rect.height / 2,
+    rect.height / 2,
+    e.clientY,
+  );
+
+  // El botón se mueve suavemente
+  gsap.to(btn, {
+    x: x * 0.15,
+    y: y * 0.15,
+    duration: 0.4,
+    ease: "power2.out",
+  });
+
+  // El texto se mueve más para "rebotar" dentro del botón
+  gsap.to(text, {
+    x: x * 0.55,
+    y: y * 0.55,
+    duration: 0.4,
+    ease: "power2.out",
+  });
+};
+
+const handleMouseLeave = (e) => {
+  const zone = e.currentTarget;
+  const btn = zone.querySelector(".boton");
+  const text = zone.querySelector(".boton-texto");
+
+  if (!btn || !text) return;
+
+  gsap.to([btn, text], {
+    x: 0,
+    y: 0,
+    duration: 0.7,
+    ease: "elastic.out(1, 0.4)",
+    overwrite: true,
+  });
+};
 
 onMounted(async () => {
   try {
-    const res = await getGeoJson('proyectos_carrusel.json')
-    // getGeoJson ya hace response.json(), así que res es el array directamente
+    const res = await getGeoJson("proyectos_carrusel.json");
     if (res) {
-      projects.value = res
+      projects.value = res;
     } else {
-      console.warn('El JSON no es un array:', res)
+      console.warn("El JSON no es un array:", res);
     }
   } catch (error) {
-    console.error('Error cargando proyectos:', error)
+    console.error("Error cargando proyectos:", error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 </script>
 
 <template>
   <div class="home">
     <!-- Hero -->
     <section class="hero-section">
-      <!-- 2/5 -->
       <div class="hero-animacion">
         <div class="animacion">Aquí irá una animación</div>
       </div>
-
-      <!-- 3/5 -->
       <div class="hero-texto">
         <h1 class="hero-title">
           Complementariedad y sinergia entre Programas y Proyectos de Inversión (PPI)
@@ -49,65 +119,46 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- Botones -->
+    <!-- Botones con efecto magnético -->
     <section class="boton-section">
-      <!-- Botón 1: Categorías -->
-      <RouterLink class="boton" to="/fichas">
-        <div class="boton-contenido">
-          <img class="boton-imagen" src="../../../assets/img/img_circle.png" alt="Categorías" />
-          <span class="boton-texto">Categorías</span>
-        </div>
-        <svg
-          class="boton-flecha"
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-          />
-        </svg>
-      </RouterLink>
-
-      <!-- Botón 2: Territorio -->
-      <RouterLink class="boton" to="/mapa">
-        <div class="boton-contenido">
-          <img class="boton-imagen" src="../../../assets/img/Mexico.png" alt="Fichas" />
-          <span class="boton-texto">Territorio</span>
-        </div>
-        <svg
-          class="boton-flecha"
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-          />
-        </svg>
-      </RouterLink>
+      <div
+        v-for="(btn, index) in botones"
+        :key="index"
+        class="magnetic-zone"
+        @mousemove="handleMouseMove"
+        @mouseleave="handleMouseLeave"
+      >
+        <RouterLink class="boton" :to="btn.to">
+          <div class="boton-contenido">
+            <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
+            <span class="boton-texto">{{ btn.label }}</span>
+          </div>
+          <svg
+            class="boton-flecha"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
+            />
+          </svg>
+        </RouterLink>
+      </div>
     </section>
 
     <!-- Sección Proyectos -->
     <section class="proyectos-section">
-      <!-- Loading mientras carga -->
       <div v-if="loading" class="loading-state">Cargando proyectos...</div>
-
-      <!-- Carrusel una vez cargado -->
       <Carousel
         v-else-if="projects.length"
         :items="projects"
         :autoplay="false"
         :autoplay-speed="5000"
       />
-
-      <!-- Estado vacío -->
       <div v-else class="empty-state">No hay proyectos disponibles.</div>
     </section>
   </div>
@@ -124,8 +175,7 @@ onMounted(async () => {
   margin-right: auto;
 }
 
-/* Distribución de 2/5 para la animación y 3/5 para el texto */
-
+/* Hero */
 .hero-section {
   display: flex;
   gap: 24px;
@@ -133,12 +183,12 @@ onMounted(async () => {
 }
 
 .hero-animacion {
-  flex: 2; /* 2 parte */
+  flex: 2;
   min-width: 0;
 }
 
 .hero-texto {
-  flex: 3; /* 3 partes */
+  flex: 3;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -159,61 +209,71 @@ onMounted(async () => {
   text-align: center;
 }
 
-/* Seccion de botones */
+/* Botones */
 .boton-section {
   display: flex;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 120px;
+  margin: 64px 0 64px 0;
+  justify-content: center;
+}
+
+.magnetic-zone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 150px;
+  border-radius: 50%;
+  /* border: 1px dashed #ccc; */ /* Descomenta si quieres ver el área de captura */
 }
 
 .boton {
-  flex: 1; /* 50% cada uno */
+  flex: 1;
   min-width: 0;
+  max-width: 300px;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* contenido a la izq, flecha a la der */
+  justify-content: space-between;
   gap: 12px;
   padding: 16px 20px;
-  /*   background-color: beige; */
   border-radius: 20px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(220, 220, 230);
+  border: 1px solid rgb(220, 220, 230);
+  text-decoration: none;
+  color: inherit;
+  /* ===== IMPORTANTE para el efecto magnético ===== */
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
 }
 
 .boton-contenido {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 0; /* permite truncar texto si es necesario */
+  min-width: 0;
 }
 
 .boton-imagen {
   width: 40px;
   height: 40px;
   object-fit: cover;
-  flex-shrink: 0; /* No se encoge */
+  flex-shrink: 0;
 }
 
 .boton-texto {
   font-size: 1rem;
+  /* ===== IMPORTANTE para que GSAP transforme el span ===== */
+  display: inline-block;
+  will-change: transform;
 }
 
 .boton-flecha {
-  flex-shrink: 0; /* No se encoge */
+  flex-shrink: 0;
 }
 
-/* Sección Proyectos */
-
+/* Proyectos */
 .proyectos-section {
   margin-bottom: 32px;
-}
-
-.section-title {
-  text-align: center;
-  margin-bottom: 24px;
-  font-size: 1.75rem;
-  color: #1a1a1a;
 }
 
 .loading-state,
@@ -223,24 +283,23 @@ onMounted(async () => {
   color: #666;
   font-size: 1.1rem;
 }
-/* ============================================
-   RESPONSIVE: tablet y móvil
-   ============================================ */
+
+/* Responsive */
 @media (max-width: 768px) {
-  /* Hero: apila verticalmente */
   .hero-section {
     flex-direction: column;
   }
 
   .hero-animacion,
   .hero-texto {
-    flex: none; /* quita la proporción 2/5 - 3/5 */
+    flex: none;
     width: 100%;
   }
 
-  /* Botones: apila verticalmente */
   .boton-section {
     flex-direction: column;
+    align-items: center;
+    gap: 32px;
   }
 
   .boton {
