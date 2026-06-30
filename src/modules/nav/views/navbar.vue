@@ -30,7 +30,6 @@
         >
           <a :href="item.href" class="navbar-link">
             {{ item.label }}
-            <span v-if="item.children && item.children.length" class="arrow">▾</span>
           </a>
         </li>
       </ul>
@@ -47,7 +46,7 @@
         <div class="mega-menu-container">
           <!-- Columna 1: Sub-elementos -->
           <div class="column column-main">
-            <h3 class="column-title">{{ activeItem.label }}</h3>
+            <!-- <h3 class="column-title">{{ activeItem.label }}</h3> -->
             <ul class="submenu-list">
               <li
                 v-for="sub in activeItem.children"
@@ -62,7 +61,7 @@
                   :class="{ 'has-children': sub.children && sub.children.length }"
                 >
                   <span class="submenu-label">{{ sub.label }}</span>
-                  <span v-if="sub.children && sub.children.length" class="sub-arrow">→</span>
+                  <!-- <span v-if="sub.children && sub.children.length" class="sub-arrow">→</span> -->
                 </a>
               </li>
             </ul>
@@ -75,7 +74,7 @@
                 v-if="activeSubItem.children && activeSubItem.children.length"
                 class="detail-children"
               >
-                <h4 class="detail-title">{{ activeSubItem.label }}</h4>
+                <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description }}</p>
                 <ul class="detail-list">
                   <li v-for="child in activeSubItem.children" :key="child.id" class="detail-item">
@@ -87,7 +86,7 @@
                 </ul>
               </div>
               <div v-else class="detail-empty">
-                <h4 class="detail-title">{{ activeSubItem.label }}</h4>
+                <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description || 'Sección informativa.' }}</p>
                 <a :href="activeSubItem.href" class="detail-cta">
                   Ir a {{ activeSubItem.label }} →

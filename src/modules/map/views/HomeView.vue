@@ -215,8 +215,7 @@ onMounted(async () => {
   flex: 1;
   min-width: 100%;
   display: flex;
-  gap: 12px;
-  padding: 16px 33px 16px 40px;
+  padding: 16px 38px 16px 40px;
   border-radius: 100px;
   text-decoration: none;
   color: inherit;
@@ -238,7 +237,7 @@ onMounted(async () => {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 18px;
 }
 
 .boton-contenido {
@@ -253,6 +252,8 @@ onMounted(async () => {
   height: 40px;
   object-fit: cover;
   flex-shrink: 0;
+  filter: brightness(1000);
+  transform: translate(0, -2px)
 }
 
 .boton-texto {
