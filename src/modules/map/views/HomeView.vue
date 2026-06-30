@@ -28,7 +28,7 @@ const botones = [
 const handleMouseMove = (e) => {
   const zone = e.currentTarget; // .magnetic-zone
   const btn = zone.querySelector(".boton");
-  const text = zone.querySelector(".boton-texto");
+  const text = zone.querySelector(".boton-imgtxt");
 
   if (!btn || !text) return;
 
@@ -60,9 +60,11 @@ const handleMouseMove = (e) => {
 
   // El texto se mueve más para "rebotar" dentro del botón
   gsap.to(text, {
-    x: x * 0.55,
-    y: y * 0.55,
-    duration: 0.4,
+    x: x * 0.15,
+    y: y * 0.15,
+   /*  x: x * 0.55,
+    y: y * 0.55, */
+    duration: 0.5,
     ease: "power2.out",
   });
 };
@@ -70,7 +72,7 @@ const handleMouseMove = (e) => {
 const handleMouseLeave = (e) => {
   const zone = e.currentTarget;
   const btn = zone.querySelector(".boton");
-  const text = zone.querySelector(".boton-texto");
+  const text = zone.querySelector(".boton-imgtxt");
 
   if (!btn || !text) return;
 
@@ -130,8 +132,10 @@ onMounted(async () => {
       >
         <RouterLink class="boton" :to="btn.to">
           <div class="boton-contenido">
-            <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
-            <span class="boton-texto">{{ btn.label }}</span>
+            <div class="boton-imgtxt">
+              <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
+              <span class="boton-texto">{{ btn.label }}</span>
+            </div>
           </div>
           <svg
             class="boton-flecha"
@@ -244,6 +248,13 @@ onMounted(async () => {
   position: relative;
   overflow: hidden;
   will-change: transform;
+}
+.boton-imgtxt{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .boton-contenido {
