@@ -28,19 +28,13 @@ const botones = [
 const handleMouseMove = (e) => {
   const zone = e.currentTarget; // .magnetic-zone
   const btn = zone.querySelector(".boton");
-  const text = zone.querySelector(".boton-texto");
+  const text = zone.querySelector(".boton-imgtxt");
 
   if (!btn || !text) return;
 
   const rect = zone.getBoundingClientRect();
 
-  const x = gsap.utils.mapRange(
-    rect.left,
-    rect.right,
-    -rect.width / 2,
-    rect.width / 2,
-    e.clientX,
-  );
+  const x = gsap.utils.mapRange(rect.left, rect.right, -rect.width / 2, rect.width / 2, e.clientX);
 
   const y = gsap.utils.mapRange(
     rect.top,
@@ -60,9 +54,9 @@ const handleMouseMove = (e) => {
 
   // El texto se mueve más para "rebotar" dentro del botón
   gsap.to(text, {
-    x: x * 0.55,
-    y: y * 0.55,
-    duration: 0.4,
+    x: x * 0.15,
+    y: y * 0.15,
+    duration: 0.5,
     ease: "power2.out",
   });
 };
@@ -70,7 +64,7 @@ const handleMouseMove = (e) => {
 const handleMouseLeave = (e) => {
   const zone = e.currentTarget;
   const btn = zone.querySelector(".boton");
-  const text = zone.querySelector(".boton-texto");
+  const text = zone.querySelector(".boton-imgtxt");
 
   if (!btn || !text) return;
 
@@ -130,22 +124,11 @@ onMounted(async () => {
       >
         <RouterLink class="boton" :to="btn.to">
           <div class="boton-contenido">
-            <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
-            <span class="boton-texto">{{ btn.label }}</span>
+            <div class="boton-imgtxt">
+              <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
+              <span class="boton-texto">{{ btn.label }}</span>
+            </div>
           </div>
-          <svg
-            class="boton-flecha"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-            />
-          </svg>
         </RouterLink>
       </div>
     </section>
@@ -164,6 +147,7 @@ onMounted(async () => {
   </div>
 
   <RouterView />
+
 </template>
 
 <style scoped>
@@ -212,38 +196,49 @@ onMounted(async () => {
 /* Botones */
 .boton-section {
   display: flex;
-  gap: 120px;
+  gap: 16rem;
   margin: 64px 0 64px 0;
   justify-content: center;
+  color: white;
+  font-weight: bold;
 }
 
 .magnetic-zone {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 300px;
-  height: 150px;
-  border-radius: 50%;
+
   /* border: 1px dashed #ccc; */ /* Descomenta si quieres ver el área de captura */
 }
 
 .boton {
   flex: 1;
-  min-width: 0;
-  max-width: 300px;
+  min-width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 16px 20px;
-  border-radius: 20px;
-  border: 1px solid rgb(220, 220, 230);
+  padding: 16px 33px 16px 40px;
+  border-radius: 100px;
   text-decoration: none;
   color: inherit;
   /* ===== IMPORTANTE para el efecto magnético ===== */
   position: relative;
   overflow: hidden;
   will-change: transform;
+  background-image: linear-gradient(
+          144.02deg,
+          /* rgb(10, 228, 72) 7.56%,
+          rgb(171, 255, 132) 56.98% */
+          rgb(75, 95, 166),
+          rgb(131, 202, 231)
+        );
+}
+
+.boton-imgtxt {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
 }
 
 .boton-contenido {
