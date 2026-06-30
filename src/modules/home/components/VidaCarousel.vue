@@ -180,7 +180,13 @@ onMounted(() => {
         <li class="card-02"></li>
         <li class="card-03"></li>
       </ul>
+      <div class="actions">
+        <button class="prev">Prev</button>
+        <button class="next">Next</button>
+      </div>
     </div>
+
+    <div class="drag-proxy"></div>
   </section>
 </template>
 
@@ -225,6 +231,29 @@ section {
   top: 0;
   left: 0;
   border-radius: 0.8rem;
+}
+
+.actions {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+a {
+  color: #88ce02;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.drag-proxy {
+  visibility: hidden;
+  position: absolute;
 }
 
 .card-01 {
