@@ -1,22 +1,132 @@
-<script setup>
-import { onMounted } from "vue";
+<template>
+  <div ref="gallery" class="gallery">
+    <ul ref="cardsContainer" class="cards">
+      <li
+        v-for="(image, index) in images"
+        :key="index"
+        :style="{ backgroundImage: `url(${image})` }"
+      ></li>
+    </ul>
+    <div class="actions">
+      <button ref="prevBtn" class="prev">Prev</button>
+      <button ref="nextBtn" class="next">Next</button>
+    </div>
+  </div>
+  <div ref="dragProxy" class="drag-proxy"></div>
+</template>
 
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Draggable } from "gsap/Draggable";
 
-gsap.registerPlugin(ScrollTrigger, Draggable);
+gsap.registerPlugin(Draggable);
+
+const props = defineProps({
+  images: {
+    type: Array,
+    default: () => [
+      "https://assets.codepen.io/16327/portrait-number-01.png",
+      "https://assets.codepen.io/16327/portrait-number-02.png",
+      "https://assets.codepen.io/16327/portrait-number-03.png",
+      "https://assets.codepen.io/16327/portrait-number-04.png",
+      "https://assets.codepen.io/16327/portrait-number-05.png",
+      "https://assets.codepen.io/16327/portrait-number-06.png",
+      "https://assets.codepen.io/16327/portrait-number-07.png",
+      "https://assets.codepen.io/16327/portrait-number-01.png",
+      "https://assets.codepen.io/16327/portrait-number-02.png",
+      "https://assets.codepen.io/16327/portrait-number-03.png",
+      "https://assets.codepen.io/16327/portrait-number-04.png",
+      "https://assets.codepen.io/16327/portrait-number-05.png",
+      "https://assets.codepen.io/16327/portrait-number-06.png",
+      "https://assets.codepen.io/16327/portrait-number-07.png",
+    ],
+  },
+});
+
+const gallery = ref(null);
+const cardsContainer = ref(null);
+const dragProxy = ref(null);
+const prevBtn = ref(null);
+const nextBtn = ref(null);
+
+let seamlessLoop;
+let draggableInstance;
+let currentTween = null;
+let currentOffset = 0;
+
+const spacing = 0.1;
+const snapTime = gsap.utils.snap(spacing);
+const playhead = { offset: 0 };
+
+function buildSeamlessLoop(items, spacing, animateFunc) {
+  const overlap = Math.ceil(1 / spacing);
+  const startTime = items.length * spacing + 0.5;
+  const loopTime = (items.length + overlap) * spacing + 1;
+  const rawSequence = gsap.timeline({ paused: true });
+  const seamlessLoop = gsap.timeline({
+    paused: true,
+    repeat: -1,
+    onRepeat() {
+      if (this._time === this._dur) {
+        this._tTime += this._dur - 0.01;
+      }
+    },
+  });
+
+  const l = items.length + overlap * 2;
+
+  for (let i = 0; i < l; i++) {
+    const index = i % items.length;
+    const time = i * spacing;
+    rawSequence.add(animateFunc(items[index]), time);
+    if (i <= items.length) {
+      seamlessLoop.add("label" + i, time);
+    }
+  }
+
+  rawSequence.time(startTime);
+  seamlessLoop
+    .to(rawSequence, {
+      time: loopTime,
+      duration: loopTime - startTime,
+      ease: "none",
+    })
+    .fromTo(
+      rawSequence,
+      { time: overlap * spacing + 1 },
+      {
+        time: startTime,
+        duration: startTime - (overlap * spacing + 1),
+        immediateRender: false,
+        ease: "none",
+      },
+    );
+
+  return seamlessLoop;
+}
+
+function goToOffset(offset) {
+  if (currentTween) currentTween.kill();
+  currentOffset = offset;
+
+  const snappedTime = snapTime(offset);
+  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
+
+  currentTween = gsap.to(playhead, {
+    offset: snappedTime,
+    duration: 0.5,
+    ease: "power3",
+    onUpdate() {
+      seamlessLoop.time(wrapTime(playhead.offset));
+    },
+  });
+}
 
 onMounted(() => {
-  let iteration = 0;
+  const cards = gsap.utils.toArray(cardsContainer.value.querySelectorAll("li"));
 
-  // set initial state of items
-  gsap.set(".cards li", { xPercent: 400, opacity: 0, scale: 0 });
-
-  const spacing = 0.1; // spacing of the cards (stagger)
-  const snapTime = gsap.utils.snap(spacing); // we'll use this to snapTime the playhead on the seamlessLoop
-  const cards = gsap.utils.toArray(".cards li");
-  // this function will get called for each element in the buildSeamlessLoop() function, and we just need to return an animation that'll get inserted into a master timeline, spaced
+  gsap.set(cards, { xPercent: 400, opacity: 0, scale: 0 });
 
   const animateFunc = (element) => {
     const tl = gsap.timeline();
@@ -42,170 +152,63 @@ onMounted(() => {
     return tl;
   };
 
-  const seamlessLoop = buildSeamlessLoop(cards, spacing, animateFunc);
+  seamlessLoop = buildSeamlessLoop(cards, spacing, animateFunc);
 
-  const playhead = { offset: 0 }; // a proxy object we use to simulate the playhead position, but it can go infinitely in either direction and we'll just use an onUpdate to convert it to the corresponding time on the seamlessLoop timeline.
+  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
+  seamlessLoop.time(wrapTime(0));
 
-  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration()); // feed in any offset (time) and it'll return the corresponding wrapped time (a safe value between 0 and the seamlessLoop's duration)
+  const onNext = () => {
+    currentOffset += spacing;
+    goToOffset(currentOffset);
+  };
 
-  const scrub = gsap.to(playhead, {
-    // we reuse this tween to smoothly scrub the playhead on the seamlessLoop
-    offset: 0,
-    onUpdate() {
-      seamlessLoop.time(wrapTime(playhead.offset)); // convert the offset to a "safe" corresponding time on the seamlessLoop timeline
-    },
-    duration: 0.5,
-    ease: "power3",
-    paused: true,
-  });
+  const onPrev = () => {
+    currentOffset -= spacing;
+    goToOffset(currentOffset);
+  };
 
-  const trigger = ScrollTrigger.create({
-      start: 0,
-      onUpdate(self) {
-        let scroll = self.scroll();
-        if (scroll > self.end - 1) {
-          wrap(1, 2);
-        } else if (scroll < 1 && self.direction < 0) {
-          wrap(-1, self.end - 2);
-        } else {
-          scrub.vars.offset = (iteration + self.progress) * seamlessLoop.duration();
-          scrub.invalidate().restart(); // to improve performance, we just invalidate and restart the same tween. No need for overwrites or creating a new tween on each update.
-        }
-      },
-      end: "+=3000",
-      pin: ".gallery",
-    }),
-    // converts a progress value (0-1, but could go outside those bounds when wrapping) into a "safe" scroll value that's at least 1 away from the start or end because we reserve those for sensing when the user scrolls ALL the way up or down, to wrap.
-    progressToScroll = (progress) =>
-      gsap.utils.clamp(1, trigger.end - 1, gsap.utils.wrap(0, 1, progress) * trigger.end),
-    wrap = (iterationDelta, scrollTo) => {
-      iteration += iterationDelta;
-      trigger.scroll(scrollTo);
-      trigger.update(); // by default, when we trigger.scroll(), it waits 1 tick to update().
-    };
+  nextBtn.value.addEventListener("click", onNext);
+  prevBtn.value.addEventListener("click", onPrev);
 
-  // when the user stops scrolling, snap to the closest item.
-  ScrollTrigger.addEventListener("scrollEnd", () => scrollToOffset(scrub.vars.offset));
-
-  // feed in an offset (like a time on the seamlessLoop timeline, but it can exceed 0 and duration() in either direction; it'll wrap) and it'll set the scroll position accordingly. That'll call the onUpdate() on the trigger if there's a change.
-  function scrollToOffset(offset) {
-    // moves the scroll playhead to the place that corresponds to the totalTime value of the seamlessLoop, and wraps if necessary.
-    let snappedTime = snapTime(offset),
-      progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration(),
-      scroll = progressToScroll(progress);
-    if (progress >= 1 || progress < 0) {
-      return wrap(Math.floor(progress), scroll);
-    }
-    trigger.scroll(scroll);
-  }
-
-  document
-    .querySelector(".next")
-    .addEventListener("click", () => scrollToOffset(scrub.vars.offset + spacing));
-  document
-    .querySelector(".prev")
-    .addEventListener("click", () => scrollToOffset(scrub.vars.offset - spacing));
-
-  // below is the dragging functionality (mobile-friendly too)...
-  Draggable.create(".drag-proxy", {
+  draggableInstance = Draggable.create(dragProxy.value, {
     type: "x",
-    trigger: ".cards",
+    trigger: cardsContainer.value,
     onPress() {
-      this.startOffset = scrub.vars.offset;
+      if (currentTween) currentTween.kill();
+      this.startOffset = playhead.offset;
     },
     onDrag() {
-      scrub.vars.offset = this.startOffset + (this.startX - this.x) * 0.001;
-      scrub.invalidate().restart(); // same thing as we do in the ScrollTrigger's onUpdate
+      const newOffset = this.startOffset + (this.startX - this.x) * 0.001;
+      playhead.offset = newOffset;
+      seamlessLoop.time(wrapTime(newOffset));
     },
     onDragEnd() {
-      scrollToOffset(scrub.vars.offset);
+      currentOffset = playhead.offset;
+      goToOffset(currentOffset);
     },
-  });
+  })[0];
+});
 
-  function buildSeamlessLoop(items, spacing, animateFunc) {
-    let overlap = Math.ceil(1 / spacing), // number of EXTRA animations on either side of the start/end to accommodate the seamless looping
-      startTime = items.length * spacing + 0.5, // the time on the rawSequence at which we'll start the seamless loop
-      loopTime = (items.length + overlap) * spacing + 1, // the spot at the end where we loop back to the startTime
-      rawSequence = gsap.timeline({ paused: true }), // this is where all the "real" animations live
-      seamlessLoop = gsap.timeline({
-        // this merely scrubs the playhead of the rawSequence so that it appears to seamlessly loop
-        paused: true,
-        repeat: -1, // to accommodate infinite scrolling/looping
-        onRepeat() {
-          // works around a super rare edge case bug that's fixed GSAP 3.6.1
-          this._time === this._dur && (this._tTime += this._dur - 0.01);
-        },
-      }),
-      l = items.length + overlap * 2,
-      time,
-      i,
-      index;
-
-    // now loop through and create all the animations in a staggered fashion. Remember, we must create EXTRA animations at the end to accommodate the seamless looping.
-    for (i = 0; i < l; i++) {
-      index = i % items.length;
-      time = i * spacing;
-      rawSequence.add(animateFunc(items[index]), time);
-      i <= items.length && seamlessLoop.add("label" + i, time); // we don't really need these, but if you wanted to jump to key spots using labels, here ya go.
-    }
-
-    // here's where we set up the scrubbing of the playhead to make it appear seamless.
-    rawSequence.time(startTime);
-    seamlessLoop
-      .to(rawSequence, {
-        time: loopTime,
-        duration: loopTime - startTime,
-        ease: "none",
-      })
-      .fromTo(
-        rawSequence,
-        { time: overlap * spacing + 1 },
-        {
-          time: startTime,
-          duration: startTime - (overlap * spacing + 1),
-          immediateRender: false,
-          ease: "none",
-        },
-      );
-    return seamlessLoop;
-  }
+onUnmounted(() => {
+  if (currentTween) currentTween.kill();
+  if (seamlessLoop) seamlessLoop.kill();
+  if (draggableInstance) draggableInstance.kill();
 });
 </script>
 
-<template>
-  <section>
-    <div class="gallery">
-      <ul class="cards">
-        <li class="card-01"></li>
-        <li class="card-02"></li>
-        <li class="card-03"></li>
-      </ul>
-      <div class="actions">
-        <button class="prev">Prev</button>
-        <button class="next">Next</button>
-      </div>
-    </div>
-
-    <div class="drag-proxy"></div>
-  </section>
-</template>
-
 <style scoped>
-section {
-  min-width: calc(100dvw - (100dvw - 100%));
-  min-height: 100dvh;
-  border: solid 1px red;
-  padding: 0;
-  margin: 0;
-  position: relative;
+* {
+  box-sizing: border-box;
 }
+
 .gallery {
-  position: absolute;
-  width: calc(100dvw - (100dvw - 100%));
-  height: 100dvh;
+  position: relative; /* Cambiado de absolute a relative */
+  width: 100%;
+  height: 100vh; /* Ocupa toda la altura visible */
   overflow: hidden;
-  border: solid 1px rgb(255, 235, 12);
+  background: #111; /* Fondo oscuro trasladado aquí */
 }
+
 .cards {
   position: absolute;
   width: 14rem;
@@ -213,7 +216,8 @@ section {
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border: solid 1px rgb(12, 255, 48);
+  padding: 0;
+  margin: 0;
 }
 
 .cards li {
@@ -242,27 +246,26 @@ section {
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  z-index: 10;
 }
 
-a {
-  color: #88ce02;
-  text-decoration: none;
+button {
+  cursor: pointer;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: #333;
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.2s;
 }
-a:hover {
-  text-decoration: underline;
+
+button:hover {
+  background: #555;
 }
+
 .drag-proxy {
   visibility: hidden;
   position: absolute;
-}
-
-.card-01 {
-  background-image: url(@/assets/carrusel/portrait-number-01.png);
-}
-.card-02 {
-  background-image: url(@/assets/carrusel/portrait-number-02.png);
-}
-.card-03 {
-  background-image: url(@/assets/carrusel/portrait-number-03.png);
 }
 </style>

@@ -1,91 +1,97 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import { ref, onMounted } from 'vue'
-import gsap from 'gsap'
-import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
-import Carousel from '@/modules/home/components/Carousel.vue'
-import VidaCarousel from '@/modules/home/components/VidaCarousel.vue'
-import { useGeoJson } from '@/modules/map/composables/useGeoJson'
-const { getGeoJson } = useGeoJson()
+import { RouterView, RouterLink } from "vue-router";
+import { ref, onMounted } from "vue";
+import gsap from "gsap";
+import CantidadProyectos from "../../home/components/CantidadProyectos.vue";
+import Carousel from "@/modules/home/components/Carousel.vue";
+import VidaCarousel from "@/modules/home/components/VidaCarousel.vue";
+import { useGeoJson } from "@/modules/map/composables/useGeoJson";
+const { getGeoJson } = useGeoJson();
 
-const projects = ref([])
-const loading = ref(true)
+const projects = ref([]);
+const loading = ref(true);
 
 // Configuración de los botones
 const botones = [
   {
-    to: '/fichas',
-    img: new URL('../../../assets/img/img_circle.png', import.meta.url).href,
-    label: 'Categorías',
+    to: "/fichas",
+    img: new URL("../../../assets/img/img_circle.png", import.meta.url).href,
+    label: "Categorías",
   },
   {
-    to: '/mapa',
-    img: new URL('../../../assets/img/Mexico.png', import.meta.url).href,
-    label: 'Territorio',
+    to: "/mapa",
+    img: new URL("../../../assets/img/Mexico.png", import.meta.url).href,
+    label: "Territorio",
   },
-]
+];
 
 // Efecto magnético
 const handleMouseMove = (e) => {
-  const zone = e.currentTarget // .magnetic-zone
-  const btn = zone.querySelector('.boton')
-  const text = zone.querySelector('.boton-imgtxt')
+  const zone = e.currentTarget; // .magnetic-zone
+  const btn = zone.querySelector(".boton");
+  const text = zone.querySelector(".boton-imgtxt");
 
-  if (!btn || !text) return
+  if (!btn || !text) return;
 
-  const rect = zone.getBoundingClientRect()
+  const rect = zone.getBoundingClientRect();
 
-  const x = gsap.utils.mapRange(rect.left, rect.right, -rect.width / 2, rect.width / 2, e.clientX)
+  const x = gsap.utils.mapRange(rect.left, rect.right, -rect.width / 2, rect.width / 2, e.clientX);
 
-  const y = gsap.utils.mapRange(rect.top, rect.bottom, -rect.height / 2, rect.height / 2, e.clientY)
+  const y = gsap.utils.mapRange(
+    rect.top,
+    rect.bottom,
+    -rect.height / 2,
+    rect.height / 2,
+    e.clientY,
+  );
 
   // El botón se mueve suavemente
   gsap.to(btn, {
     x: x * 0.15,
     y: y * 0.15,
     duration: 0.4,
-    ease: 'power2.out',
-  })
+    ease: "power2.out",
+  });
 
   // El texto se mueve más para "rebotar" dentro del botón
   gsap.to(text, {
     x: x * 0.15,
     y: y * 0.15,
     duration: 0.5,
-    ease: 'power2.out',
-  })
-}
+    ease: "power2.out",
+  });
+};
 
 const handleMouseLeave = (e) => {
-  const zone = e.currentTarget
-  const btn = zone.querySelector('.boton')
-  const text = zone.querySelector('.boton-imgtxt')
+  const zone = e.currentTarget;
+  const btn = zone.querySelector(".boton");
+  const text = zone.querySelector(".boton-imgtxt");
 
-  if (!btn || !text) return
+  if (!btn || !text) return;
 
   gsap.to([btn, text], {
     x: 0,
     y: 0,
     duration: 0.7,
-    ease: 'elastic.out(1, 0.4)',
+    ease: "elastic.out(1, 0.4)",
     overwrite: true,
-  })
-}
+  });
+};
 
 onMounted(async () => {
   try {
-    const res = await getGeoJson('proyectos_carrusel.json')
+    const res = await getGeoJson("proyectos_carrusel.json");
     if (res) {
-      projects.value = res
+      projects.value = res;
     } else {
-      console.warn('El JSON no es un array:', res)
+      console.warn("El JSON no es un array:", res);
     }
   } catch (error) {
-    console.error('Error cargando proyectos:', error)
+    console.error("Error cargando proyectos:", error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 </script>
 
 <template>
@@ -130,6 +136,7 @@ onMounted(async () => {
 
     <!-- Sección Proyectos -->
     <section class="proyectos-section">
+      <VidaCarousel></VidaCarousel>
       <div v-if="loading" class="loading-state">Cargando proyectos...</div>
 
       <Carousel
@@ -143,7 +150,6 @@ onMounted(async () => {
   </div>
 
   <RouterView />
-  <VidaCarousel>gola</VidaCarousel>
 </template>
 
 <style scoped>
