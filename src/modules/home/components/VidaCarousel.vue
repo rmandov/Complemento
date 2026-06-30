@@ -1,12 +1,14 @@
 <template>
   <div ref="gallery" class="gallery">
-    <ul ref="cardsContainer" class="cards">
-      <li
-        v-for="(image, index) in images"
-        :key="index"
-        :style="{ backgroundImage: `url(${image})` }"
-      ></li>
-    </ul>
+    <div ref="cardsContainer" class="cards">
+      <div v-for="(card, index) in cards" :key="index" class="card">
+        <img :src="card.image" :alt="card.title" />
+        <div class="card-content">
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.description }}</p>
+        </div>
+      </div>
+    </div>
     <div class="actions">
       <button ref="prevBtn" class="prev">Prev</button>
       <button ref="nextBtn" class="next">Next</button>
@@ -23,23 +25,79 @@ import { Draggable } from "gsap/Draggable";
 gsap.registerPlugin(Draggable);
 
 const props = defineProps({
-  images: {
+  cards: {
     type: Array,
     default: () => [
-      "https://assets.codepen.io/16327/portrait-number-01.png",
-      "https://assets.codepen.io/16327/portrait-number-02.png",
-      "https://assets.codepen.io/16327/portrait-number-03.png",
-      "https://assets.codepen.io/16327/portrait-number-04.png",
-      "https://assets.codepen.io/16327/portrait-number-05.png",
-      "https://assets.codepen.io/16327/portrait-number-06.png",
-      "https://assets.codepen.io/16327/portrait-number-07.png",
-      "https://assets.codepen.io/16327/portrait-number-01.png",
-      "https://assets.codepen.io/16327/portrait-number-02.png",
-      "https://assets.codepen.io/16327/portrait-number-03.png",
-      "https://assets.codepen.io/16327/portrait-number-04.png",
-      "https://assets.codepen.io/16327/portrait-number-05.png",
-      "https://assets.codepen.io/16327/portrait-number-06.png",
-      "https://assets.codepen.io/16327/portrait-number-07.png",
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-01.png",
+        title: "Card 01",
+        description: "Descripción de la primera tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-02.png",
+        title: "Card 02",
+        description: "Descripción de la segunda tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-03.png",
+        title: "Card 03",
+        description: "Descripción de la tercera tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-04.png",
+        title: "Card 04",
+        description: "Descripción de la cuarta tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-05.png",
+        title: "Card 05",
+        description: "Descripción de la quinta tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-06.png",
+        title: "Card 06",
+        description: "Descripción de la sexta tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-07.png",
+        title: "Card 07",
+        description: "Descripción de la séptima tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-01.png",
+        title: "Card 08",
+        description: "Descripción de la octava tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-02.png",
+        title: "Card 09",
+        description: "Descripción de la novena tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-03.png",
+        title: "Card 10",
+        description: "Descripción de la décima tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-04.png",
+        title: "Card 11",
+        description: "Descripción de la undécima tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-05.png",
+        title: "Card 12",
+        description: "Descripción de la duodécima tarjeta.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-06.png",
+        title: "Card 13",
+        description: "Descripción de la tarjeta 13.",
+      },
+      {
+        image: "https://assets.codepen.io/16327/portrait-number-07.png",
+        title: "Card 14",
+        description: "Descripción de la tarjeta 14.",
+      },
     ],
   },
 });
@@ -124,7 +182,7 @@ function goToOffset(offset) {
 }
 
 onMounted(() => {
-  const cards = gsap.utils.toArray(cardsContainer.value.querySelectorAll("li"));
+  const cards = gsap.utils.toArray(cardsContainer.value.querySelectorAll(".card"));
 
   gsap.set(cards, { xPercent: 400, opacity: 0, scale: 0 });
 
@@ -202,17 +260,17 @@ onUnmounted(() => {
 }
 
 .gallery {
-  position: relative; /* Cambiado de absolute a relative */
-  width: 100%;
-  height: 100vh; /* Ocupa toda la altura visible */
+  position: relative;
+  width: calc(100dvw - (100dvw - 100%));
+  height: 100vh;
   overflow: hidden;
-  background: #111; /* Fondo oscuro trasladado aquí */
+  background: #ffffff;
 }
 
 .cards {
   position: absolute;
-  width: 14rem;
-  height: 18rem;
+  width: 16rem;
+  height: 22rem;
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -220,21 +278,47 @@ onUnmounted(() => {
   margin: 0;
 }
 
-.cards li {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 14rem;
-  aspect-ratio: 9/16;
-  text-align: center;
-  line-height: 18rem;
-  font-size: 2rem;
+.card {
   position: absolute;
-  background-size: contain;
-  background-repeat: no-repeat;
   top: 0;
   left: 0;
+  width: 16rem;
+  height: 22rem;
   border-radius: 0.8rem;
+  overflow: hidden;
+  background: #1a1a1a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.card img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-content {
+  padding: 1rem;
+  color: #fff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.card-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #ccc;
 }
 
 .actions {
