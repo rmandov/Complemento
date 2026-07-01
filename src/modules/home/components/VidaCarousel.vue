@@ -255,10 +255,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
 .gallery {
   position: relative;
   width: calc(100dvw - (100dvw - 100%));
@@ -288,8 +284,8 @@ onUnmounted(() => {
   overflow: hidden;
   background-image: linear-gradient(
     144.02deg,
-    rgb(10, 228, 72) 7.56%,
-    rgb(171, 255, 132) 56.98% /* rgb(75, 95, 166),
+    rgb(0, 97, 255) 7.56%,
+    rgb(96, 239, 255) 56.98% /* rgb(75, 95, 166),
     rgb(131, 202, 231) */
   );
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
@@ -306,7 +302,7 @@ onUnmounted(() => {
 
 .card-content {
   padding: 1rem;
-  color: #fff;
+  color: #000000;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -323,7 +319,7 @@ onUnmounted(() => {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: #ccc;
+  color: #000000;
 }
 
 .actions {

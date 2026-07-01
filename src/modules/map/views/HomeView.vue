@@ -102,7 +102,7 @@ onMounted(async () => {
         <div class="animacion">Aquí irá una animación</div>
       </div>
       <div class="hero-texto">
-        <h1 class="hero-title">
+        <h1 class="hero-title text-4xl font-bold">
           Complementariedad y sinergia entre Programas y Proyectos de Inversión (PPI)
         </h1>
         <p class="hero-description">
@@ -136,8 +136,16 @@ onMounted(async () => {
 
     <!-- Sección Proyectos -->
     <section class="proyectos-section">
+      <h2 class="text-2xl font-bold">Proyectos estratégicos</h2>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
+        perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
+        mollitia blanditiis atque quidem aut!
+      </p>
       <VidaCarousel></VidaCarousel>
-      <div v-if="loading" class="loading-state">Cargando proyectos...</div>
+
+      <!-- Antiguo carrusel -->
+      <!-- <div v-if="loading" class="loading-state">Cargando proyectos...</div>
 
       <Carousel
         v-else-if="projects.length"
@@ -145,7 +153,7 @@ onMounted(async () => {
         :autoplay="false"
         :autoplay-speed="5000"
       />
-      <div v-else class="empty-state">No hay proyectos disponibles.</div>
+      <div v-else class="empty-state">No hay proyectos disponibles.</div> -->
     </section>
   </div>
 
