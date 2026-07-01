@@ -1,10 +1,5 @@
 <template>
-  <h2>Proyectos estratégicos</h2>
-  <p>
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
-    perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
-    mollitia blanditiis atque quidem aut!
-  </p>
+  
   <div class="carousel-wrapper">
     <!-- Botón Izquierda -->
     <button class="carousel-btn" @click="scrollLeft">
