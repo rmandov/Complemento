@@ -248,6 +248,13 @@ onMounted(async () => {
   justify-content: center;
   gap: 18px;
 }
+.boton-imgtxt{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+}
 
 .boton-contenido {
   display: flex;
