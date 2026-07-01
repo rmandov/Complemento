@@ -74,6 +74,9 @@
                 v-if="activeSubItem.children && activeSubItem.children.length"
                 class="detail-children"
               >
+
+               <!-- SE ENCUENTRA COMENTADO EL TÍTULO -->
+
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description }}</p>
                 <ul class="detail-list">
@@ -86,10 +89,13 @@
                 </ul>
               </div>
               <div v-else class="detail-empty">
+
+                <!-- SE ENCUENTRA COMENTADO EL TÍTULO  -->
+
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description || "Sección informativa." }}</p>
                 <a :href="activeSubItem.href" class="detail-cta">
-                  Ir a {{ activeSubItem.label }} →
+                  Ir a {{ activeSubItem.label }}
                 </a>
               </div>
             </template>
@@ -344,14 +350,9 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.navbar-link:hover {
+.navbar-link:hover, .navbar-link:active {
   color: #000000;
   background: rgba(180, 180, 180, 0.904);
-}
-
-.arrow {
-  font-size: 0.65rem;
-  opacity: 0.7;
 }
 
 /* =============================
@@ -405,7 +406,7 @@ onUnmounted(() => {
   width: 100%;
   max-width: 700px;
   background: rgba(255, 255, 255);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   border-radius: 0 0 12px 12px;
 }
@@ -422,7 +423,8 @@ onUnmounted(() => {
 .column-main {
   background: #f8fafc;
   padding: 1.5rem;
-  border-right: 1px solid #e2e8f0;
+  border-radius: 0 0 0 12PX;
+  /* border-right: 1px solid #e2e8f0; */
 }
 
 .column-title {
@@ -460,15 +462,15 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  color: #334155;
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
   border-radius: 12px;
   font-size: 0.95rem;
 }
 
-.submenu-link:hover {
-  color: #1e40af;
+.submenu-item.active .submenu-link {
+  font-weight: 700;
 }
 
 .sub-arrow {
@@ -488,14 +490,14 @@ onUnmounted(() => {
 .detail-placeholder {
   animation: fadeIn 0.25s ease;
 }
-
+/* Título */
 .detail-title {
   font-size: 1.25rem;
   color: #1e293b;
   margin: 0 0 0.75rem 0;
   font-weight: 700;
 }
-
+/* Descripcion */
 .detail-desc {
   color: #64748b;
   line-height: 1.6;
@@ -519,10 +521,10 @@ onUnmounted(() => {
 .detail-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: #f1f5f9;
-  color: #334155;
+  color: #000000;
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -537,33 +539,39 @@ onUnmounted(() => {
   transform: translateX(4px);
 }
 
-.detail-dot {
+/* Puntos del enlistado */
+
+/* .detail-dot {
   width: 6px;
   height: 6px;
   background: #3b82f6;
   border-radius: 50%;
   flex-shrink: 0;
-}
+} */
 
 .detail-link:hover .detail-dot {
   background: #fff;
 }
 
 .detail-cta {
-  display: inline-flex;
-  align-self: flex-start;
-  margin-top: auto;
-  padding: 0.875rem 1.5rem;
-  background: #1a365d;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  color: #000000;
   text-decoration: none;
   border-radius: 8px;
-  font-weight: 600;
-  transition: background 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.2s ease;
 }
 
 .detail-cta:hover {
   background: #3b82f6;
+  color: #fff;
+  transform: translateX(4px);
 }
 
 .detail-placeholder {
@@ -743,15 +751,12 @@ onUnmounted(() => {
    ============================= */
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
 }
 
 .slide-enter-active,
