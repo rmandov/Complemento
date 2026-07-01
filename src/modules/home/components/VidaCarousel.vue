@@ -286,8 +286,13 @@ onUnmounted(() => {
   height: 22rem;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: #1a1a1a;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background-image: linear-gradient(
+    144.02deg,
+    rgb(10, 228, 72) 7.56%,
+    rgb(171, 255, 132) 56.98% /* rgb(75, 95, 166),
+    rgb(131, 202, 231) */
+  );
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
 }
