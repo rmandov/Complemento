@@ -57,11 +57,6 @@ const handleMouseMove = (e) => {
   gsap.to(text, {
     x: x * 0.15,
     y: y * 0.15,
-<<<<<<< HEAD
-   /*  x: x * 0.55,
-    y: y * 0.55, */
-=======
->>>>>>> develop
     duration: 0.5,
     ease: "power2.out",
   });
