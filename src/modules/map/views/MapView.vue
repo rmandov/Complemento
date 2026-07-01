@@ -6,8 +6,6 @@ import 'leaflet/dist/leaflet.css'
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
-import { booleanIntersects, circle } from '@turf/turf'
-
 // Components
 import InformationClick from '../components/InformationClick.vue'
 import InformationProjects from '../components/InformationProjects.vue'
