@@ -167,16 +167,8 @@ watch(
   },
 )
 
-// --- Círculo del radar + Marker draggable ---
+// --- Círculo del radar ---
 const radarCircle = shallowRef(null)
-const dragMarker = shallowRef(null)
-
-// Icono invisible/pequeño para el centro del radar (arrastrable)
-const radarCenterIcon = L.divIcon({
-  className: 'radar-center-marker',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-})
 
 watch(center, (c) => {
   if (!map.value || !c) {
@@ -184,14 +176,9 @@ watch(center, (c) => {
       map.value?.removeLayer(radarCircle.value)
       radarCircle.value = null
     }
-    if (dragMarker.value) {
-      map.value?.removeLayer(dragMarker.value)
-      dragMarker.value = null
-    }
     return
   }
 
-  // Crear o actualizar círculo
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
@@ -203,28 +190,6 @@ watch(center, (c) => {
     }).addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
-  }
-
-  // Crear o actualizar marker draggable en el centro
-  if (!dragMarker.value) {
-    dragMarker.value = L.marker([c.lat, c.lng], {
-      icon: radarCenterIcon,
-      draggable: true,
-      zIndexOffset: 1000, // Siempre encima
-    })
-      .addTo(map.value)
-      .on('drag', (e) => {
-        const latLng = e.target.getLatLng()
-        // Actualizar círculo en tiempo real mientras arrastra
-        radarCircle.value?.setLatLng(latLng)
-      })
-      .on('dragend', (e) => {
-        const latLng = e.target.getLatLng()
-        // Actualizar el centro de búsqueda (dispara watch y searchPoints)
-        center.value = { lat: latLng.lat, lng: latLng.lng }
-      })
-  } else {
-    dragMarker.value.setLatLng([c.lat, c.lng])
   }
 })
 
@@ -355,10 +320,6 @@ onUnmounted(() => {
     map.value.removeLayer(radarCircle.value)
     radarCircle.value = null
   }
-  if (dragMarker.value && map.value) {
-    map.value.removeLayer(dragMarker.value)
-    dragMarker.value = null
-  }
 })
 </script>
 
@@ -440,27 +401,6 @@ onUnmounted(() => {
   pointer-events: none; /* Crucial para no bloquear los clics en el mapa */
   white-space: nowrap;
   transition: opacity 0.15s ease;
-}
-
-/* Marker del centro del radar - invisible pero captura eventos de drag */
-:global(.radar-center-marker) {
-  background: transparent;
-  border: none;
-}
-
-:global(.radar-center-marker::after) {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  background: #3b82f6;
-  border: 2px solid white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-  cursor: move;
 }
 
 .map-wraper {
