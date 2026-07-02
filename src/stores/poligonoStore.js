@@ -1,37 +1,37 @@
 // stores/handleLayers.js
-import { ref, shallowRef } from "vue";
-import { defineStore } from "pinia";
+import { ref, shallowRef } from 'vue'
+import { defineStore } from 'pinia'
 
-export const usePoligonoStore = defineStore("poligono", () => {
-  const entidad = shallowRef(null);
-  const municipiosLayer = shallowRef(null);
-  const isMunicipiosLayer = ref(false);
-  const municipio = shallowRef(null);
+export const usePoligonoStore = defineStore('poligono', () => {
+  const entidad = shallowRef(null)
+  const municipiosLayer = shallowRef(null)
+  const isMunicipiosLayer = ref(false)
+  const municipio = shallowRef(null)
 
   function setEntidad(newPoligono) {
-    entidad.value = newPoligono;
+    entidad.value = newPoligono
   }
 
   function setMunicipio(newPoligono) {
-    municipio.value = newPoligono;
+    municipio.value = newPoligono
   }
 
   function setMunicipiosLayer(newPoligono) {
-    municipiosLayer.value = newPoligono;
-    isMunicipiosLayer.value = true;
+    municipiosLayer.value = newPoligono
+    isMunicipiosLayer.value = true
   }
 
   function clearMunicipiosLayer() {
-    municipio.value = null;
-    municipiosLayer.value = null;
-    isMunicipiosLayer.value = false;
+    municipio.value = null
+    municipiosLayer.value = null
+    isMunicipiosLayer.value = false
   }
 
   function clear() {
-    entidad.value = null;
-    municipio.value = null;
-    municipiosLayer.value = null;
-    isMunicipiosLayer.value = false;
+    entidad.value = null
+    municipio.value = null
+    municipiosLayer.value = null
+    isMunicipiosLayer.value = false
   }
 
   return {
@@ -44,5 +44,5 @@ export const usePoligonoStore = defineStore("poligono", () => {
     setMunicipiosLayer,
     clearMunicipiosLayer,
     clear,
-  };
-});
+  }
+})
