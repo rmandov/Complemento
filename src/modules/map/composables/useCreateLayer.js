@@ -70,7 +70,7 @@ export function createLayer(poligonos_json, options = {}) {
           poligonoStore.setEntidad(null);
 
           // ** INICIO - Gestion municipios
-          if (poligonoStore.is_MLayer) {
+          if (poligonoStore.isMunicipiosLayer) {
             map.removeLayer(poligonoStore.municipiosLayer);
             poligonoStore.clearMunicipiosLayer();
           }
