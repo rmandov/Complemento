@@ -87,7 +87,7 @@
               </div>
               <div v-else class="detail-empty">
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
-                <p class="detail-desc">{{ activeSubItem.description || "Sección informativa." }}</p>
+                <p class="detail-desc">{{ activeSubItem.description || 'Sección informativa.' }}</p>
                 <a :href="activeSubItem.href" class="detail-cta">
                   Ir a {{ activeSubItem.label }} →
                 </a>
@@ -166,117 +166,117 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import menuData from "./menuData.json";
+import { ref, onMounted, onUnmounted } from 'vue'
+import menuData from './menuData.json'
 
 // ===== Props =====
 const props = defineProps({
   logoSrc: {
     type: String,
-    default: "/logo.png",
+    default: '/logo.png',
   },
   logoAlt: {
     type: String,
-    default: "Logo",
+    default: 'Logo',
   },
   logoHref: {
     type: String,
-    default: "/",
+    default: '/',
   },
   breakpoint: {
     type: Number,
     default: 768,
   },
-});
+})
 
 // ===== Estado =====
-const menuItems = ref(menuData);
-const activeItem = ref(null);
-const activeSubItem = ref(null);
-const mobileOpen = ref(false);
-const openAccordion = ref(null);
-const isMobile = ref(false);
-let closeTimeout = null;
+const menuItems = ref(menuData)
+const activeItem = ref(null)
+const activeSubItem = ref(null)
+const mobileOpen = ref(false)
+const openAccordion = ref(null)
+const isMobile = ref(false)
+let closeTimeout = null
 
 // ===== Métodos Desktop =====
 const handleMouseEnter = (item) => {
-  cancelClose();
+  cancelClose()
   if (item.children && item.children.length > 0) {
-    activeItem.value = item;
-    activeSubItem.value = item.children[0];
+    activeItem.value = item
+    activeSubItem.value = item.children[0]
   } else {
-    activeItem.value = null;
-    activeSubItem.value = null;
+    activeItem.value = null
+    activeSubItem.value = null
   }
-};
+}
 
 const handleSubMouseEnter = (sub) => {
-  activeSubItem.value = sub;
-};
+  activeSubItem.value = sub
+}
 
 const closeMenuDelayed = () => {
   closeTimeout = setTimeout(() => {
-    activeItem.value = null;
-    activeSubItem.value = null;
-  }, 200);
-};
+    activeItem.value = null
+    activeSubItem.value = null
+  }, 200)
+}
 
 const cancelClose = () => {
   if (closeTimeout) {
-    clearTimeout(closeTimeout);
-    closeTimeout = null;
+    clearTimeout(closeTimeout)
+    closeTimeout = null
   }
-};
+}
 
 // ===== Métodos Móvil =====
 const toggleMobile = () => {
-  mobileOpen.value = !mobileOpen.value;
+  mobileOpen.value = !mobileOpen.value
   if (mobileOpen.value) {
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden'
   } else {
-    document.body.style.overflow = "";
-    openAccordion.value = null;
+    document.body.style.overflow = ''
+    openAccordion.value = null
   }
-};
+}
 
 const closeMobile = () => {
-  mobileOpen.value = false;
-  document.body.style.overflow = "";
-  openAccordion.value = null;
-};
+  mobileOpen.value = false
+  document.body.style.overflow = ''
+  openAccordion.value = null
+}
 
 const toggleAccordion = (id) => {
-  openAccordion.value = openAccordion.value === id ? null : id;
-};
+  openAccordion.value = openAccordion.value === id ? null : id
+}
 
 // ===== Responsive =====
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < props.breakpoint;
+  isMobile.value = window.innerWidth < props.breakpoint
   if (!isMobile.value) {
-    closeMobile();
+    closeMobile()
   }
-};
+}
 
 const handleLogoError = (e) => {
   // Fallback: si la imagen falla, muestra texto
-  e.target.style.display = "none";
-  const fallback = document.createElement("span");
-  fallback.textContent = props.logoAlt;
-  fallback.style.color = "#fff";
-  fallback.style.fontWeight = "700";
-  fallback.style.fontSize = "1.25rem";
-  e.target.parentNode.appendChild(fallback);
-};
+  e.target.style.display = 'none'
+  const fallback = document.createElement('span')
+  fallback.textContent = props.logoAlt
+  fallback.style.color = '#fff'
+  fallback.style.fontWeight = '700'
+  fallback.style.fontSize = '1.25rem'
+  e.target.parentNode.appendChild(fallback)
+}
 
 onMounted(() => {
-  checkMobile();
-  window.addEventListener("resize", checkMobile);
-});
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
 
 onUnmounted(() => {
-  window.removeEventListener("resize", checkMobile);
-  document.body.style.overflow = "";
-});
+  window.removeEventListener('resize', checkMobile)
+  document.body.style.overflow = ''
+})
 </script>
 
 <style scoped>
@@ -286,7 +286,7 @@ onUnmounted(() => {
 .navbar {
   position: relative;
   background: #f5f5f5;
-  font-family: "NotoSans";
+  font-family: 'NotoSans';
 }
 
 .navbar-container {

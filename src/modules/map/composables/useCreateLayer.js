@@ -1,12 +1,13 @@
-import L from 'leaflet'
-import { usePoligonoStore } from '@/stores/poligono'
-import { useMapStore } from '@/stores/map'
+// src/modules/map/composables/useCreateLayer.js
+import L from "leaflet";
+import { usePoligonoStore } from "@/stores/poligonoStore";
+import { useMapStore } from "@/stores/map";
 
 // Para cargar los GeoJson
-import { useGeoJson } from '../composables/useGeoJson'
-import { useMap } from './mapControler'
+import { useGeoJson } from "../composables/useGeoJson";
+import { useMap } from "./mapControler";
 
-const { getGeoJson } = useGeoJson()
+const { getGeoJson } = useGeoJson();
 
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
@@ -24,165 +25,165 @@ const { getGeoJson } = useGeoJson()
 
 // Carga Entidades
 export function createLayer(poligonos_json, options = {}) {
-  const newEntidad = usePoligonoStore()
-  const datosEntidad = useMapStore()
-  const { flyToBounds } = useMap()
+  const poligonoStore = usePoligonoStore();
+  const datosEntidad = useMapStore();
+  const { flyToBounds } = useMap();
 
   const {
     map,
-    pane = '',
-    name = 'NOMGEO',
+    pane = "",
+    name = "NOMGEO",
     style = {
       weight: 1.2,
-      fillColor: 'rgb(251, 95, 16)',
+      fillColor: "rgb(251, 95, 16)",
       fillOpacity: 0.5,
-      color: 'white',
-      dashArray: '3',
+      color: "white",
+      dashArray: "3",
     },
-  } = options
+  } = options;
 
-  if (!poligonos_json) return
+  if (!poligonos_json) return;
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
-      const nombreEntidad = feature.properties[name] || 'nombre del poligono'
-      layer.bindTooltip(nombreEntidad)
+      const nombreEntidad = feature.properties[name] || "nombre del poligono";
+      layer.bindTooltip(nombreEntidad);
 
       // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
       layer.on({
         mouseover,
         mouseout,
-      })
+      });
 
-      layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
-        const bounds = layer.getBounds()
-        layer.setStyle(style)
+      layer.on("click", async (e) => {
+        L.DomEvent.stopPropagation(e);
+        const bounds = layer.getBounds();
+        layer.setStyle(style);
 
         // ** INICIO - Gestion de poligono clickeado **
         // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
-        if (newEntidad.EPoligono) {
+        if (poligonoStore.entidad) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.EPoligono.addTo(map)
-          newEntidad.setEPoligono(null)
+          poligonoStore.entidad.addTo(map);
+          poligonoStore.setEntidad(null);
 
           // ** INICIO - Gestion municipios
-          if (newEntidad.is_MLayer) {
-            map.removeLayer(newEntidad.municipiosLayer)
-            newEntidad.clearMLayer()
+          if (poligonoStore.is_MLayer) {
+            map.removeLayer(poligonoStore.municipiosLayer);
+            poligonoStore.clearMunicipiosLayer();
           }
           // ** FIN - Gestion municipios
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setEPoligono(layer)
-        map.removeLayer(layer)
+        poligonoStore.setEntidad(layer);
+        map.removeLayer(layer);
         // ** FIN - Gestion de poligono clickeado **
 
         // ** INICIO - Carga de muncipios de la entidad clickeada **
         // 1. Tratamiento del nombre para buscar en json
         const nombreEntidad_json = nombreEntidad
           .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replaceAll(' ', '_')
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replaceAll(" ", "_");
 
-        const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`)
+        const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`);
 
         if (muncipios) {
           const municipiosLayer = createMunicipiosLayer(muncipios, {
             map,
-            pane: 'poligonosPane',
-            name: 'NOMGEO',
-          })
+            pane: "poligonosPane",
+            name: "NOMGEO",
+          });
 
-          newEntidad.setMLayer(municipiosLayer)
-          newEntidad.municipiosLayer.addTo(map)
+          poligonoStore.setMunicipiosLayer(municipiosLayer);
+          poligonoStore.municipiosLayer.addTo(map);
         }
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
         /* map.flyToBounds(bounds); */
 
         // Cambio de título de Entidad
-        datosEntidad.setEntidad(nombreEntidad)
+        datosEntidad.setEntidad(nombreEntidad);
 
-        const claveEntidad = feature.properties['CVE_ENT'] || '69'
+        const claveEntidad = feature.properties["CVE_ENT"] || "69";
 
-        datosEntidad.setCVE_ENT(claveEntidad)
+        datosEntidad.setCVE_ENT(claveEntidad);
 
-        flyToBounds(map, bounds)
-      })
+        flyToBounds(map, bounds);
+      });
     },
-  })
+  });
 
-  return newLayer
+  return newLayer;
 }
 
 // Eventos
 function mouseover(e) {
-  const layer = e.target
-  layer.setStyle({ fillOpacity: 0.8, weight: 2 })
+  const layer = e.target;
+  layer.setStyle({ fillOpacity: 0.8, weight: 2 });
 }
 
 function mouseout(e) {
-  const layer = e.target
-  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+  const layer = e.target;
+  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
 }
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
-  const datosMunicipio = useMapStore()
-  const newEntidad = usePoligonoStore()
-  const { flyToBounds } = useMap()
+  const datosMunicipio = useMapStore();
+  const poligonoStore = usePoligonoStore();
+  const { flyToBounds } = useMap();
   const {
     map,
-    pane = '',
-    name = 'NOMGEO',
+    pane = "",
+    name = "NOMGEO",
     style = {
       weight: 1.2,
-      fillColor: 'rgb(30, 133, 248)',
+      fillColor: "rgb(30, 133, 248)",
       fillOpacity: 0.5,
-      color: 'white',
-      dashArray: '3',
+      color: "white",
+      dashArray: "3",
     },
-  } = options
+  } = options;
 
-  if (!poligonos_json) return
+  if (!poligonos_json) return;
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
-      const nombreLayer = feature.properties[name] || 'nombre del poligono'
-      layer.bindTooltip(nombreLayer)
+      const nombreLayer = feature.properties[name] || "nombre del poligono";
+      layer.bindTooltip(nombreLayer);
 
       // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
       layer.on({
         mouseover,
         mouseout,
-      })
+      });
 
-      layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
-        const bounds = layer.getBounds()
-        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-        if (newEntidad.MPoligono) {
+      layer.on("click", async (e) => {
+        L.DomEvent.stopPropagation(e);
+        const bounds = layer.getBounds();
+        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 });
+        if (poligonoStore.municipio) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.MPoligono.addTo(map)
-          newEntidad.setMPoligono(null)
+          poligonoStore.municipio.addTo(map);
+          poligonoStore.setMunicipio(null);
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setMPoligono(layer)
-        map.removeLayer(layer)
+        poligonoStore.setMunicipio(layer);
+        map.removeLayer(layer);
 
-        datosMunicipio.setMunicipio(nombreLayer)
+        datosMunicipio.setMunicipio(nombreLayer);
 
         if (map && bounds.isValid()) {
-          flyToBounds(map, bounds)
+          flyToBounds(map, bounds);
         }
-      })
+      });
     },
-  })
-  return newLayer
+  });
+  return newLayer;
 }

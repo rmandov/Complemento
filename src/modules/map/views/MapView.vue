@@ -1,4 +1,5 @@
 <script setup>
+// src/modules/map/views/MapView.vue
 import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -16,18 +17,43 @@ import RadiusControl from '../components/RadiusControl.vue'
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
 
-// Capas
-import { useMap } from '@/modules/map/composables/mapControler'
+// Composables
+import { useMap as createMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
-import { useInfoLayer } from '../composables/useInfoLayer'
-
-// Búsqueda por proximidad
 import { useMapInteractions } from '../composables/useMapInteractions.js'
-/* import { useProximitySearch } from '../composables/useProximitySearch.js' */
 
 // Stores
-import { usePoligonoStore } from '@/stores/poligono'
+import { usePoligonoStore } from '@/stores/poligonoStore.js'
 import { usePointsStore } from '@/stores/pointsStore.js'
+
+// Se inicializan valores de pinia
+const pointsProyectos = usePointsStore()
+const poligonoStore = usePoligonoStore()
+
+// INICIO useMap()
+
+// 1. Se inicializa el mapa mandando mapContainer que es un ref de un div
+/*
+initMap - crea el mapa tomando el mapContainer.
+map - es el mapa en donde podemos aplicar los layers
+resetView- retorna la vista al encuadre de todo México
+*/
+const mapContainer = ref(null)
+const { initMap, resetView, map } = createMap(mapContainer)
+
+// goBack revisa si existe alguna entidad/municipio clickeado para entonces
+// devolver el poligono eliminado
+// despues realiza el resetView()
+function goBack() {
+  if (poligonoStore.municipio || poligonoStore.entidad) {
+    map.value.removeLayer(poligonoStore.municipiosLayer)
+    poligonoStore.entidad.addTo(map.value)
+  }
+  poligonoStore.clear()
+  resetView()
+}
+
+// FIN useMap()
 
 // INICIO - Movimiento de zoom con ctrl + wheel
 
@@ -70,15 +96,9 @@ function handleWheel(event) {
 }
 // FIN - Movimiento de zoom con ctrl + wheel
 
-const pointsProyectos = usePointsStore()
 
-const newEntidad = usePoligonoStore()
 
-const mapContainer = ref(null)
 const capaProyectos = shallowRef(null)
-
-const { map, initMap, resetView } = useMap(mapContainer)
-const { infoLayer } = useInfoLayer()
 
 const radius = ref(5000) // metros
 
@@ -314,19 +334,12 @@ async function toggleProyectos() {
   }
 }
 
-function goBack() {
-  if (newEntidad.MPoligono || newEntidad.EPoligono) {
-    map.value.removeLayer(newEntidad.municipiosLayer)
-    newEntidad.EPoligono.addTo(map.value)
-  }
-  newEntidad.clear()
-  resetView()
-}
 
-// --- Montaje ---
+
+// --- MAIN ---
 onMounted(async () => {
   initMap()
-  registerClick()
+  /* registerClick() */
 
   /* infoLayer.addTo(map.value) */
 
@@ -383,7 +396,7 @@ onUnmounted(() => {
       <button class="focus-mexico shadow-lg" @click="goBack">
         <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
           <path
-            fill="rgb(251, 126, 62)"
+            fill="#afafaf"
             d="M506.752,291.992h-28.989c-0.73,0-1.457,0.157-2.126,0.448l-25.459,11.32
 		c-1.895,0.841-3.114,2.722-3.114,4.788v17.583c0,0.791-0.178,1.574-0.524,2.286l-11.805,24.394h-12.946
 		c-0.68,0-1.353,0.135-1.98,0.392l-32.463,13.28c-1.706,0.698-3.65,0.449-5.126-0.662l-9.479-7.103

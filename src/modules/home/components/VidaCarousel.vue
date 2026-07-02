@@ -18,137 +18,137 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import gsap from "gsap";
-import { Draggable } from "gsap/Draggable";
+import { ref, onMounted, onUnmounted } from 'vue'
+import gsap from 'gsap'
+import { Draggable } from 'gsap/Draggable'
 
-gsap.registerPlugin(Draggable);
+gsap.registerPlugin(Draggable)
 
 const props = defineProps({
   cards: {
     type: Array,
     default: () => [
       {
-        image: "https://assets.codepen.io/16327/portrait-number-01.png",
-        title: "Card 01",
-        description: "Descripción de la primera tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-01.png',
+        title: 'Card 01',
+        description: 'Descripción de la primera tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-02.png",
-        title: "Card 02",
-        description: "Descripción de la segunda tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-02.png',
+        title: 'Card 02',
+        description: 'Descripción de la segunda tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-03.png",
-        title: "Card 03",
-        description: "Descripción de la tercera tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-03.png',
+        title: 'Card 03',
+        description: 'Descripción de la tercera tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-04.png",
-        title: "Card 04",
-        description: "Descripción de la cuarta tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-04.png',
+        title: 'Card 04',
+        description: 'Descripción de la cuarta tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-05.png",
-        title: "Card 05",
-        description: "Descripción de la quinta tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-05.png',
+        title: 'Card 05',
+        description: 'Descripción de la quinta tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-06.png",
-        title: "Card 06",
-        description: "Descripción de la sexta tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-06.png',
+        title: 'Card 06',
+        description: 'Descripción de la sexta tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-07.png",
-        title: "Card 07",
-        description: "Descripción de la séptima tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-07.png',
+        title: 'Card 07',
+        description: 'Descripción de la séptima tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-01.png",
-        title: "Card 08",
-        description: "Descripción de la octava tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-01.png',
+        title: 'Card 08',
+        description: 'Descripción de la octava tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-02.png",
-        title: "Card 09",
-        description: "Descripción de la novena tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-02.png',
+        title: 'Card 09',
+        description: 'Descripción de la novena tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-03.png",
-        title: "Card 10",
-        description: "Descripción de la décima tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-03.png',
+        title: 'Card 10',
+        description: 'Descripción de la décima tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-04.png",
-        title: "Card 11",
-        description: "Descripción de la undécima tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-04.png',
+        title: 'Card 11',
+        description: 'Descripción de la undécima tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-05.png",
-        title: "Card 12",
-        description: "Descripción de la duodécima tarjeta.",
+        image: 'https://assets.codepen.io/16327/portrait-number-05.png',
+        title: 'Card 12',
+        description: 'Descripción de la duodécima tarjeta.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-06.png",
-        title: "Card 13",
-        description: "Descripción de la tarjeta 13.",
+        image: 'https://assets.codepen.io/16327/portrait-number-06.png',
+        title: 'Card 13',
+        description: 'Descripción de la tarjeta 13.',
       },
       {
-        image: "https://assets.codepen.io/16327/portrait-number-07.png",
-        title: "Card 14",
-        description: "Descripción de la tarjeta 14.",
+        image: 'https://assets.codepen.io/16327/portrait-number-07.png',
+        title: 'Card 14',
+        description: 'Descripción de la tarjeta 14.',
       },
     ],
   },
-});
+})
 
-const gallery = ref(null);
-const cardsContainer = ref(null);
-const dragProxy = ref(null);
-const prevBtn = ref(null);
-const nextBtn = ref(null);
+const gallery = ref(null)
+const cardsContainer = ref(null)
+const dragProxy = ref(null)
+const prevBtn = ref(null)
+const nextBtn = ref(null)
 
-let seamlessLoop;
-let draggableInstance;
-let currentTween = null;
-let currentOffset = 0;
+let seamlessLoop
+let draggableInstance
+let currentTween = null
+let currentOffset = 0
 
-const spacing = 0.1;
-const snapTime = gsap.utils.snap(spacing);
-const playhead = { offset: 0 };
+const spacing = 0.1
+const snapTime = gsap.utils.snap(spacing)
+const playhead = { offset: 0 }
 
 function buildSeamlessLoop(items, spacing, animateFunc) {
-  const overlap = Math.ceil(1 / spacing);
-  const startTime = items.length * spacing + 0.5;
-  const loopTime = (items.length + overlap) * spacing + 1;
-  const rawSequence = gsap.timeline({ paused: true });
+  const overlap = Math.ceil(1 / spacing)
+  const startTime = items.length * spacing + 0.5
+  const loopTime = (items.length + overlap) * spacing + 1
+  const rawSequence = gsap.timeline({ paused: true })
   const seamlessLoop = gsap.timeline({
     paused: true,
     repeat: -1,
     onRepeat() {
       if (this._time === this._dur) {
-        this._tTime += this._dur - 0.01;
+        this._tTime += this._dur - 0.01
       }
     },
-  });
+  })
 
-  const l = items.length + overlap * 2;
+  const l = items.length + overlap * 2
 
   for (let i = 0; i < l; i++) {
-    const index = i % items.length;
-    const time = i * spacing;
-    rawSequence.add(animateFunc(items[index]), time);
+    const index = i % items.length
+    const time = i * spacing
+    rawSequence.add(animateFunc(items[index]), time)
     if (i <= items.length) {
-      seamlessLoop.add("label" + i, time);
+      seamlessLoop.add('label' + i, time)
     }
   }
 
-  rawSequence.time(startTime);
+  rawSequence.time(startTime)
   seamlessLoop
     .to(rawSequence, {
       time: loopTime,
       duration: loopTime - startTime,
-      ease: "none",
+      ease: 'none',
     })
     .fromTo(
       rawSequence,
@@ -157,37 +157,37 @@ function buildSeamlessLoop(items, spacing, animateFunc) {
         time: startTime,
         duration: startTime - (overlap * spacing + 1),
         immediateRender: false,
-        ease: "none",
+        ease: 'none',
       },
-    );
+    )
 
-  return seamlessLoop;
+  return seamlessLoop
 }
 
 function goToOffset(offset) {
-  if (currentTween) currentTween.kill();
-  currentOffset = offset;
+  if (currentTween) currentTween.kill()
+  currentOffset = offset
 
-  const snappedTime = snapTime(offset);
-  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
+  const snappedTime = snapTime(offset)
+  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration())
 
   currentTween = gsap.to(playhead, {
     offset: snappedTime,
     duration: 0.5,
-    ease: "power3",
+    ease: 'power3',
     onUpdate() {
-      seamlessLoop.time(wrapTime(playhead.offset));
+      seamlessLoop.time(wrapTime(playhead.offset))
     },
-  });
+  })
 }
 
 onMounted(() => {
-  const cards = gsap.utils.toArray(cardsContainer.value.querySelectorAll(".card"));
+  const cards = gsap.utils.toArray(cardsContainer.value.querySelectorAll('.card'))
 
-  gsap.set(cards, { xPercent: 400, opacity: 0, scale: 0 });
+  gsap.set(cards, { xPercent: 400, opacity: 0, scale: 0 })
 
   const animateFunc = (element) => {
-    const tl = gsap.timeline();
+    const tl = gsap.timeline()
     tl.fromTo(
       element,
       { scale: 0, opacity: 0 },
@@ -198,60 +198,60 @@ onMounted(() => {
         duration: 0.5,
         yoyo: true,
         repeat: 1,
-        ease: "power1.in",
+        ease: 'power1.in',
         immediateRender: false,
       },
     ).fromTo(
       element,
       { xPercent: 400 },
-      { xPercent: -400, duration: 1, ease: "none", immediateRender: false },
+      { xPercent: -400, duration: 1, ease: 'none', immediateRender: false },
       0,
-    );
-    return tl;
-  };
+    )
+    return tl
+  }
 
-  seamlessLoop = buildSeamlessLoop(cards, spacing, animateFunc);
+  seamlessLoop = buildSeamlessLoop(cards, spacing, animateFunc)
 
-  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
-  seamlessLoop.time(wrapTime(0));
+  const wrapTime = gsap.utils.wrap(0, seamlessLoop.duration())
+  seamlessLoop.time(wrapTime(0))
 
   const onNext = () => {
-    currentOffset += spacing;
-    goToOffset(currentOffset);
-  };
+    currentOffset += spacing
+    goToOffset(currentOffset)
+  }
 
   const onPrev = () => {
-    currentOffset -= spacing;
-    goToOffset(currentOffset);
-  };
+    currentOffset -= spacing
+    goToOffset(currentOffset)
+  }
 
-  nextBtn.value.addEventListener("click", onNext);
-  prevBtn.value.addEventListener("click", onPrev);
+  nextBtn.value.addEventListener('click', onNext)
+  prevBtn.value.addEventListener('click', onPrev)
 
   draggableInstance = Draggable.create(dragProxy.value, {
-    type: "x",
+    type: 'x',
     trigger: cardsContainer.value,
     onPress() {
-      if (currentTween) currentTween.kill();
-      this.startOffset = playhead.offset;
+      if (currentTween) currentTween.kill()
+      this.startOffset = playhead.offset
     },
     onDrag() {
-      const newOffset = this.startOffset + (this.startX - this.x) * 0.001;
-      playhead.offset = newOffset;
-      seamlessLoop.time(wrapTime(newOffset));
+      const newOffset = this.startOffset + (this.startX - this.x) * 0.001
+      playhead.offset = newOffset
+      seamlessLoop.time(wrapTime(newOffset))
     },
     onDragEnd() {
-      currentOffset = playhead.offset;
-      goToOffset(currentOffset);
+      currentOffset = playhead.offset
+      goToOffset(currentOffset)
     },
-  })[0];
-});
+  })[0]
+})
 
 onUnmounted(() => {
-  if (currentTween) currentTween.kill();
-  if (seamlessLoop) seamlessLoop.kill();
-  if (draggableInstance) draggableInstance.kill();
-});
+  if (currentTween) currentTween.kill()
+  if (seamlessLoop) seamlessLoop.kill()
+  if (draggableInstance) draggableInstance.kill()
+})
 </script>
 
 <style scoped>
