@@ -3,11 +3,13 @@ import L from 'leaflet'
 import { usePoligonoStore } from '@/stores/poligonoStore'
 import { useMapStore } from '@/stores/map'
 
-// Para cargar los GeoJson
-import { useGeoJson } from '../composables/useGeoJson'
+// Cache compartido de municipios (nuevo): unifica la carga que antes
+// hacía este archivo directamente con la que ahora también dispara el
+// radar (useMunicipiosRadar.js), evitando descargas duplicadas.
+import { useMunicipiosCache } from '../composables/useMunicipiosCache'
 import { useMap } from './mapControler'
 
-const { getGeoJson } = useGeoJson()
+const { getMunicipiosByEntidad } = useMunicipiosCache()
 
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
@@ -82,14 +84,14 @@ export function createLayer(poligonos_json, options = {}) {
         // ** FIN - Gestion de poligono clickeado **
 
         // ** INICIO - Carga de muncipios de la entidad clickeada **
-        // 1. Tratamiento del nombre para buscar en json
-        const nombreEntidad_json = nombreEntidad
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replaceAll(' ', '_')
-
-        const muncipios = await getGeoJson(`municipios/${nombreEntidad_json}.json`)
+        // Se usa el cache compartido (useMunicipiosCache) en vez de pedir
+        // el archivo directamente: si el radar ya había cargado esta
+        // entidad previamente (porque su radio la tocaba), aquí se
+        // reutiliza esa respuesta sin volver a pedirla por red. La
+        // resolución del nombre de archivo (NOMGEO -> slug) ahora vive
+        // DENTRO del composable de cache (nombreEntidadASlug en
+        // geoUtils.js), como única fuente de verdad.
+        const muncipios = await getMunicipiosByEntidad(feature)
 
         if (muncipios) {
           const municipiosLayer = createMunicipiosLayer(muncipios, {
