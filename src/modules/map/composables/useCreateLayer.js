@@ -1,5 +1,6 @@
+// src/modules/map/composables/useCreateLayer.js
 import L from 'leaflet'
-import { usePoligonoStore } from '@/stores/poligono'
+import { usePoligonoStore } from '@/stores/poligonoStore'
 import { useMapStore } from '@/stores/map'
 
 // Para cargar los GeoJson
@@ -24,7 +25,7 @@ const { getGeoJson } = useGeoJson()
 
 // Carga Entidades
 export function createLayer(poligonos_json, options = {}) {
-  const newEntidad = usePoligonoStore()
+  const poligonoStore = usePoligonoStore()
   const datosEntidad = useMapStore()
   const { flyToBounds } = useMap()
 
@@ -34,7 +35,7 @@ export function createLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(251, 95, 16)',
+      fillColor: 'rgb(106, 106, 106)',
       fillOpacity: 0.5,
       color: 'white',
       dashArray: '3',
@@ -63,20 +64,20 @@ export function createLayer(poligonos_json, options = {}) {
 
         // ** INICIO - Gestion de poligono clickeado **
         // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
-        if (newEntidad.EPoligono) {
+        if (poligonoStore.entidad) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.EPoligono.addTo(map)
-          newEntidad.setEPoligono(null)
+          poligonoStore.entidad.addTo(map)
+          poligonoStore.setEntidad(null)
 
           // ** INICIO - Gestion municipios
-          if (newEntidad.is_MLayer) {
-            map.removeLayer(newEntidad.municipiosLayer)
-            newEntidad.clearMLayer()
+          if (poligonoStore.isMunicipiosLayer) {
+            map.removeLayer(poligonoStore.municipiosLayer)
+            poligonoStore.clearMunicipiosLayer()
           }
           // ** FIN - Gestion municipios
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setEPoligono(layer)
+        poligonoStore.setEntidad(layer)
         map.removeLayer(layer)
         // ** FIN - Gestion de poligono clickeado **
 
@@ -97,8 +98,8 @@ export function createLayer(poligonos_json, options = {}) {
             name: 'NOMGEO',
           })
 
-          newEntidad.setMLayer(municipiosLayer)
-          newEntidad.municipiosLayer.addTo(map)
+          poligonoStore.setMunicipiosLayer(municipiosLayer)
+          poligonoStore.municipiosLayer.addTo(map)
         }
         // ** FIN - Carga de muncipios de la entidad clickeada **
 
@@ -133,7 +134,7 @@ function mouseout(e) {
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
   const datosMunicipio = useMapStore()
-  const newEntidad = usePoligonoStore()
+  const poligonoStore = usePoligonoStore()
   const { flyToBounds } = useMap()
   const {
     map,
@@ -141,7 +142,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(30, 133, 248)',
+      fillColor: 'rgb(151, 151, 151)',
       fillOpacity: 0.5,
       color: 'white',
       dashArray: '3',
@@ -167,13 +168,13 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         L.DomEvent.stopPropagation(e)
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-        if (newEntidad.MPoligono) {
+        if (poligonoStore.municipio) {
           // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          newEntidad.MPoligono.addTo(map)
-          newEntidad.setMPoligono(null)
+          poligonoStore.municipio.addTo(map)
+          poligonoStore.setMunicipio(null)
         }
         // Se almacena poligono clickeado y se elimina del mapa
-        newEntidad.setMPoligono(layer)
+        poligonoStore.setMunicipio(layer)
         map.removeLayer(layer)
 
         datosMunicipio.setMunicipio(nombreLayer)

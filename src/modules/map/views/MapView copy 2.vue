@@ -26,7 +26,7 @@ import { useMapInteractions } from '../composables/useMapInteractions.js'
 /* import { useProximitySearch } from '../composables/useProximitySearch.js' */
 
 // Stores
-import { usePoligonoStore } from '@/stores/poligono'
+import { usePoligonoStore } from '@/stores/poligonoStore.js'
 import { usePointsStore } from '@/stores/pointsStore.js'
 
 // INICIO - Movimiento de zoom con ctrl + wheel
@@ -315,9 +315,9 @@ async function toggleProyectos() {
 }
 
 function goBack() {
-  if (newEntidad.MPoligono || newEntidad.EPoligono) {
+  if (newEntidad.municipio || newEntidad.entidad) {
     map.value.removeLayer(newEntidad.municipiosLayer)
-    newEntidad.EPoligono.addTo(map.value)
+    newEntidad.entidad.addTo(map.value)
   }
   newEntidad.clear()
   resetView()
