@@ -375,13 +375,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Map-wrapper -->
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map"></div>
-      <!-- <InformationProjects></InformationProjects> -->
 
-      <!-- Mensaje flotante de advertencia (Google Maps Style) -->
+      <!-- Tooltip de advertencia para zoom -->
       <div
         v-if="showWarning"
         class="map-scroll-tooltip"
@@ -390,8 +388,11 @@ onUnmounted(() => {
         Usa Ctrl + rueda del ratón para hacer zoom
       </div>
 
+      <!-- Control de radio -->
       <RadiusControl v-model:radius="radius" :count="radioCantidad" />
-      <InformationClick></InformationClick>
+      <!-- Panel de información al hacer clic -->
+      <InformationClick />
+      <!-- Botón para regresar a vista México -->
       <button class="focus-mexico shadow-lg" @click="goBack">
         <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
           <path fill="#afafaf" :d="MEXICO_ICON" />
@@ -399,12 +400,13 @@ onUnmounted(() => {
       </button>
     </div>
 
+    <!-- Botón para mostrar/ocultar proyectos -->
     <button class="back-button" @click="toggleProyectos">Proyectos</button>
   </div>
-  <!-- Informacion -->
-  <!-- tabla -->
+
+  <!-- Tabla de información -->
   <div>
-    <TableMap></TableMap>
+    <TableMap />
   </div>
 </template>
 
