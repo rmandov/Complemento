@@ -5,6 +5,7 @@ import { onMounted, ref } from "vue";
 export interface MenuItem {
   id: number;
   label: string;
+  texto: string;
   href: string;
   description?: string;
   children?: MenuItem[];
@@ -43,7 +44,7 @@ const enterMouse = (id: number, event: PointerEvent) => {
 const menuAbierto = ref<boolean>(false);
 const handleAbrirMenu = () => {
   menuAbierto.value = !menuAbierto.value;
-  itemActivo.value=null;
+  itemActivo.value = null;
 };
 onMounted(() => {
   obtenerNav();
@@ -86,7 +87,8 @@ onMounted(() => {
                     class="subnav-boton"
                     :class="{ 'subnav-boton-activo': itemActivo === subitem.id }"
                     @click="handleClickItem(subitem.id)"
-                    @pointerenter="(e)=>enterMouse(subitem.id,e)"
+                    @pointerenter="(e) => enterMouse(subitem.id, e)"
+                    :style="{ '--color-borde-btn': subitem.texto }"
                   >
                     <span style="flex: 1">{{ idx + 1 }}</span>
 
@@ -122,13 +124,7 @@ onMounted(() => {
               </ul>
             </nav>
           </div>
-          <a
-            v-else
-            target="_blank"
-            :href="item.href"
-            class="nav-boton"
-            >{{ item.label }}
-          </a>
+          <a v-else target="_blank" :href="item.href" class="nav-boton">{{ item.label }} </a>
         </li>
       </ul>
     </nav>
@@ -150,9 +146,10 @@ onMounted(() => {
   background-color: #fff;
   border-bottom: 1px solid #f1f5f9;
   --color-borde-activo: #1a365d;
-  --sombra-boton-nav: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1);
+  --sombra-boton-nav:none;/* 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1); */
   --sombra-boton-nav-hover: 0 2px 3px rgba(0, 0, 0, 0.15);
-  --color-borde-boton: 1px solid rgba(255, 255, 255, 0.5);
+  --color-borde-boton:  rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
 }
 .nav-contenedor {
   max-height: 0px;
@@ -172,13 +169,13 @@ onMounted(() => {
 }
 .nav-item {
   border-radius: 999px;
-  padding: 0.125rem 0.5rem;
+  padding: 0 0.5rem;
   display: flex;
   gap: 0.5rem;
 }
 .nav-item-boton {
   box-shadow: var(--sombra-boton-nav);
-  border: var(--color-borde-boton);
+  border:1px solid var(--color-borde-boton);
   border-radius: 12px;
 }
 
@@ -212,18 +209,20 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
-  border: var(--color-borde-boton);
 
   transition:
     transform 0.3s ease-in-out,
     border-radius 0.3s ease-in-out,
     box-shadow 0.3s ease-in-out,
-    border-color 0.3s ease-in-out;
+    border-color 0.3s ease-in-out,
+    border 0.3s ease-in-out;
+    border: 3px solid var(--color-borde-btn, --color-borde-boton);
 }
 
 .subnav-boton:hover,
 .subnav-boton-activo {
   transform: scale(1.1);
+  margin: 0 0.5rem;
   border-color: var(--color-borde-activo);
   box-shadow: var(--sombra-boton-nav-hover);
 }
@@ -267,9 +266,9 @@ onMounted(() => {
 .etiqueta-conenedor {
   overflow: hidden;
   white-space: nowrap;
-
-  max-width: 0;
-  opacity: 0;
+  margin-left: 0.5rem;
+  max-width: none;
+  opacity: 1;
 
   transition:
     max-width 0.3s ease-in-out,
@@ -360,14 +359,14 @@ onMounted(() => {
   align-items: center;
 
   height: 2rem;
-  padding: 0 0.5rem;
+  padding: 3px 0.5rem;
 
   border-radius: 999px;
   cursor: pointer;
 
   background: rgba(255, 255, 255, 0.3);
   box-shadow: var(--sombra-boton-nav);
-  border: var(--color-borde-boton);
+  border: 3px solid var(--color-borde-boton);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
@@ -430,6 +429,14 @@ onMounted(() => {
     left: 0;
     right: unset;
     min-width: 20rem;
+  }
+  .etiqueta-conenedor {
+    overflow: hidden;
+    white-space: nowrap;
+
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
   }
 }
 .hamburger-btn {
