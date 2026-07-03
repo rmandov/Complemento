@@ -39,5 +39,6 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 #Public
+public/data
 public/municipios
 public/PPIs
