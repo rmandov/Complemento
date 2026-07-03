@@ -25,7 +25,7 @@
         "id": 22,
         "label": "Programación",
         "href": "/",
-        "description": "Es la etapa donde se desarrollan los Programas Presupuestarios bajo la Metodología de Marco Lógico (MML), lo que resulta en la construcción de Matrices de Indicadores para Resultados (MIR).",
+        "description": "Es la etapa donde se desarrollan los Programas Presupuestarios",
         "children": []
       },
       {
@@ -39,7 +39,7 @@
         "id": 24,
         "label": "Ejercicio y Control",
         "href": "/",
-        "description": "Es la etapa donde se gastan los recursos asignados a los Programas Presupuestarios para cumplir con los objetivos por los que fueron creados (entregar un servicio, construir una obra, regular una política, etc.).",
+        "description": "Es la etapa donde se gastan los recursos asignados a los Programas Presupuestarios para cumplir con los objetivos por los que fueron creados.",
         "children": []
       },
       {
