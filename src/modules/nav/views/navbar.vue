@@ -74,6 +74,9 @@
                 v-if="activeSubItem.children && activeSubItem.children.length"
                 class="detail-children"
               >
+
+               <!-- SE ENCUENTRA COMENTADO EL TÍTULO -->
+
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description }}</p>
                 <ul class="detail-list">
@@ -86,10 +89,13 @@
                 </ul>
               </div>
               <div v-else class="detail-empty">
+
+                <!-- SE ENCUENTRA COMENTADO EL TÍTULO  -->
+
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
-                <p class="detail-desc">{{ activeSubItem.description || "Sección informativa." }}</p>
+                <p class="detail-desc">{{ activeSubItem.description || 'Sección informativa.' }}</p>
                 <a :href="activeSubItem.href" class="detail-cta">
-                  Ir a {{ activeSubItem.label }} →
+                  Ir a {{ activeSubItem.label }}
                 </a>
               </div>
             </template>
@@ -166,117 +172,117 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import menuData from "./menuData.json";
+import { ref, onMounted, onUnmounted } from 'vue'
+import menuData from './menuData.json'
 
 // ===== Props =====
 const props = defineProps({
   logoSrc: {
     type: String,
-    default: "/logo.png",
+    default: '/logo.png',
   },
   logoAlt: {
     type: String,
-    default: "Logo",
+    default: 'Logo',
   },
   logoHref: {
     type: String,
-    default: "/",
+    default: '/',
   },
   breakpoint: {
     type: Number,
     default: 768,
   },
-});
+})
 
 // ===== Estado =====
-const menuItems = ref(menuData);
-const activeItem = ref(null);
-const activeSubItem = ref(null);
-const mobileOpen = ref(false);
-const openAccordion = ref(null);
-const isMobile = ref(false);
-let closeTimeout = null;
+const menuItems = ref(menuData)
+const activeItem = ref(null)
+const activeSubItem = ref(null)
+const mobileOpen = ref(false)
+const openAccordion = ref(null)
+const isMobile = ref(false)
+let closeTimeout = null
 
 // ===== Métodos Desktop =====
 const handleMouseEnter = (item) => {
-  cancelClose();
+  cancelClose()
   if (item.children && item.children.length > 0) {
-    activeItem.value = item;
-    activeSubItem.value = item.children[0];
+    activeItem.value = item
+    activeSubItem.value = item.children[0]
   } else {
-    activeItem.value = null;
-    activeSubItem.value = null;
+    activeItem.value = null
+    activeSubItem.value = null
   }
-};
+}
 
 const handleSubMouseEnter = (sub) => {
-  activeSubItem.value = sub;
-};
+  activeSubItem.value = sub
+}
 
 const closeMenuDelayed = () => {
   closeTimeout = setTimeout(() => {
-    activeItem.value = null;
-    activeSubItem.value = null;
-  }, 200);
-};
+    activeItem.value = null
+    activeSubItem.value = null
+  }, 200)
+}
 
 const cancelClose = () => {
   if (closeTimeout) {
-    clearTimeout(closeTimeout);
-    closeTimeout = null;
+    clearTimeout(closeTimeout)
+    closeTimeout = null
   }
-};
+}
 
 // ===== Métodos Móvil =====
 const toggleMobile = () => {
-  mobileOpen.value = !mobileOpen.value;
+  mobileOpen.value = !mobileOpen.value
   if (mobileOpen.value) {
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden'
   } else {
-    document.body.style.overflow = "";
-    openAccordion.value = null;
+    document.body.style.overflow = ''
+    openAccordion.value = null
   }
-};
+}
 
 const closeMobile = () => {
-  mobileOpen.value = false;
-  document.body.style.overflow = "";
-  openAccordion.value = null;
-};
+  mobileOpen.value = false
+  document.body.style.overflow = ''
+  openAccordion.value = null
+}
 
 const toggleAccordion = (id) => {
-  openAccordion.value = openAccordion.value === id ? null : id;
-};
+  openAccordion.value = openAccordion.value === id ? null : id
+}
 
 // ===== Responsive =====
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < props.breakpoint;
+  isMobile.value = window.innerWidth < props.breakpoint
   if (!isMobile.value) {
-    closeMobile();
+    closeMobile()
   }
-};
+}
 
 const handleLogoError = (e) => {
   // Fallback: si la imagen falla, muestra texto
-  e.target.style.display = "none";
-  const fallback = document.createElement("span");
-  fallback.textContent = props.logoAlt;
-  fallback.style.color = "#fff";
-  fallback.style.fontWeight = "700";
-  fallback.style.fontSize = "1.25rem";
-  e.target.parentNode.appendChild(fallback);
-};
+  e.target.style.display = 'none'
+  const fallback = document.createElement('span')
+  fallback.textContent = props.logoAlt
+  fallback.style.color = '#fff'
+  fallback.style.fontWeight = '700'
+  fallback.style.fontSize = '1.25rem'
+  e.target.parentNode.appendChild(fallback)
+}
 
 onMounted(() => {
-  checkMobile();
-  window.addEventListener("resize", checkMobile);
-});
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
 
 onUnmounted(() => {
-  window.removeEventListener("resize", checkMobile);
-  document.body.style.overflow = "";
-});
+  window.removeEventListener('resize', checkMobile)
+  document.body.style.overflow = ''
+})
 </script>
 
 <style scoped>
@@ -286,7 +292,7 @@ onUnmounted(() => {
 .navbar {
   position: relative;
   background: #f5f5f5;
-  font-family: "NotoSans";
+  font-family: 'NotoSans';
 }
 
 .navbar-container {
@@ -344,14 +350,9 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.navbar-link:hover {
+.navbar-link:hover, .navbar-link:active {
   color: #000000;
   background: rgba(180, 180, 180, 0.904);
-}
-
-.arrow {
-  font-size: 0.65rem;
-  opacity: 0.7;
 }
 
 /* =============================
@@ -405,7 +406,7 @@ onUnmounted(() => {
   width: 100%;
   max-width: 700px;
   background: rgba(255, 255, 255);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   border-radius: 0 0 12px 12px;
 }
@@ -422,7 +423,8 @@ onUnmounted(() => {
 .column-main {
   background: #f8fafc;
   padding: 1.5rem;
-  border-right: 1px solid #e2e8f0;
+  border-radius: 0 0 0 12PX;
+  /* border-right: 1px solid #e2e8f0; */
 }
 
 .column-title {
@@ -460,15 +462,15 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  color: #334155;
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
   border-radius: 12px;
   font-size: 0.95rem;
 }
 
-.submenu-link:hover {
-  color: #1e40af;
+.submenu-item.active .submenu-link {
+  font-weight: 700;
 }
 
 .sub-arrow {
@@ -488,14 +490,14 @@ onUnmounted(() => {
 .detail-placeholder {
   animation: fadeIn 0.25s ease;
 }
-
+/* Título */
 .detail-title {
   font-size: 1.25rem;
   color: #1e293b;
   margin: 0 0 0.75rem 0;
   font-weight: 700;
 }
-
+/* Descripcion */
 .detail-desc {
   color: #64748b;
   line-height: 1.6;
@@ -519,10 +521,10 @@ onUnmounted(() => {
 .detail-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: #f1f5f9;
-  color: #334155;
+  color: #000000;
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -537,33 +539,39 @@ onUnmounted(() => {
   transform: translateX(4px);
 }
 
-.detail-dot {
+/* Puntos del enlistado */
+
+/* .detail-dot {
   width: 6px;
   height: 6px;
   background: #3b82f6;
   border-radius: 50%;
   flex-shrink: 0;
-}
+} */
 
 .detail-link:hover .detail-dot {
   background: #fff;
 }
 
 .detail-cta {
-  display: inline-flex;
-  align-self: flex-start;
-  margin-top: auto;
-  padding: 0.875rem 1.5rem;
-  background: #1a365d;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  color: #000000;
   text-decoration: none;
   border-radius: 8px;
-  font-weight: 600;
-  transition: background 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.2s ease;
 }
 
 .detail-cta:hover {
   background: #3b82f6;
+  color: #fff;
+  transform: translateX(4px);
 }
 
 .detail-placeholder {
@@ -743,15 +751,12 @@ onUnmounted(() => {
    ============================= */
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
 }
 
 .slide-enter-active,

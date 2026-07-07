@@ -24,8 +24,6 @@ const { getGeoJson } = useGeoJson()
 import { useMap as createMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useMapInteractions } from '../composables/useMapInteractions.js'
-// NUEVO: composable que calcula qué municipios toca el radar
-import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
 import { usePoligonoStore } from '@/stores/poligonoStore.js'
@@ -108,18 +106,6 @@ const radius = ref(5000) // metros
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
 
-// --- RADAR: Municipios tocados por el área del radar (NUEVO) ---
-// municipiosEnRadar: array reactivo de features de municipios que
-//   intersectan el círculo (total, parcial o por el borde).
-// cargandoMunicipios: true mientras se están descargando archivos de
-//   municipios de entidades candidatas que aún no estaban en cache.
-const {
-  municipiosEnRadar,
-  cargandoMunicipios,
-  inicializarConEntidades,
-  actualizarMunicipiosEnRadar,
-} = useMunicipiosRadar()
-
 const filteredFeatures = shallowRef([])
 let rawFeatures = []
 let spatialIndex = null
@@ -193,11 +179,6 @@ function searchPoints() {
 // Reaccionar a cambios de centro o radio
 watch([center, radius], () => {
   if (spatialIndex) searchPoints()
-
-  // NUEVO: recalcula (con debounce interno) qué municipios toca el radar.
-  // Usa lazy-loading de las entidades candidatas, así que puede tardar
-  // un poco la primera vez que el radar entra a un estado nuevo.
-  actualizarMunicipiosEnRadar(center.value, radius.value)
 })
 
 watch(
@@ -373,11 +354,6 @@ onMounted(async () => {
       name: 'NOMGEO',
     })
     EntidadesMuncipiosLayer.addTo(map.value)
-
-    // NUEVO: reutiliza el mismo entidades.json ya cargado para construir
-    // el índice de bbox que usa el radar (Fase A) — no se vuelve a pedir
-    // este archivo por red.
-    inicializarConEntidades(entidades)
   }
 
   // INICIO - Movimiento de zoom con ctrl + wheel
@@ -399,11 +375,13 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Map-wrapper -->
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map"></div>
+      <!-- <InformationProjects></InformationProjects> -->
 
-      <!-- Tooltip de advertencia para zoom -->
+      <!-- Mensaje flotante de advertencia (Google Maps Style) -->
       <div
         v-if="showWarning"
         class="map-scroll-tooltip"
@@ -412,27 +390,8 @@ onUnmounted(() => {
         Usa Ctrl + rueda del ratón para hacer zoom
       </div>
 
-      <!-- Control de radio -->
       <RadiusControl v-model:radius="radius" :count="radioCantidad" />
-
-      <!-- NUEVO: panel con el listado de municipios tocados por el radar.
-           Reemplázalo por TableMap.vue si prefieres mostrarlo ahí; el
-           dato ya está disponible en `municipiosEnRadar`. -->
-      <div v-if="cargandoMunicipios" class="municipios-radar-panel">
-        Cargando municipios del área...
-      </div>
-      <div v-else-if="municipiosEnRadar.length" class="municipios-radar-panel">
-        <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
-        <ul>
-          <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
-            {{ m.properties.NOMGEO }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Panel de información al hacer clic -->
-      <InformationClick />
-      <!-- Botón para regresar a vista México -->
+      <InformationClick></InformationClick>
       <button class="focus-mexico shadow-lg" @click="goBack">
         <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
           <path fill="#afafaf" :d="MEXICO_ICON" />
@@ -440,13 +399,12 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <!-- Botón para mostrar/ocultar proyectos -->
     <button class="back-button" @click="toggleProyectos">Proyectos</button>
   </div>
-
-  <!-- Tabla de información -->
+  <!-- Informacion -->
+  <!-- tabla -->
   <div>
-    <TableMap />
+    <TableMap></TableMap>
   </div>
 </template>
 
@@ -488,26 +446,6 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
-}
-
-/* NUEVO: panel del listado de municipios tocados por el radar */
-.municipios-radar-panel {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  max-height: 220px;
-  overflow-y: auto;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.municipios-radar-panel ul {
-  margin: 4px 0 0;
-  padding-left: 18px;
 }
 
 .map-wraper {

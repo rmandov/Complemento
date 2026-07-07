@@ -1,5 +1,4 @@
 <template>
-  
   <div class="carousel-wrapper">
     <!-- Botón Izquierda -->
     <button class="carousel-btn" @click="scrollLeft">
