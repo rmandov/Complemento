@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import Navbar from './modules/nav/views/navbar.vue'
+import Navbar from './modules/nav/views/navbar_ciclo.vue'
 import logoImg from '@/assets/img/logo.png'
 </script>
 
