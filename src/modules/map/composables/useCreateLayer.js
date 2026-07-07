@@ -40,7 +40,8 @@ export function createLayer(poligonos_json, options = {}) {
       fillColor: 'rgb(106, 106, 106)',
       fillOpacity: 0.5,
       color: 'white',
-      dashArray: '3',
+
+      /* dashArray: '3', */
     },
   } = options
 
@@ -147,7 +148,6 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
       fillColor: 'rgb(151, 151, 151)',
       fillOpacity: 0.5,
       color: 'white',
-      dashArray: '3',
     },
   } = options
 
