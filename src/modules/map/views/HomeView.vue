@@ -137,7 +137,7 @@ onMounted(async () => {
         perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
         mollitia blanditiis atque quidem aut!
       </p>
-      <VidaCarousel></VidaCarousel>
+      <!-- <VidaCarousel></VidaCarousel> -->
 
       <Carousel2></Carousel2>
 

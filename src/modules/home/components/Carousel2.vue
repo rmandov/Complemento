@@ -16,6 +16,17 @@
       </li>
     </ul>
 
+    <button class="arrow arrow-prev" @click="prev" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+    <button class="arrow arrow-next" @click="next" aria-label="Siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M9 18l6-6-6-6" />
+      </svg>
+    </button>
+
     <div class="actions">
       <button class="prev" @click="prev">Prev</button>
       <button class="next" @click="next">Next</button>
@@ -43,9 +54,8 @@ const setCardRef = (el, index) => {
 
 const spacing = 0.1;
 
-// ── Duplicar tarjetas hasta alcanzar el mínimo que exige el loop ──
 const loopCards = computed(() => {
-  const minItems = Math.ceil(1.5 / spacing) + 1; // 16 para spacing=0.1
+  const minItems = Math.ceil(1.5 / spacing) + 1;
   const items = [];
   while (items.length < minItems) {
     items.push(...cardsData);
@@ -53,12 +63,10 @@ const loopCards = computed(() => {
   return items.slice(0, Math.max(minItems, cardsData.length * 3));
 });
 
-// ── Estado del playhead ──
 const playhead = { offset: 0 };
 let iteration = 0;
 let seamlessLoop, wrapTime, snapTime;
 
-// ── Animación individual de cada tarjeta ──
 const animateFunc = (element) => {
   const tl = gsap.timeline();
   tl.fromTo(
@@ -83,7 +91,6 @@ const animateFunc = (element) => {
   return tl;
 };
 
-// ── Loop infinito ──
 const buildSeamlessLoop = (items, spacing, animateFunc) => {
   let overlap = Math.ceil(1 / spacing),
     startTime = items.length * spacing + 0.5,
@@ -138,7 +145,6 @@ const updateCarousel = (offset) => {
   seamlessLoop.time(wrapTime(offset));
 };
 
-// ── Navegación con tracking de iteración ──
 const animateToOffset = (offset) => {
   let snappedTime = snapTime(offset);
   let progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
@@ -162,24 +168,14 @@ const animateToOffset = (offset) => {
   });
 };
 
-// ── CLIC EN TARJETA: calcular ruta más corta y centrarla ──
 const goToCard = (clickedIndex) => {
   const total = loopCards.value.length;
-  
-  // Índice virtual actual (redondeado al slot más cercano)
   const currentVirtualIndex = Math.round(playhead.offset / spacing);
-  
-  // Posición relativa dentro del ciclo actual [0, total)
   const currentRelative = ((currentVirtualIndex % total) + total) % total;
-  
-  // Diferencia directa
   let diff = clickedIndex - currentRelative;
-  
-  // Buscar la ruta circular más corta (adelante o atrás)
+
   if (diff > total / 2) diff -= total;
   if (diff < -total / 2) diff += total;
-  
-  // Si ya está centrada (diff === 0), no hacer nada
   if (diff === 0) return;
 
   animateToOffset(playhead.offset + diff * spacing);
@@ -188,7 +184,6 @@ const goToCard = (clickedIndex) => {
 const next = () => animateToOffset(playhead.offset + spacing);
 const prev = () => animateToOffset(playhead.offset - spacing);
 
-// ── Inicialización ──
 const initCarousel = () => {
   gsap.set(cardElements.value, { xPercent: 400, opacity: 0, scale: 0 });
 
@@ -198,7 +193,6 @@ const initCarousel = () => {
 
   updateCarousel(0);
 
-  // Draggable horizontal
   Draggable.create(dragProxyRef.value, {
     type: "x",
     trigger: cardsRef.value,
@@ -228,9 +222,11 @@ onMounted(() => {
 .gallery {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 60vh;
   overflow: hidden;
   background: #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cards {
@@ -272,7 +268,7 @@ onMounted(() => {
   height: 55%;
   object-fit: cover;
   display: block;
-  pointer-events: none; /* evita que la imagen intercepte el clic */
+  pointer-events: none;
 }
 
 .card-content {
@@ -282,7 +278,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  pointer-events: none; /* el clic pasa al li */
+  pointer-events: none;
 }
 
 .card-content h3 {
@@ -299,6 +295,7 @@ onMounted(() => {
   line-height: 1.4;
 }
 
+/* ─── Desktop ─── */
 .actions {
   position: absolute;
   bottom: 25px;
@@ -319,14 +316,130 @@ onMounted(() => {
   color: #111;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    background 0.2s;
+  transition: transform 0.2s, background 0.2s;
 }
 
 .actions button:hover {
   transform: scale(1.05);
   background: #9be02a;
+}
+
+.arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  cursor: pointer;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: opacity 0.3s, background 0.3s;
+}
+
+.arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.arrow-prev {
+  left: 12px;
+}
+
+.arrow-next {
+  right: 12px;
+}
+
+/* ─── Tablet pequeña y móvil ─── */
+@media (max-width: 768px) {
+  .gallery {
+    height: 70vh;
+    touch-action: pan-y;
+  }
+
+  /* 
+    CLAVE DEL FIX:
+    - En lugar de width:75vw (que hace tarjetas gigantes en tablets),
+    - Usamos height:min(60vh,520px) como dimensión principal.
+    - El ancho se calcula automáticamente desde aspect-ratio:9/16.
+    - max-width:85vw evita que en landscape exótico se desborde horizontal.
+  */
+  .cards {
+    width: auto;
+    height: min(60vh, 520px);
+    max-width: 85vw;
+    aspect-ratio: 9/16;
+    top: 50%; /* centrado vertical perfecto */
+  }
+
+  .cards li {
+    width: auto;
+    height: 100%;
+    max-width: 85vw;
+    aspect-ratio: 9/16;
+    border-radius: 1rem;
+  }
+
+  .card-content h3 {
+    font-size: 1rem;
+  }
+
+  .card-content p {
+    font-size: 0.75rem;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .arrow {
+    display: flex;
+    opacity: 0.35;
+  }
+
+  .arrow:active {
+    opacity: 0.8;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .cards::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+}
+
+/* ─── Móvil muy pequeño: ajuste fino ─── */
+@media (max-width: 400px) {
+  .cards {
+    height: min(65vh, 480px);
+  }
+}
+
+/* ─── Tablets landscape / medianas ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .cards {
+    width: 12rem;
+    height: 19rem;
+  }
+
+  .cards li {
+    width: 12rem;
+  }
 }
 
 .drag-proxy {
