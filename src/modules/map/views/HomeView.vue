@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
 import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
 import Carousel from '@/modules/home/components/Carousel.vue'
+import Carousel2 from '@/modules/home/components/Carousel2.vue'
 import VidaCarousel from '@/modules/home/components/VidaCarousel.vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -137,6 +138,8 @@ onMounted(async () => {
         mollitia blanditiis atque quidem aut!
       </p>
       <VidaCarousel></VidaCarousel>
+
+      <Carousel2></Carousel2>
 
       <!-- Antiguo carrusel -->
       <!-- <div v-if="loading" class="loading-state">Cargando proyectos...</div>

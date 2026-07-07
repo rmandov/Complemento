@@ -1,0 +1,37 @@
+[
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-01.png",
+    "title": "Retrato 1sdfsf",
+    "description": "Descripción breve de la primera imagen."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-02.png",
+    "title": "Retrato 2",
+    "description": "Otra descripción para la segunda imagen."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-03.png",
+    "title": "Retrato 3",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-04.png",
+    "title": "Retrato 4",
+    "description": "Cuarta imagen con su texto."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-05.png",
+    "title": "Retrato 5",
+    "description": "Quinta imagen."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-06.png",
+    "title": "Retrato 6",
+    "description": "Sexta imagen."
+  },
+  {
+    "image": "https://assets.codepen.io/16327/portrait-number-07.png",
+    "title": "Retrato 7",
+    "description": "Séptima imagen."
+  }
+]
