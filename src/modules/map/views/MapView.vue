@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
+import gsap from 'gsap'
 
 // img
 import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js'
@@ -354,6 +355,64 @@ async function toggleProyectos() {
   }
 }
 
+// Efecto magnético
+const handleMouseMove = (e) => {
+  const btn = e.currentTarget
+  const content = btn.querySelector('.magnetic')
+
+  if (!content) return
+
+  const rect = btn.getBoundingClientRect()
+
+  // centro del botón
+  const centerX = rect.left + rect.width / 2
+  const centerY = rect.top + rect.height / 2
+
+  // distancia del mouse al centro
+  const x = e.clientX - centerX
+  const y = e.clientY - centerY
+
+  // mueve el botón un poco
+  gsap.to(btn, {
+    x: x * 0.25,
+    y: y * 0.25,
+    duration: 0.3,
+    ease: 'power2.out',
+    overwrite: true,
+  })
+
+  // mueve el contenido un poco más para el efecto "magnético"
+  gsap.to(content, {
+    x: x * 0.35,
+    y: y * 0.35,
+    duration: 0.35,
+    ease: 'power2.out',
+    overwrite: true,
+  })
+}
+
+const handleMouseLeave = (e) => {
+  const btn = e.currentTarget
+  const content = btn.querySelector('.magnetic')
+
+  gsap.to(btn, {
+    x: 0,
+    y: 0,
+    duration: 0.6,
+    ease: 'elastic.out(1, 0.4)',
+    overwrite: true,
+  })
+
+  if (content) {
+    gsap.to(content, {
+      x: 0,
+      y: 0,
+      duration: 0.6,
+      ease: 'elastic.out(1, 0.4)',
+      overwrite: true,
+    })
+  }
+}
 // --- MAIN ---
 onMounted(async () => {
   initMap()
@@ -432,16 +491,47 @@ onUnmounted(() => {
 
       <!-- Panel de información al hacer clic -->
       <InformationClick />
-      <!-- Botón para regresar a vista México -->
-      <button class="focus-mexico shadow-lg" @click="goBack">
-        <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#afafaf" :d="MEXICO_ICON" />
-        </svg>
-      </button>
-    </div>
 
-    <!-- Botón para mostrar/ocultar proyectos -->
-    <button class="back-button" @click="toggleProyectos">Proyectos</button>
+      <div class="buttons">
+  <!-- Botón para regresar a vista México -->
+  <button class="focus-mexico shadow-lg" @click="goBack"  @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave">
+    <div class="magnetic">
+      <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#afafaf" :d="MEXICO_ICON" />
+      </svg>
+    </div>
+  </button>
+
+  <!-- Botón magnético -->
+  <button
+    class="back-button shadow-lg"
+    @click="toggleProyectos"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
+  >
+    <div class="magnetic">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        fill="#005cc8"
+        viewBox="0 0 16 16"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
+        />
+        <path
+          fill-rule="evenodd"
+          d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
+        />
+      </svg>
+    </div>
+  </button>
+</div>
+
+    </div>
   </div>
 
   <!-- Tabla de información -->
@@ -554,6 +644,12 @@ onUnmounted(() => {
   aspect-ratio: 1/1;
 
   transform: scale(0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  will-change: transform;
 }
 
 .info {
@@ -568,4 +664,37 @@ onUnmounted(() => {
 :deep(.leaflet-interactive:focus) {
   outline: none;
 }
+
+
+
+.back-button {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  z-index: 1000;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 100px;
+  overflow: hidden;
+  border: none;
+
+  height: 38px;
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  will-change: transform;
+}
+
+.magnetic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
+}
+
+
 </style>

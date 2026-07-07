@@ -1,54 +1,54 @@
 <script setup lang="ts">
 //@ts-ignore
-import logoImg from "@/assets/img/logo.png";
-import { onMounted, ref } from "vue";
+import logoImg from '@/assets/img/logo.png'
+import { onMounted, ref } from 'vue'
 export interface MenuItem {
-  id: number;
-  label: string;
-  texto: string;
-  href: string;
-  description?: string;
-  children?: MenuItem[];
+  id: number
+  label: string
+  texto: string
+  href: string
+  description?: string
+  children?: MenuItem[]
 }
 
-const menu = ref<MenuItem[] | null>(null);
-const itemActivo = ref<number | null>(null);
+const menu = ref<MenuItem[] | null>(null)
+const itemActivo = ref<number | null>(null)
 //@ts-ignore
-const urlBase = import.meta.env.BASE_URL;
+const urlBase = import.meta.env.BASE_URL
 
 const obtenerNav = async () => {
   try {
-    const response = await fetch(urlBase + "nav.json");
-    menu.value = await response.json();
-    console.log(menu.value);
+    const response = await fetch(urlBase + 'nav.json')
+    menu.value = await response.json()
+    console.log(menu.value)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-};
+}
 const handleClickItem = (id: number) => {
   if (id === itemActivo.value) {
-    itemActivo.value = null;
-    return;
+    itemActivo.value = null
+    return
   }
-  itemActivo.value = id;
-};
+  itemActivo.value = id
+}
 const leaveMouse = () => {
-  itemActivo.value = null;
-};
+  itemActivo.value = null
+}
 const enterMouse = (id: number, event: PointerEvent) => {
-  if (event.pointerType !== "mouse") return;
+  if (event.pointerType !== 'mouse') return
 
-  itemActivo.value = id;
-};
+  itemActivo.value = id
+}
 
-const menuAbierto = ref<boolean>(false);
+const menuAbierto = ref<boolean>(false)
 const handleAbrirMenu = () => {
-  menuAbierto.value = !menuAbierto.value;
-  itemActivo.value = null;
-};
+  menuAbierto.value = !menuAbierto.value
+  itemActivo.value = null
+}
 onMounted(() => {
-  obtenerNav();
-});
+  obtenerNav()
+})
 </script>
 <template>
   <header class="navbar shadow-sm">
@@ -146,9 +146,9 @@ onMounted(() => {
   background-color: #fff;
   border-bottom: 1px solid #f1f5f9;
   --color-borde-activo: #1a365d;
-  --sombra-boton-nav:none;/* 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1); */
+  --sombra-boton-nav: none; /* 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1); */
   --sombra-boton-nav-hover: 0 2px 3px rgba(0, 0, 0, 0.15);
-  --color-borde-boton:  rgba(255, 255, 255, 0.5);
+  --color-borde-boton: rgba(255, 255, 255, 0.5);
   font-size: 0.8rem;
 }
 .nav-contenedor {
@@ -175,7 +175,7 @@ onMounted(() => {
 }
 .nav-item-boton {
   box-shadow: var(--sombra-boton-nav);
-  border:1px solid var(--color-borde-boton);
+  border: 1px solid var(--color-borde-boton);
   border-radius: 12px;
 }
 
@@ -209,14 +209,13 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
-
   transition:
     transform 0.3s ease-in-out,
     border-radius 0.3s ease-in-out,
     box-shadow 0.3s ease-in-out,
     border-color 0.3s ease-in-out,
     border 0.3s ease-in-out;
-    border: 3px solid var(--color-borde-btn, --color-borde-boton);
+  border: 3px solid var(--color-borde-btn, --color-borde-boton);
 }
 
 .subnav-boton:hover,
