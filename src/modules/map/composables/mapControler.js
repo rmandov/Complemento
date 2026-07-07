@@ -20,7 +20,8 @@ export function useMap(containerRef) {
 
     // Definimos el mapa y su encuadre
     map.value = L.map(containerRef.value, {
-      /* preferCanvas: true, */ minZoom: 5,
+      minZoom: 5,
+
       scrollWheelZoom: false,
       zoomControl: false,
     })
@@ -38,8 +39,21 @@ export function useMap(containerRef) {
 
     // Agregamos capa de calles
     // Esta puede eliminarse y solo usarse las geometrias que nos da el geojson
-    const calles = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    /*     const calles = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 20,
+      },
+    );
+
+    calles.addTo(map.value); */
+
+    // 1. Capa de fondo (SIN ETIQUETAS)
+    const callesFondo = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
       {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -47,6 +61,20 @@ export function useMap(containerRef) {
         maxZoom: 20,
       },
     )
+
+    // 2. Capa de etiquetas (SOLO TEXTO TRANSPARENTE) forzada en un pane superior
+    const callesLabels = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; CARTO',
+        subdomains: 'abcd',
+        minZoom: 11,
+        pane: 'markerPane',
+      },
+    )
+
+    // 3. Agrupamos ambas en una sola capa lógica para que el usuario las active juntas
+    const calles = L.layerGroup([callesFondo, callesLabels])
 
     calles.addTo(map.value)
   }

@@ -186,7 +186,7 @@ function searchPoints() {
   console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
 
   // Se resta de la cantidad el proyecto mismo
-  radioCantidad.value = filteredFeatures.value.length - 1
+  radioCantidad.value = filteredFeatures.value.length
 
   console.log(filteredFeatures.value)
 }
@@ -213,6 +213,12 @@ const radarCircle = shallowRef(null)
 const dragMarker = shallowRef(null)
 
 // Icono invisible/pequeño para el centro del radar (arrastrable)
+/* const radarCenterIcon = L.icon({
+  iconUrl:"src/assets/img/cabeza.png",
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+}) */
+
 const radarCenterIcon = L.divIcon({
   className: 'radar-center-marker',
   iconSize: [20, 20],
@@ -289,7 +295,7 @@ watch(filteredFeatures, (features) => {
     const isHighlighted = idsEnRadio.has(id)
 
     layer.setStyle({
-      radius: isHighlighted ? 8 : 4,
+      radius: isHighlighted ? 2 : 4,
       fillColor: isHighlighted ? '#3b82f6' : '#3498db',
       color: isHighlighted ? '#1d4ed8' : 'rgb(255,255,255)',
       fillOpacity: isHighlighted ? 1 : 0.7,
@@ -423,6 +429,7 @@ onMounted(async () => {
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
   map.value.createPane('proyectosPane').style.zIndex = 700
+  map.value.createPane('radarPane').style.zIndex = 900
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {
@@ -493,44 +500,52 @@ onUnmounted(() => {
       <InformationClick />
 
       <div class="buttons">
-  <!-- Botón para regresar a vista México -->
-  <button class="focus-mexico shadow-lg" @click="goBack"  @mousemove="handleMouseMove"
-    @mouseleave="handleMouseLeave">
-    <div class="magnetic">
-      <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#afafaf" :d="MEXICO_ICON" />
-      </svg>
-    </div>
-  </button>
+        <!-- Botón para regresar a vista México -->
+        <button
+          class="focus-mexico shadow-lg"
+          @click="goBack"
+          @mousemove="handleMouseMove"
+          @mouseleave="handleMouseLeave"
+        >
+          <div class="magnetic">
+            <svg
+              width="90"
+              height="90"
+              viewBox="150 -40 200 600"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path fill="#afafaf" :d="MEXICO_ICON" />
+            </svg>
+          </div>
+        </button>
 
-  <!-- Botón magnético -->
-  <button
-    class="back-button shadow-lg"
-    @click="toggleProyectos"
-    @mousemove="handleMouseMove"
-    @mouseleave="handleMouseLeave"
-  >
-    <div class="magnetic">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        fill="#005cc8"
-        viewBox="0 0 16 16"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
-        />
-        <path
-          fill-rule="evenodd"
-          d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
-        />
-      </svg>
-    </div>
-  </button>
-</div>
-
+        <!-- Botón magnético -->
+        <button
+          class="back-button shadow-lg"
+          @click="toggleProyectos"
+          @mousemove="handleMouseMove"
+          @mouseleave="handleMouseLeave"
+        >
+          <div class="magnetic">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="#005cc8"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -580,11 +595,28 @@ onUnmounted(() => {
   cursor: move;
 }
 
+/* :global(.radar-center-marker::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+
+  background-image: url('@/assets/img/cabeza.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  transform: translate(-50%, -50%);
+  cursor: move;
+} */
+
 /* NUEVO: panel del listado de municipios tocados por el radar */
 .municipios-radar-panel {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 50%;
+  right: 10px;
   z-index: 1000;
   background: white;
   padding: 8px 12px;
@@ -665,8 +697,6 @@ onUnmounted(() => {
   outline: none;
 }
 
-
-
 .back-button {
   position: absolute;
   top: 80px;
@@ -695,6 +725,4 @@ onUnmounted(() => {
   will-change: transform;
   pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
 }
-
-
 </style>
