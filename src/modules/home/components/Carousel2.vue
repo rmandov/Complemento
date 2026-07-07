@@ -4,7 +4,9 @@
       <li
         v-for="(card, index) in loopCards"
         :key="index"
-        :ref="el => setCardRef(el, index)"
+        :ref="(el) => setCardRef(el, index)"
+        @click="goToCard(index)"
+        class="card-item"
       >
         <img :src="card.image" :alt="card.title" loading="lazy" />
         <div class="card-content">
@@ -23,10 +25,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import gsap from 'gsap';
-import { Draggable } from 'gsap/Draggable';
-import cardsData from './cards.json';
+import { ref, onMounted, computed } from "vue";
+import gsap from "gsap";
+import { Draggable } from "gsap/Draggable";
+import cardsData from "./cards.json";
 
 gsap.registerPlugin(Draggable);
 
@@ -41,9 +43,7 @@ const setCardRef = (el, index) => {
 
 const spacing = 0.1;
 
-// ── CLAVE 1: duplicar tarjetas hasta alcanzar el mínimo que exige el loop ──
-// Con spacing 0.1 se necesitan ~16 elementos para que la fórmula de
-// buildSeamlessLoop no genere una duración negativa en el segundo tween.
+// ── Duplicar tarjetas hasta alcanzar el mínimo que exige el loop ──
 const loopCards = computed(() => {
   const minItems = Math.ceil(1.5 / spacing) + 1; // 16 para spacing=0.1
   const items = [];
@@ -71,19 +71,19 @@ const animateFunc = (element) => {
       duration: 0.5,
       yoyo: true,
       repeat: 1,
-      ease: 'power1.in',
+      ease: "power1.in",
       immediateRender: false,
-    }
+    },
   ).fromTo(
     element,
     { xPercent: 400 },
-    { xPercent: -400, duration: 1, ease: 'none', immediateRender: false },
-    0
+    { xPercent: -400, duration: 1, ease: "none", immediateRender: false },
+    0,
   );
   return tl;
 };
 
-// ── Loop infinito (igual al original, pero con suficientes items) ──
+// ── Loop infinito ──
 const buildSeamlessLoop = (items, spacing, animateFunc) => {
   let overlap = Math.ceil(1 / spacing),
     startTime = items.length * spacing + 0.5,
@@ -93,17 +93,25 @@ const buildSeamlessLoop = (items, spacing, animateFunc) => {
       paused: true,
       repeat: -1,
       onRepeat() {
-        this._time === this._dur && (this._tTime += this._dur - 0.01);
+        const tl = this;
+        if (tl._time === tl._dur) {
+          tl._tTime += tl._dur - 0.01;
+        }
       },
     }),
     l = items.length + overlap * 2,
-    time, i, index;
+    time,
+    i,
+    index;
 
   for (i = 0; i < l; i++) {
     index = i % items.length;
     time = i * spacing;
     rawSequence.add(animateFunc(items[index]), time);
-    i <= items.length && seamlessLoop.add('label' + i, time);
+
+    if (i <= items.length) {
+      seamlessLoop.add("label" + i, time);
+    }
   }
 
   rawSequence.time(startTime);
@@ -111,7 +119,7 @@ const buildSeamlessLoop = (items, spacing, animateFunc) => {
     .to(rawSequence, {
       time: loopTime,
       duration: loopTime - startTime,
-      ease: 'none',
+      ease: "none",
     })
     .fromTo(
       rawSequence,
@@ -120,8 +128,8 @@ const buildSeamlessLoop = (items, spacing, animateFunc) => {
         time: startTime,
         duration: startTime - (overlap * spacing + 1),
         immediateRender: false,
-        ease: 'none',
-      }
+        ease: "none",
+      },
     );
   return seamlessLoop;
 };
@@ -130,30 +138,51 @@ const updateCarousel = (offset) => {
   seamlessLoop.time(wrapTime(offset));
 };
 
-// ── CLAVE 2: navegación con tracking de iteración (sin ScrollTrigger) ──
+// ── Navegación con tracking de iteración ──
 const animateToOffset = (offset) => {
   let snappedTime = snapTime(offset);
   let progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
 
-  // Si cruzamos los límites [0, 1), ajustamos la iteración
   if (progress >= 1 || progress < 0) {
     iteration += Math.floor(progress);
   }
 
-  // Recalcular progreso con la iteración ya corregida
   let newProgress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
   let wrappedProgress = gsap.utils.wrap(0, 1, newProgress);
-  let targetOffset = seamlessLoop.duration() * iteration + wrappedProgress * seamlessLoop.duration();
+  let targetOffset =
+    seamlessLoop.duration() * iteration + wrappedProgress * seamlessLoop.duration();
 
-  // Snap final para aterrizar exactamente sobre una tarjeta
   targetOffset = snapTime(targetOffset);
 
   gsap.to(playhead, {
     offset: targetOffset,
     duration: 0.6,
-    ease: 'power3.out',
+    ease: "power3.out",
     onUpdate: () => updateCarousel(playhead.offset),
   });
+};
+
+// ── CLIC EN TARJETA: calcular ruta más corta y centrarla ──
+const goToCard = (clickedIndex) => {
+  const total = loopCards.value.length;
+  
+  // Índice virtual actual (redondeado al slot más cercano)
+  const currentVirtualIndex = Math.round(playhead.offset / spacing);
+  
+  // Posición relativa dentro del ciclo actual [0, total)
+  const currentRelative = ((currentVirtualIndex % total) + total) % total;
+  
+  // Diferencia directa
+  let diff = clickedIndex - currentRelative;
+  
+  // Buscar la ruta circular más corta (adelante o atrás)
+  if (diff > total / 2) diff -= total;
+  if (diff < -total / 2) diff += total;
+  
+  // Si ya está centrada (diff === 0), no hacer nada
+  if (diff === 0) return;
+
+  animateToOffset(playhead.offset + diff * spacing);
 };
 
 const next = () => animateToOffset(playhead.offset + spacing);
@@ -171,7 +200,7 @@ const initCarousel = () => {
 
   // Draggable horizontal
   Draggable.create(dragProxyRef.value, {
-    type: 'x',
+    type: "x",
     trigger: cardsRef.value,
     onPress() {
       this.startOffset = playhead.offset;
@@ -201,7 +230,7 @@ onMounted(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background: #111;
+  background: #ffffff;
 }
 
 .cards {
@@ -230,6 +259,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.cards li:hover {
+  box-shadow: 0 15px 40px rgba(136, 206, 2, 0.4);
 }
 
 .cards li img {
@@ -237,6 +272,7 @@ onMounted(() => {
   height: 55%;
   object-fit: cover;
   display: block;
+  pointer-events: none; /* evita que la imagen intercepte el clic */
 }
 
 .card-content {
@@ -246,6 +282,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  pointer-events: none; /* el clic pasa al li */
 }
 
 .card-content h3 {
@@ -282,7 +319,9 @@ onMounted(() => {
   color: #111;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .actions button:hover {
