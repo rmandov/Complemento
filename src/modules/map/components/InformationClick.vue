@@ -43,7 +43,7 @@ onMounted(() => {
   bottom: 15px;
   left: 15px;
 
-  z-index: 1000; /* Más alto que todo */
+  z-index: 500; /* Más alto que todo */
   pointer-events: none;
   border-radius: 10px;
   overflow: auto;
