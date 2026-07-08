@@ -1,18 +1,19 @@
 <script setup>
-import { RouterView, useRouter } from 'vue-router'
-import Navbar from './modules/nav/views/navbar_ciclo.vue'
-import logoImg from '@/assets/img/logo.png'
-import footer from './modules/footer/views/footer.vue';
-import Footer from './modules/footer/views/footer.vue';
+import { RouterView, useRouter } from "vue-router";
+import Navbar from "./modules/nav/views/navbar_ciclo.vue";
+import navbar_basic from "./modules/nav/views/navbar.vue";
+import logoImg from "@/assets/img/logo.png";
+import Footer from "./modules/footer/views/footer.vue";
 </script>
 
 <template>
-  <Navbar
+  <navbar_basic :logoSrc="logoImg"></navbar_basic>
+  <!-- <Navbar
     :logoSrc="logoImg"
     logoAlt="Logo Gobierno"
     logoHref="https://www.transparenciapresupuestaria.gob.mx/"
     :breakpoint="768"
-  ></Navbar>
+  ></Navbar> -->
   <RouterView />
   <Footer></Footer>
 </template>
