@@ -81,7 +81,12 @@ onMounted(() => {
             <div class="flex items-center">{{ item.label }}</div>
             <nav v-if="item.children" class="subnav-contenedor">
               <ul class="subnav">
-                <li v-for="(subitem, idx) in item.children" :key="subitem.id" class="subnav-item">
+                <li
+                  v-for="(subitem, idx) in item.children"
+                  :key="subitem.id"
+                  class="subnav-item"
+                  @mouseleave="leaveMouse"
+                >
                   <button
                     type="button"
                     class="subnav-boton"
@@ -104,7 +109,6 @@ onMounted(() => {
                   <div
                     class="submenu-contenedor"
                     :class="{ 'subnav-activo': itemActivo === subitem.id }"
-                    @mouseleave="leaveMouse"
                   >
                     <p v-html="subitem.description" class="submenu-descripcion"></p>
                     <ul class="detail-list" v-if="subitem.children?.length">
@@ -146,9 +150,9 @@ onMounted(() => {
   background-color: #fff;
   border-bottom: 1px solid #f1f5f9;
   --color-borde-activo: #1a365d;
-  --sombra-boton-nav:none;/* 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1); */
+  --sombra-boton-nav: none; /* 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 4px 30px rgba(255, 255, 255, 0.1); */
   --sombra-boton-nav-hover: 0 2px 3px rgba(0, 0, 0, 0.15);
-  --color-borde-boton:  rgba(255, 255, 255, 0.5);
+  --color-borde-boton: rgba(255, 255, 255, 0.5);
   font-size: 0.8rem;
 }
 .nav-contenedor {
@@ -175,7 +179,7 @@ onMounted(() => {
 }
 .nav-item-boton {
   box-shadow: var(--sombra-boton-nav);
-  border:1px solid var(--color-borde-boton);
+  border: 1px solid var(--color-borde-boton);
   border-radius: 12px;
 }
 
@@ -189,7 +193,21 @@ onMounted(() => {
 .subnav-item {
   position: relative;
   flex: 0 0 auto;
+  width: auto;
+}
+.subnav-boton.subnav-boton-activo::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+
+  /* mismo ancho que el submenú */
   width: 100%;
+
+  /* alto máximo del submenú */
+  height: 100%;
+
+  background: transparent;
 }
 
 .subnav-boton {
@@ -209,14 +227,13 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
-
   transition:
     transform 0.3s ease-in-out,
     border-radius 0.3s ease-in-out,
     box-shadow 0.3s ease-in-out,
     border-color 0.3s ease-in-out,
     border 0.3s ease-in-out;
-    border: 3px solid var(--color-borde-btn, --color-borde-boton);
+  border: 3px solid var(--color-borde-btn, --color-borde-boton);
 }
 
 .subnav-boton:hover,
@@ -232,8 +249,8 @@ onMounted(() => {
 
 .submenu-contenedor {
   position: absolute;
-  top: 2.5rem;
-  right: 0;
+  top: 0;
+  left: 100%;
   min-width: 50dvw;
   max-width: 20rem;
   max-height: 0;
@@ -427,7 +444,6 @@ onMounted(() => {
   .submenu-contenedor {
     top: calc(100% + 1rem);
     left: 0;
-    right: unset;
     min-width: 20rem;
   }
   .etiqueta-conenedor {
