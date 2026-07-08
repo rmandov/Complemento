@@ -116,9 +116,11 @@ const { center, register: registerClick, unregister: unregisterClick } = useMapI
 //   municipios de entidades candidatas que aún no estaban en cache.
 const {
   municipiosEnRadar,
+  municipiosRecortadosEnRadar,        // NUEVO
   cargandoMunicipios,
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
+  actualizarMunicipiosRecortadosEnRadar, // NUEVO
 } = useMunicipiosRadar()
 
 const filteredFeatures = shallowRef([])
@@ -195,10 +197,11 @@ function searchPoints() {
 watch([center, radius], () => {
   if (spatialIndex) searchPoints()
 
-  // NUEVO: recalcula (con debounce interno) qué municipios toca el radar.
-  // Usa lazy-loading de las entidades candidatas, así que puede tardar
-  // un poco la primera vez que el radar entra a un estado nuevo.
+  // Lista de municipios (para el panel HTML)
   actualizarMunicipiosEnRadar(center.value, radius.value)
+
+  // NUEVO: geometría recortada para pintar en el mapa
+  actualizarMunicipiosRecortadosEnRadar(center.value, radius.value)
 })
 
 watch(
@@ -211,6 +214,7 @@ watch(
 // --- Círculo del radar + Marker draggable ---
 const radarCircle = shallowRef(null)
 const dragMarker = shallowRef(null)
+const municipiosRecortadosLayer = shallowRef(null) // NUEVO: capa de intersección
 
 // Icono invisible/pequeño para el centro del radar (arrastrable)
 /* const radarCenterIcon = L.icon({
@@ -234,6 +238,11 @@ watch(center, (c) => {
     if (dragMarker.value) {
       map.value?.removeLayer(dragMarker.value)
       dragMarker.value = null
+    }
+    // NUEVO: limpiar municipios recortados cuando se desactiva el radar
+    if (municipiosRecortadosLayer.value) {
+      map.value?.removeLayer(municipiosRecortadosLayer.value)
+      municipiosRecortadosLayer.value = null
     }
     return
   }
@@ -302,6 +311,35 @@ watch(filteredFeatures, (features) => {
       weight: isHighlighted ? 2 : 1,
     })
   })
+})
+
+// NUEVO: cuando cambia el FeatureCollection recortado, lo pinta en el mapa
+watch(municipiosRecortadosEnRadar, (fc) => {
+  if (!map.value) return
+
+  // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
+  if (!fc || !fc.features?.length) return
+
+  municipiosRecortadosLayer.value = L.geoJSON(fc, {
+    pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
+    style: {
+      color: '#2563eb',      // borde azul
+      fillColor: '#60a5fa',  // relleno azul claro
+      fillOpacity: 0.35,
+      weight: 1.5,
+    },
+    onEachFeature: (feature, layer) => {
+      layer.bindPopup(`
+        <b>${feature.properties.NOMGEO}</b><br>
+        <small>${feature.properties.NOM_ENT || ''}</small>
+      `)
+    },
+  }).addTo(map.value)
 })
 
 // --- Carga de proyectos ---
@@ -460,6 +498,11 @@ onUnmounted(() => {
   if (dragMarker.value && map.value) {
     map.value.removeLayer(dragMarker.value)
     dragMarker.value = null
+  }
+  // NUEVO
+  if (municipiosRecortadosLayer.value && map.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
   }
 })
 </script>
