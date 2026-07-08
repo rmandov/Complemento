@@ -16,20 +16,24 @@ const resultados = shallowRef([])
 const cargando = ref(false)
 const error = ref('')
 
+const cantidad = 5000;
+
 // ✅ Query computada: se actualiza automáticamente cuando cambia entidadDefault
 const sqlQuery = computed(
-  () => `SELECT
+  () => `
+  SELECT
   ID_PPI_ESPACIAL,
   NOMBRE_CORTO,
   FASE_DESC,
   CASE
     WHEN POBLACION_BENEFICIADA = 0 THEN 'SIN BENEFICIO'
-    WHEN POBLACION_BENEFICIADA < 1000 THEN 'BAJO'
+    WHEN POBLACION_BENEFICIADA < ${cantidad} THEN 'BAJO'
     WHEN POBLACION_BENEFICIADA < 10000 THEN 'MEDIO'
     ELSE 'ALTO'
   END AS nivel_impacto
 FROM dataset
-WHERE ENTIDAD_FEDERATIVA_ID = '${entidadDefault.value}';`,
+WHERE ENTIDAD_FEDERATIVA_ID = '${entidadDefault.value}';
+`,
 )
 
 function toPlainObjects(arrowResult) {
