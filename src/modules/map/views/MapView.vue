@@ -254,8 +254,9 @@ watch(center, (c) => {
       color: '#3b82f6',
       fillColor: '#3b82f6',
       fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '5, 10',
+      weight: 5,
+      opacity:1
+      /* dashArray: '5, 10', */
     }).addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
