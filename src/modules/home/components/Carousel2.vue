@@ -251,7 +251,7 @@ onMounted(() => {
   left: 0;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: #1a1a1a;
+  background: #696969;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -260,7 +260,7 @@ onMounted(() => {
 }
 
 .cards li:hover {
-  box-shadow: 0 15px 40px rgba(136, 206, 2, 0.4);
+  box-shadow: 0 15px 40px rgb(63, 63, 63);
 }
 
 .cards li img {
@@ -279,6 +279,7 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
   pointer-events: none;
+  background-color: #5e5e5e;
 }
 
 .card-content h3 {
@@ -291,14 +292,14 @@ onMounted(() => {
 .card-content p {
   margin: 0;
   font-size: 0.8rem;
-  color: #aaa;
+  color: #e4e4e4;
   line-height: 1.4;
 }
 
 /* ─── Desktop ─── */
 .actions {
   position: absolute;
-  bottom: 25px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -309,11 +310,11 @@ onMounted(() => {
 }
 
 .actions button {
-  background: #88ce02;
+  background: #dddddd;
   border: none;
   padding: 0.6rem 1.4rem;
   border-radius: 2rem;
-  color: #111;
+  color: #000000;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
@@ -321,7 +322,7 @@ onMounted(() => {
 
 .actions button:hover {
   transform: scale(1.05);
-  background: #9be02a;
+  background: #aaaaaa;
 }
 
 .arrow {
