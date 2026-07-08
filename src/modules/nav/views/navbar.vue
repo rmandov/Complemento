@@ -74,8 +74,7 @@
                 v-if="activeSubItem.children && activeSubItem.children.length"
                 class="detail-children"
               >
-
-               <!-- SE ENCUENTRA COMENTADO EL TÍTULO -->
+                <!-- SE ENCUENTRA COMENTADO EL TÍTULO -->
 
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
                 <p class="detail-desc">{{ activeSubItem.description }}</p>
@@ -89,7 +88,6 @@
                 </ul>
               </div>
               <div v-else class="detail-empty">
-
                 <!-- SE ENCUENTRA COMENTADO EL TÍTULO  -->
 
                 <!-- <h4 class="detail-title">{{ activeSubItem.label }}</h4> -->
@@ -350,7 +348,8 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.navbar-link:hover, .navbar-link:active {
+.navbar-link:hover,
+.navbar-link:active {
   color: #000000;
   background: rgba(180, 180, 180, 0.904);
 }
@@ -423,7 +422,7 @@ onUnmounted(() => {
 .column-main {
   background: #f8fafc;
   padding: 1.5rem;
-  border-radius: 0 0 0 12PX;
+  border-radius: 0 0 0 12px;
   /* border-right: 1px solid #e2e8f0; */
 }
 

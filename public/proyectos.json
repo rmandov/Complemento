@@ -1,0 +1,20 @@
+{
+  "cards": [
+    {
+      "id": 1,
+      "titulo": "Proyectos y Programas",
+      "valor": 8
+    },
+    {
+      "id": 2,
+      "titulo": "Proyectos en Operación",
+      "valor": 2
+    },
+    {
+      "id": 3,
+      "titulo": "Proyectos concluidos",
+      "valor": 132
+    }
+  ],
+  "leyenda": "Información actualizada al primer trimestre de 2026"
+}

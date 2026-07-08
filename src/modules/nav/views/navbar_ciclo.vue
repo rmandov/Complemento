@@ -1,54 +1,54 @@
 <script setup lang="ts">
 //@ts-ignore
-import logoImg from "@/assets/img/logo.png";
-import { onMounted, ref } from "vue";
+import logoImg from '@/assets/img/logo.png'
+import { onMounted, ref } from 'vue'
 export interface MenuItem {
-  id: number;
-  label: string;
-  texto: string;
-  href: string;
-  description?: string;
-  children?: MenuItem[];
+  id: number
+  label: string
+  texto: string
+  href: string
+  description?: string
+  children?: MenuItem[]
 }
 
-const menu = ref<MenuItem[] | null>(null);
-const itemActivo = ref<number | null>(null);
+const menu = ref<MenuItem[] | null>(null)
+const itemActivo = ref<number | null>(null)
 //@ts-ignore
-const urlBase = import.meta.env.BASE_URL;
+const urlBase = import.meta.env.BASE_URL
 
 const obtenerNav = async () => {
   try {
-    const response = await fetch(urlBase + "nav.json");
-    menu.value = await response.json();
-    console.log(menu.value);
+    const response = await fetch(urlBase + 'nav.json')
+    menu.value = await response.json()
+    console.log(menu.value)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-};
+}
 const handleClickItem = (id: number) => {
   if (id === itemActivo.value) {
-    itemActivo.value = null;
-    return;
+    itemActivo.value = null
+    return
   }
-  itemActivo.value = id;
-};
+  itemActivo.value = id
+}
 const leaveMouse = () => {
-  itemActivo.value = null;
-};
+  itemActivo.value = null
+}
 const enterMouse = (id: number, event: PointerEvent) => {
-  if (event.pointerType !== "mouse") return;
+  if (event.pointerType !== 'mouse') return
 
-  itemActivo.value = id;
-};
+  itemActivo.value = id
+}
 
-const menuAbierto = ref<boolean>(false);
+const menuAbierto = ref<boolean>(false)
 const handleAbrirMenu = () => {
-  menuAbierto.value = !menuAbierto.value;
-  itemActivo.value = null;
-};
+  menuAbierto.value = !menuAbierto.value
+  itemActivo.value = null
+}
 onMounted(() => {
-  obtenerNav();
-});
+  obtenerNav()
+})
 </script>
 <template>
   <header class="navbar shadow-sm">

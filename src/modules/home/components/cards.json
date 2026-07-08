@@ -1,0 +1,72 @@
+[
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 1",
+    "description": "Descripción breve de la primera imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 2",
+    "description": "Otra descripción para la segunda imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 3",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 4",
+    "description": "Cuarta imagen con su texto."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 5",
+    "description": "Quinta imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 6",
+    "description": "Sexta imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 7",
+    "description": "Séptima imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 8",
+    "description": "Descripción breve de la octava imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 9",
+    "description": "Otra descripción para la novena imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 10",
+    "description": "La décima imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 11",
+    "description": "Undécimo imagen con su texto."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 12",
+    "description": "Duodécimo imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 13",
+    "description": "Treceava imagen."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 14",
+    "description": "Catorceava imagen."
+  }
+]
