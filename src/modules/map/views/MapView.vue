@@ -14,7 +14,6 @@ import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticB
 
 // Components
 import InformationClick from '../components/InformationClick.vue'
-import InformationProjects from '../components/InformationProjects.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
 
@@ -32,32 +31,12 @@ import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 // Stores
 import { usePointsStore } from '@/stores/pointsStore.js'
 
-// Se inicializan valores de pinia
+
 const pointsProyectos = usePointsStore()
 
-// INICIO useMap()
 
-// 1. Se inicializa el mapa mandando mapContainer que es un ref de un div
-/*
-initMap - crea el mapa tomando el mapContainer.
-map - es el mapa en donde podemos aplicar los layers
-resetView- retorna la vista al encuadre de todo México
-*/
 const mapContainer = ref(null)
 const { initMap, map, goBack } = createMap(mapContainer)
-
-/* function goBack() {
-  // Si existe una entidad almacenada en pinia, significa que fue clickeada esa entidad
-  // Elmina la capa de municipios que se addTo al mapa y coloca el poligono de la entidad que se guardó.
-  if (poligonoStore.entidad) {
-    map.value.removeLayer(poligonoStore.municipiosLayer)
-    poligonoStore.entidad.addTo(map.value)
-  }
-  // Limpia cualquier poligono que fuera almacenado en clicks realizados
-  poligonoStore.clear()
-  // Cambia el setView enfocando a Mexico
-  resetView()
-} */
 
 // FIN useMap()
 
