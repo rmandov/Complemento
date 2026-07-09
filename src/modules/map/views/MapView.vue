@@ -252,12 +252,12 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: '#3b82f6',
-      fillColor: '#3b82f6',
-      fillOpacity: 0.15,
+      color: 'orange', //  #3b82f6
+      fillColor: 'orange',
+      fillOpacity: 0.1,
       weight: 5,
-      opacity:1
-      /* dashArray: '5, 10', */
+      opacity: 1,
+      /* dashArray: '5, 10', */pane: 'radarPaneMain'
     }).addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
@@ -337,8 +337,8 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
     style: {
-      color: '#2563eb',      // borde azul color: '#2563eb',
-      fillColor: '#60a5fa',  // relleno azul claro
+      color: 'orange',      // borde azul color: '#2563eb',
+      fillColor: 'orange',  // relleno azul claro #60a5fa'
       fillOpacity: 0,
       weight: 1.5,
     },
@@ -472,8 +472,8 @@ onMounted(async () => {
   /* registerClick() */
 
   /* infoLayer.addTo(map.value) */
-  map.value.createPane('radarPane').style.zIndex = 600
-  map.value.createPane('radarPaneMain').style.zIndex = 700
+  map.value.createPane('radarPane').style.zIndex = 800
+  map.value.createPane('radarPaneMain').style.zIndex = 900
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
 
@@ -641,7 +641,7 @@ onUnmounted(() => {
   left: 50%;
   width: 12px;
   height: 12px;
-  background: #3b82f6;
+  background: orange; /* #3b82f6; */
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);

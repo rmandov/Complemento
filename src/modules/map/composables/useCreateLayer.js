@@ -126,7 +126,7 @@ export function createLayer(poligonos_json, options = {}) {
 // Eventos
 function mouseover(e) {
   const layer = e.target;
-  layer.setStyle({ fillOpacity: 0, weight: 2 });
+  layer.setStyle({ fillOpacity: 0.8, weight: 2 });
 }
 
 function mouseout(e) {
