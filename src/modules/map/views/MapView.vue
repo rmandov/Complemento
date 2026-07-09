@@ -48,15 +48,16 @@ resetView- retorna la vista al encuadre de todo México
 const mapContainer = ref(null)
 const { initMap, resetView, map } = createMap(mapContainer)
 
-// goBack revisa si existe alguna entidad/municipio clickeado para entonces
-// devolver el poligono eliminado
-// despues realiza el resetView()
 function goBack() {
-  if (poligonoStore.municipio || poligonoStore.entidad) {
+  // Si existe una entidad almacenada en pinia, significa que fue clickeada esa entidad
+  // Elmina la capa de municipios que se addTo al mapa y coloca el poligono de la entidad que se guardó.
+  if (poligonoStore.entidad) {
     map.value.removeLayer(poligonoStore.municipiosLayer)
     poligonoStore.entidad.addTo(map.value)
   }
+  // Limpia cualquier poligono que fuera almacenado en clicks realizados
   poligonoStore.clear()
+  // Cambia el setView enfocando a Mexico
   resetView()
 }
 
@@ -445,6 +446,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   unregisterClick()
+
   if (radarCircle.value && map.value) {
     map.value.removeLayer(radarCircle.value)
     radarCircle.value = null
