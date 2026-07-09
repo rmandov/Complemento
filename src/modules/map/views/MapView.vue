@@ -227,6 +227,7 @@ const radarCenterIcon = L.divIcon({
   className: 'radar-center-marker',
   iconSize: [20, 20],
   iconAnchor: [10, 10],
+
 })
 
 watch(center, (c) => {
@@ -268,12 +269,19 @@ watch(center, (c) => {
       icon: radarCenterIcon,
       draggable: true,
       zIndexOffset: 1000, // Siempre encima
+      pane: 'radarPaneMain'
     })
       .addTo(map.value)
       .on('drag', (e) => {
         const latLng = e.target.getLatLng()
         // Actualizar círculo en tiempo real mientras arrastra
         radarCircle.value?.setLatLng(latLng)
+
+        // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
@@ -329,17 +337,17 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
     style: {
-      color: '#2563eb',      // borde azul
+      color: '#2563eb',      // borde azul color: '#2563eb',
       fillColor: '#60a5fa',  // relleno azul claro
-      fillOpacity: 0.35,
+      fillOpacity: 0,
       weight: 1.5,
     },
-    onEachFeature: (feature, layer) => {
+   /*  onEachFeature: (feature, layer) => {
       layer.bindPopup(`
         <b>${feature.properties.NOMGEO}</b><br>
         <small>${feature.properties.NOM_ENT || ''}</small>
       `)
-    },
+    }, */
   }).addTo(map.value)
 })
 
@@ -464,11 +472,12 @@ onMounted(async () => {
   /* registerClick() */
 
   /* infoLayer.addTo(map.value) */
-  map.value.createPane('radarPane').style.zIndex = 200
+  map.value.createPane('radarPane').style.zIndex = 600
+  map.value.createPane('radarPaneMain').style.zIndex = 700
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
 
-  map.value.createPane('proyectosPane').style.zIndex = 700
+  map.value.createPane('proyectosPane').style.zIndex = 550
 
 
   const entidades = await getGeoJson('entidades.json')
