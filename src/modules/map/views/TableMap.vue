@@ -16,7 +16,7 @@ const resultados = shallowRef([])
 const cargando = ref(false)
 const error = ref('')
 
-const cantidad = 5000;
+const cantidad = 5000
 
 // ✅ Query computada: se actualiza automáticamente cuando cambia entidadDefault
 const sqlQuery = computed(

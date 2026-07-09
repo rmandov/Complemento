@@ -1,123 +1,123 @@
 // src/modules/map/composables/useMunicipiosRadar.js
-import { ref, shallowRef } from "vue";
-import * as turf from "@turf/turf";
+import { ref, shallowRef } from 'vue'
+import * as turf from '@turf/turf'
 
-import { useMunicipiosCache } from "./useMunicipiosCache";
-import { bboxSeSolapan } from "../utils/geoUtils";
+import { useMunicipiosCache } from './useMunicipiosCache'
+import { bboxSeSolapan } from '../utils/geoUtils'
 
-const { getMunicipiosByEntidad, getBboxesByEntidad } = useMunicipiosCache();
+const { getMunicipiosByEntidad, getBboxesByEntidad } = useMunicipiosCache()
 
 export function useMunicipiosRadar() {
   // Lista de municipios completos que tocan el radar (para tablas/paneles)
-  const municipiosEnRadar = shallowRef([]);
+  const municipiosEnRadar = shallowRef([])
 
   // NUEVO: FeatureCollection de municipios RECORTADOS al límite del radar (para el mapa)
-  const municipiosRecortadosEnRadar = shallowRef(null);
+  const municipiosRecortadosEnRadar = shallowRef(null)
 
-  const cargandoMunicipios = ref(false);
+  const cargandoMunicipios = ref(false)
 
-  let entidadesBboxIndex = null;
-  let ultimoToken = 0;
+  let entidadesBboxIndex = null
+  let ultimoToken = 0
 
   // Timers separados para no pisarse entre lista y capa recortada
-  let debounceTimer = null;
-  let debounceTimerRecortados = null;
+  let debounceTimer = null
+  let debounceTimerRecortados = null
 
   /* ───────────────────────────────────────────────
      INICIALIZACIÓN
      ─────────────────────────────────────────────── */
   function inicializarConEntidades(entidadesGeoJson) {
-    entidadesBboxIndex = new Map();
+    entidadesBboxIndex = new Map()
 
     if (!entidadesGeoJson?.features?.length) {
-      console.warn("useMunicipiosRadar: entidades.json vacío o inválido");
-      return;
+      console.warn('useMunicipiosRadar: entidades.json vacío o inválido')
+      return
     }
 
     for (const feature of entidadesGeoJson.features) {
-      const cveEnt = feature.properties?.CVE_ENT;
-      if (!cveEnt) continue;
+      const cveEnt = feature.properties?.CVE_ENT
+      if (!cveEnt) continue
 
       entidadesBboxIndex.set(cveEnt, {
         feature,
         bbox: turf.bbox(feature),
         nombre: feature.properties.NOMGEO,
-      });
+      })
     }
 
-    console.log(`✅ Índice de bbox de entidades listo (${entidadesBboxIndex.size})`);
+    console.log(`✅ Índice de bbox de entidades listo (${entidadesBboxIndex.size})`)
   }
 
   /* ───────────────────────────────────────────────
      FASE A (igual)
      ─────────────────────────────────────────────── */
   function obtenerEntidadesCandidatas(radarBbox) {
-    const candidatas = [];
+    const candidatas = []
     for (const [cveEnt, info] of entidadesBboxIndex.entries()) {
       if (bboxSeSolapan(radarBbox, info.bbox)) {
-        candidatas.push({ cveEnt, ...info });
+        candidatas.push({ cveEnt, ...info })
       }
     }
-    return candidatas;
+    return candidatas
   }
 
   /* ───────────────────────────────────────────────
      FASE B ORIGINAL — municipios completos que tocan el radar
      ─────────────────────────────────────────────── */
   function filtrarMunicipiosQueIntersectan(radarPolygon, radarBbox, municipiosGeoJson, cveEnt) {
-    if (!municipiosGeoJson?.features?.length) return [];
+    if (!municipiosGeoJson?.features?.length) return []
 
-    const bboxesCacheados = getBboxesByEntidad(cveEnt) || [];
-    const encontrados = [];
+    const bboxesCacheados = getBboxesByEntidad(cveEnt) || []
+    const encontrados = []
 
     municipiosGeoJson.features.forEach((municipioFeature, index) => {
-      const municipioBbox = bboxesCacheados[index] || turf.bbox(municipioFeature);
-      if (!bboxSeSolapan(radarBbox, municipioBbox)) return;
+      const municipioBbox = bboxesCacheados[index] || turf.bbox(municipioFeature)
+      if (!bboxSeSolapan(radarBbox, municipioBbox)) return
       if (turf.booleanIntersects(radarPolygon, municipioFeature)) {
-        encontrados.push(municipioFeature);
+        encontrados.push(municipioFeature)
       }
-    });
+    })
 
-    return encontrados;
+    return encontrados
   }
 
   /* ───────────────────────────────────────────────
      FASE B RECORTADA — geometría cortada al círculo del radar
      ─────────────────────────────────────────────── */
   function recortarMunicipiosAlRadar(radarPolygon, radarBbox, municipiosGeoJson, cveEnt) {
-    if (!municipiosGeoJson?.features?.length) return [];
+    if (!municipiosGeoJson?.features?.length) return []
 
-    const bboxesCacheados = getBboxesByEntidad(cveEnt) || [];
-    const recortados = [];
+    const bboxesCacheados = getBboxesByEntidad(cveEnt) || []
+    const recortados = []
 
     municipiosGeoJson.features.forEach((municipioFeature, index) => {
-      const municipioBbox = bboxesCacheados[index] || turf.bbox(municipioFeature);
+      const municipioBbox = bboxesCacheados[index] || turf.bbox(municipioFeature)
 
-      if (!bboxSeSolapan(radarBbox, municipioBbox)) return;
+      if (!bboxSeSolapan(radarBbox, municipioBbox)) return
 
       try {
-        if (!turf.booleanIntersects(radarPolygon, municipioFeature)) return;
+        if (!turf.booleanIntersects(radarPolygon, municipioFeature)) return
 
         // FIX: Turf v7+ espera un FeatureCollection, no dos argumentos
-        const recorte = turf.intersect(turf.featureCollection([municipioFeature, radarPolygon]));
+        const recorte = turf.intersect(turf.featureCollection([municipioFeature, radarPolygon]))
 
         if (recorte) {
           recorte.properties = {
             ...municipioFeature.properties,
             _radarRecortado: true,
-          };
-          recortados.push(recorte);
+          }
+          recortados.push(recorte)
         }
       } catch (err) {
         console.warn(
-          "Error recortando municipio:",
+          'Error recortando municipio:',
           municipioFeature.properties?.NOMGEO || `index-${index}`,
           err,
-        );
+        )
       }
-    });
+    })
 
-    return recortados;
+    return recortados
   }
 
   /* ───────────────────────────────────────────────
@@ -125,31 +125,31 @@ export function useMunicipiosRadar() {
      ─────────────────────────────────────────────── */
   async function calcularMunicipiosEnRadar(center, radiusMetros) {
     if (!entidadesBboxIndex) {
-      console.warn("useMunicipiosRadar: llama inicializarConEntidades() primero");
-      return;
+      console.warn('useMunicipiosRadar: llama inicializarConEntidades() primero')
+      return
     }
     if (!center || !radiusMetros) {
-      municipiosEnRadar.value = [];
-      return;
+      municipiosEnRadar.value = []
+      return
     }
 
-    const miToken = ++ultimoToken;
-    const radiusKm = radiusMetros / 1000;
+    const miToken = ++ultimoToken
+    const radiusKm = radiusMetros / 1000
 
     const radarPolygon = turf.circle([center.lng, center.lat], radiusKm, {
-      units: "kilometers",
+      units: 'kilometers',
       steps: 64,
-    });
-    const radarBbox = turf.bbox(radarPolygon);
+    })
+    const radarBbox = turf.bbox(radarPolygon)
 
-    const entidadesCandidatas = obtenerEntidadesCandidatas(radarBbox);
+    const entidadesCandidatas = obtenerEntidadesCandidatas(radarBbox)
 
     if (!entidadesCandidatas.length) {
-      municipiosEnRadar.value = [];
-      return;
+      municipiosEnRadar.value = []
+      return
     }
 
-    cargandoMunicipios.value = true;
+    cargandoMunicipios.value = true
 
     try {
       const resultadosPorEntidad = await Promise.all(
@@ -157,23 +157,23 @@ export function useMunicipiosRadar() {
           cveEnt: c.cveEnt,
           municipiosGeoJson: await getMunicipiosByEntidad(c.feature),
         })),
-      );
+      )
 
-      if (miToken !== ultimoToken) return;
+      if (miToken !== ultimoToken) return
 
-      let resultado = [];
+      let resultado = []
       for (const { cveEnt, municipiosGeoJson } of resultadosPorEntidad) {
         resultado = resultado.concat(
           filtrarMunicipiosQueIntersectan(radarPolygon, radarBbox, municipiosGeoJson, cveEnt),
-        );
+        )
       }
 
-      municipiosEnRadar.value = resultado;
-      console.log(`🏘️ Municipios tocados por el radar: ${resultado.length}`);
+      municipiosEnRadar.value = resultado
+      console.log(`🏘️ Municipios tocados por el radar: ${resultado.length}`)
     } catch (error) {
-      console.error("Error calculando municipios en radar:", error);
+      console.error('Error calculando municipios en radar:', error)
     } finally {
-      if (miToken === ultimoToken) cargandoMunicipios.value = false;
+      if (miToken === ultimoToken) cargandoMunicipios.value = false
     }
   }
 
@@ -182,32 +182,32 @@ export function useMunicipiosRadar() {
      ─────────────────────────────────────────────── */
   async function calcularMunicipiosRecortadosEnRadar(center, radiusMetros) {
     if (!entidadesBboxIndex) {
-      console.warn("useMunicipiosRadar: llama inicializarConEntidades() primero");
-      municipiosRecortadosEnRadar.value = turf.featureCollection([]);
-      return;
+      console.warn('useMunicipiosRadar: llama inicializarConEntidades() primero')
+      municipiosRecortadosEnRadar.value = turf.featureCollection([])
+      return
     }
     if (!center || !radiusMetros) {
-      municipiosRecortadosEnRadar.value = turf.featureCollection([]);
-      return;
+      municipiosRecortadosEnRadar.value = turf.featureCollection([])
+      return
     }
 
-    const miToken = ++ultimoToken;
-    const radiusKm = radiusMetros / 1000;
+    const miToken = ++ultimoToken
+    const radiusKm = radiusMetros / 1000
 
     const radarPolygon = turf.circle([center.lng, center.lat], radiusKm, {
-      units: "kilometers",
+      units: 'kilometers',
       steps: 64,
-    });
-    const radarBbox = turf.bbox(radarPolygon);
+    })
+    const radarBbox = turf.bbox(radarPolygon)
 
-    const entidadesCandidatas = obtenerEntidadesCandidatas(radarBbox);
+    const entidadesCandidatas = obtenerEntidadesCandidatas(radarBbox)
 
     if (!entidadesCandidatas.length) {
-      municipiosRecortadosEnRadar.value = turf.featureCollection([]);
-      return;
+      municipiosRecortadosEnRadar.value = turf.featureCollection([])
+      return
     }
 
-    cargandoMunicipios.value = true;
+    cargandoMunicipios.value = true
 
     try {
       const resultadosPorEntidad = await Promise.all(
@@ -215,24 +215,24 @@ export function useMunicipiosRadar() {
           cveEnt: c.cveEnt,
           municipiosGeoJson: await getMunicipiosByEntidad(c.feature),
         })),
-      );
+      )
 
-      if (miToken !== ultimoToken) return;
+      if (miToken !== ultimoToken) return
 
-      let recortados = [];
+      let recortados = []
       for (const { cveEnt, municipiosGeoJson } of resultadosPorEntidad) {
         recortados = recortados.concat(
           recortarMunicipiosAlRadar(radarPolygon, radarBbox, municipiosGeoJson, cveEnt),
-        );
+        )
       }
 
-      municipiosRecortadosEnRadar.value = turf.featureCollection(recortados);
-      console.log(`✂️ Municipios recortados al radar: ${recortados.length}`);
+      municipiosRecortadosEnRadar.value = turf.featureCollection(recortados)
+      console.log(`✂️ Municipios recortados al radar: ${recortados.length}`)
     } catch (error) {
-      console.error("Error recortando municipios al radar:", error);
-      municipiosRecortadosEnRadar.value = turf.featureCollection([]);
+      console.error('Error recortando municipios al radar:', error)
+      municipiosRecortadosEnRadar.value = turf.featureCollection([])
     } finally {
-      if (miToken === ultimoToken) cargandoMunicipios.value = false;
+      if (miToken === ultimoToken) cargandoMunicipios.value = false
     }
   }
 
@@ -240,17 +240,17 @@ export function useMunicipiosRadar() {
      DEBOUNCE (timers separados)
      ─────────────────────────────────────────────── */
   function actualizarMunicipiosEnRadar(center, radiusMetros, delay = 200) {
-    clearTimeout(debounceTimer);
+    clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
-      calcularMunicipiosEnRadar(center, radiusMetros);
-    }, delay);
+      calcularMunicipiosEnRadar(center, radiusMetros)
+    }, delay)
   }
 
   function actualizarMunicipiosRecortadosEnRadar(center, radiusMetros, delay = 200) {
-    clearTimeout(debounceTimerRecortados);
+    clearTimeout(debounceTimerRecortados)
     debounceTimerRecortados = setTimeout(() => {
-      calcularMunicipiosRecortadosEnRadar(center, radiusMetros);
-    }, delay);
+      calcularMunicipiosRecortadosEnRadar(center, radiusMetros)
+    }, delay)
   }
 
   return {
@@ -262,5 +262,5 @@ export function useMunicipiosRadar() {
     calcularMunicipiosEnRadar,
     actualizarMunicipiosRecortadosEnRadar, // NUEVO
     calcularMunicipiosRecortadosEnRadar, // NUEVO
-  };
+  }
 }

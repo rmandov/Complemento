@@ -30,12 +30,10 @@ import { useMapInteractions } from '../composables/useMapInteractions.js'
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
-import { usePoligonoStore } from '@/stores/poligonoStore.js'
 import { usePointsStore } from '@/stores/pointsStore.js'
 
 // Se inicializan valores de pinia
 const pointsProyectos = usePointsStore()
-const poligonoStore = usePoligonoStore()
 
 // INICIO useMap()
 
@@ -46,9 +44,9 @@ map - es el mapa en donde podemos aplicar los layers
 resetView- retorna la vista al encuadre de todo México
 */
 const mapContainer = ref(null)
-const { initMap, resetView, map } = createMap(mapContainer)
+const { initMap, map, goBack } = createMap(mapContainer)
 
-function goBack() {
+/* function goBack() {
   // Si existe una entidad almacenada en pinia, significa que fue clickeada esa entidad
   // Elmina la capa de municipios que se addTo al mapa y coloca el poligono de la entidad que se guardó.
   if (poligonoStore.entidad) {
@@ -59,7 +57,7 @@ function goBack() {
   poligonoStore.clear()
   // Cambia el setView enfocando a Mexico
   resetView()
-}
+} */
 
 // FIN useMap()
 
@@ -118,7 +116,7 @@ const { center, register: registerClick, unregister: unregisterClick } = useMapI
 //   municipios de entidades candidatas que aún no estaban en cache.
 const {
   municipiosEnRadar,
-  municipiosRecortadosEnRadar,        // NUEVO
+  municipiosRecortadosEnRadar, // NUEVO
   cargandoMunicipios,
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
@@ -229,7 +227,6 @@ const radarCenterIcon = L.divIcon({
   className: 'radar-center-marker',
   iconSize: [20, 20],
   iconAnchor: [10, 10],
-
 })
 
 watch(center, (c) => {
@@ -259,7 +256,7 @@ watch(center, (c) => {
       fillOpacity: 0.1,
       weight: 5,
       opacity: 1,
-      /* dashArray: '5, 10', */pane: 'radarPaneMain'
+      /* dashArray: '5, 10', */ pane: 'radarPaneMain',
     }).addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
@@ -271,7 +268,7 @@ watch(center, (c) => {
       icon: radarCenterIcon,
       draggable: true,
       zIndexOffset: 1000, // Siempre encima
-      pane: 'radarPaneMain'
+      pane: 'radarPaneMain',
     })
       .addTo(map.value)
       .on('drag', (e) => {
@@ -280,10 +277,10 @@ watch(center, (c) => {
         radarCircle.value?.setLatLng(latLng)
 
         // Limpiar capa anterior
-  if (municipiosRecortadosLayer.value) {
-    map.value.removeLayer(municipiosRecortadosLayer.value)
-    municipiosRecortadosLayer.value = null
-  }
+        if (municipiosRecortadosLayer.value) {
+          map.value.removeLayer(municipiosRecortadosLayer.value)
+          municipiosRecortadosLayer.value = null
+        }
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
@@ -339,12 +336,12 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
     style: {
-      color: 'orange',      // borde azul color: '#2563eb',
-      fillColor: 'orange',  // relleno azul claro #60a5fa'
+      color: 'orange', // borde azul color: '#2563eb',
+      fillColor: 'orange', // relleno azul claro #60a5fa'
       fillOpacity: 0,
       weight: 1.5,
     },
-   /*  onEachFeature: (feature, layer) => {
+    /*  onEachFeature: (feature, layer) => {
       layer.bindPopup(`
         <b>${feature.properties.NOMGEO}</b><br>
         <small>${feature.properties.NOM_ENT || ''}</small>
@@ -422,7 +419,6 @@ onMounted(async () => {
   map.value.createPane('entidadesPane').style.zIndex = 500
 
   map.value.createPane('proyectosPane').style.zIndex = 550
-
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {

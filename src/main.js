@@ -1,16 +1,16 @@
-import { createApp } from "vue";
-import { createPinia } from "pinia";
-import "leaflet/dist/leaflet.css";
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import 'leaflet/dist/leaflet.css'
 
 // CSS
-import "@/assets/main.css";
-import "@/assets/mapaControl.css";
+import '@/assets/main.css'
+import '@/assets/mapaControl.css'
 
-import App from "./App.vue";
-import router from "./router";
+import App from './App.vue'
+import router from './router'
 
-const app = createApp(App);
+const app = createApp(App)
 
-app.use(createPinia());
-app.use(router);
-app.mount("#app");
+app.use(createPinia())
+app.use(router)
+app.mount('#app')
