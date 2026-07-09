@@ -6,9 +6,6 @@ import L from 'leaflet'
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
-// img
-/* import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js' */
-
 // Magnetic button effect
 import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton.js'
 
@@ -17,6 +14,7 @@ import InformationClick from '../components/InformationClick.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
 import MapButtons from '../components/MapButtons.vue'
+import MapScrollTooltip from '../components/MapScrollTooltip.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -400,13 +398,7 @@ onUnmounted(() => {
       <div ref="mapContainer" class="map"></div>
 
       <!-- Tooltip de advertencia para zoom -->
-      <div
-        v-if="showWarning"
-        class="map-scroll-tooltip"
-        :style="{ left: tooltipPos.x + 'px', top: tooltipPos.y + 'px' }"
-      >
-        Usa Ctrl + rueda del ratón para hacer zoom
-      </div>
+      <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
 
       <!-- Control de radio -->
       <RadiusControl v-model:radius="radius" :count="radioCantidad" />
@@ -431,7 +423,6 @@ onUnmounted(() => {
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
       <MapButtons
-        :mexico-icon="MEXICO_ICON"
         @go-back="goBack"
         @toggle-proyectos="toggleProyectos"
         @button-mousemove="handleMouseMove"
@@ -447,24 +438,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Tooltip flotante */
-.map-scroll-tooltip {
-  position: fixed; /* Usamos fixed para que dependa directamente de clientX/clientY */
-  transform: translate(0, -50%); /* Centra el diseño verticalmente respecto al cursor */
-  background-color: rgba(236, 7, 7, 0.9);
-  color: #ffffff;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-family: sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  z-index: 9999; /* Máxima prioridad sobre controles e iconos de Leaflet */
-  pointer-events: none; /* Crucial para no bloquear los clics en el mapa */
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
 /* Marker del centro del radar - invisible pero captura eventos de drag */
 :global(.radar-center-marker) {
   background: transparent;
