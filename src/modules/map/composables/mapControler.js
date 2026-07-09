@@ -151,7 +151,7 @@ export function useMap(containerRef) {
       clearTimeout(warningTimeout)
       warningTimeout = setTimeout(() => {
         showWarning.value = false
-      }, 1500)
+      }, 800)
     }
   }
   // FIN - Movimiento de zoom con ctrl + wheel
