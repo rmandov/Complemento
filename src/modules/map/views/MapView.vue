@@ -364,10 +364,6 @@ onMounted(async () => {
     // este archivo por red.
     inicializarConEntidades(entidades)
   }
-
-  // INICIO - Movimiento de zoom con ctrl + wheel
-  mapContainer.value.addEventListener('wheel', handleWheel, { passive: false })
-  // FIN - Movimiento de zoom con ctrl + wheel
 })
 
 onUnmounted(() => {
@@ -392,7 +388,7 @@ onUnmounted(() => {
 <template>
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map"></div>
+      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
       <!-- Tooltip de advertencia para zoom -->
       <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
