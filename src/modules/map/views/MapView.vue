@@ -31,55 +31,11 @@ import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 // Stores
 import { usePointsStore } from '@/stores/pointsStore.js'
 
-
 const pointsProyectos = usePointsStore()
 
-
 const mapContainer = ref(null)
-const { initMap, map, goBack } = createMap(mapContainer)
-
-// FIN useMap()
-
-// INICIO - Movimiento de zoom con ctrl + wheel
-
-const showWarning = ref(false)
-let warningTimeout = null
-const tooltipPos = ref({ x: 0, y: 0 })
-
-// Actualiza las coordenadas X e Y relativas al contenedor del mapa
-const updateMousePosition = (event) => {
-  // Ajustamos un pequeño desfase (15px) para que el tooltip no tape la punta del cursor
-  tooltipPos.value = {
-    x: event.clientX + 15,
-    y: event.clientY + 15,
-  }
-}
-
-function handleWheel(event) {
-  // Si la tecla Ctrl está presionada, permitimos el zoom manual
-  if (event.ctrlKey) {
-    event.preventDefault() // Evita que la página web haga scroll
-
-    const currentZoom = map.value.getZoom()
-    // event.deltaY < 0 significa scroll hacia arriba (Zoom In)
-    if (event.deltaY < 0) {
-      map.value.setZoom(currentZoom + 1)
-    } else {
-      map.value.setZoom(currentZoom - 1)
-    }
-    showWarning.value = false
-  } else {
-    // Si NO está presionada la tecla Ctrl, mostramos la advertencia
-    showWarning.value = true
-
-    // Ocultar el aviso después de 2 segundos de inactividad
-    clearTimeout(warningTimeout)
-    warningTimeout = setTimeout(() => {
-      showWarning.value = false
-    }, 1000)
-  }
-}
-// FIN - Movimiento de zoom con ctrl + wheel
+const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
+  createMap(mapContainer)
 
 const capaProyectos = shallowRef(null)
 
@@ -534,7 +490,7 @@ onUnmounted(() => {
 .map-scroll-tooltip {
   position: fixed; /* Usamos fixed para que dependa directamente de clientX/clientY */
   transform: translate(0, -50%); /* Centra el diseño verticalmente respecto al cursor */
-  background-color: rgba(33, 33, 33, 0.9);
+  background-color: rgba(236, 7, 7, 0.9);
   color: #ffffff;
   padding: 8px 12px;
   border-radius: 4px;
