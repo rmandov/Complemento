@@ -7,7 +7,7 @@ import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
 // img
-import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js'
+/* import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js' */
 
 // Magnetic button effect
 import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton.js'
@@ -16,7 +16,7 @@ import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticB
 import InformationClick from '../components/InformationClick.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
-
+import MapButtons from '../components/MapButtons.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -429,53 +429,14 @@ onUnmounted(() => {
       <!-- Panel de información al hacer clic -->
       <InformationClick />
 
-      <div class="buttons">
-        <!-- Botón para regresar a vista México -->
-        <button
-          class="focus-mexico shadow-lg"
-          @click="goBack"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              width="90"
-              height="90"
-              viewBox="150 -40 200 600"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path fill="#afafaf" :d="MEXICO_ICON" />
-            </svg>
-          </div>
-        </button>
-
-        <!-- Botón magnético -->
-        <button
-          class="back-button shadow-lg"
-          @click="toggleProyectos"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="#005cc8"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
-              />
-            </svg>
-          </div>
-        </button>
-      </div>
+      <!-- Buttons para controlar el setView y carga de layer Proyectos -->
+      <MapButtons
+        :mexico-icon="MEXICO_ICON"
+        @go-back="goBack"
+        @toggle-proyectos="toggleProyectos"
+        @button-mousemove="handleMouseMove"
+        @button-mouseleave="handleMouseLeave"
+      />
     </div>
   </div>
 
@@ -524,24 +485,6 @@ onUnmounted(() => {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
 }
-
-/* :global(.radar-center-marker::after) {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 32px;
-  height: 32px;
-
-  background-image: url('@/assets/img/cabeza.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  transform: translate(-50%, -50%);
-  cursor: move;
-} */
-
 /* NUEVO: panel del listado de municipios tocados por el radar */
 .municipios-radar-panel {
   position: absolute;
@@ -576,44 +519,6 @@ onUnmounted(() => {
   height: 100%;
 }
 
-.back-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background: white;
-  border: 1px solid #e41616;
-  cursor: pointer;
-}
-
-.focus-mexico {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  z-index: 1000;
-  background: rgb(255, 255, 255);
-  /* border: 1px solid blue; */
-  cursor: pointer;
-  border-radius: 100px;
-
-  overflow: hidden;
-
-  justify-items: center;
-  align-content: center;
-  /* padding: 1rem; */
-
-  height: 100px;
-  aspect-ratio: 1/1;
-
-  transform: scale(0.4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
-}
-
 .info {
   position: relative;
   /* border: solid 1px red; */
@@ -625,34 +530,5 @@ onUnmounted(() => {
 
 :deep(.leaflet-interactive:focus) {
   outline: none;
-}
-
-.back-button {
-  position: absolute;
-  top: 80px;
-  right: 20px;
-  z-index: 1000;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 100px;
-  overflow: hidden;
-  border: none;
-
-  height: 38px;
-  aspect-ratio: 1 / 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
-}
-
-.magnetic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  will-change: transform;
-  pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
 }
 </style>
