@@ -104,7 +104,7 @@ function handleWheel(event) {
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(5000) // metros
+const radius = ref(50000) // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
@@ -464,11 +464,12 @@ onMounted(async () => {
   /* registerClick() */
 
   /* infoLayer.addTo(map.value) */
-
+  map.value.createPane('radarPane').style.zIndex = 200
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
+
   map.value.createPane('proyectosPane').style.zIndex = 700
-  map.value.createPane('radarPane').style.zIndex = 900
+
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {
