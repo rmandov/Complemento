@@ -10,7 +10,7 @@ const props = defineProps({
   radius: Number,
   count: Number,
   min: { default: 100 },
-  max: { default: 50000 },
+  max: { default: 100000 },
   step: { default: 100 },
 })
 

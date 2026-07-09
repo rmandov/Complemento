@@ -2,18 +2,18 @@
 // src/modules/map/views/MapView.vue
 import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw } from 'vue'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
-import gsap from 'gsap'
 
 // img
 import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js'
 
+// Magnetic button effect
+import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton.js'
+
 // Components
 import InformationClick from '../components/InformationClick.vue'
-import InformationProjects from '../components/InformationProjects.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
 
@@ -29,82 +29,17 @@ import { useMapInteractions } from '../composables/useMapInteractions.js'
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
-import { usePoligonoStore } from '@/stores/poligonoStore.js'
 import { usePointsStore } from '@/stores/pointsStore.js'
 
-// Se inicializan valores de pinia
 const pointsProyectos = usePointsStore()
-const poligonoStore = usePoligonoStore()
 
-// INICIO useMap()
-
-// 1. Se inicializa el mapa mandando mapContainer que es un ref de un div
-/*
-initMap - crea el mapa tomando el mapContainer.
-map - es el mapa en donde podemos aplicar los layers
-resetView- retorna la vista al encuadre de todo México
-*/
 const mapContainer = ref(null)
-const { initMap, resetView, map } = createMap(mapContainer)
-
-// goBack revisa si existe alguna entidad/municipio clickeado para entonces
-// devolver el poligono eliminado
-// despues realiza el resetView()
-function goBack() {
-  if (poligonoStore.municipio || poligonoStore.entidad) {
-    map.value.removeLayer(poligonoStore.municipiosLayer)
-    poligonoStore.entidad.addTo(map.value)
-  }
-  poligonoStore.clear()
-  resetView()
-}
-
-// FIN useMap()
-
-// INICIO - Movimiento de zoom con ctrl + wheel
-
-const showWarning = ref(false)
-let warningTimeout = null
-const tooltipPos = ref({ x: 0, y: 0 })
-
-// Actualiza las coordenadas X e Y relativas al contenedor del mapa
-const updateMousePosition = (event) => {
-  // Ajustamos un pequeño desfase (15px) para que el tooltip no tape la punta del cursor
-  tooltipPos.value = {
-    x: event.clientX + 15,
-    y: event.clientY + 15,
-  }
-}
-
-function handleWheel(event) {
-  // Si la tecla Ctrl está presionada, permitimos el zoom manual
-  if (event.ctrlKey) {
-    event.preventDefault() // Evita que la página web haga scroll
-
-    const currentZoom = map.value.getZoom()
-    // event.deltaY < 0 significa scroll hacia arriba (Zoom In)
-    if (event.deltaY < 0) {
-      map.value.setZoom(currentZoom + 1)
-    } else {
-      map.value.setZoom(currentZoom - 1)
-    }
-    showWarning.value = false
-  } else {
-    // Si NO está presionada la tecla Ctrl, mostramos la advertencia
-    showWarning.value = true
-
-    // Ocultar el aviso después de 2 segundos de inactividad
-    clearTimeout(warningTimeout)
-    warningTimeout = setTimeout(() => {
-      showWarning.value = false
-    }, 1000)
-  }
-}
-// FIN - Movimiento de zoom con ctrl + wheel
+const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
+  createMap(mapContainer)
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(5000) // metros
+const radius = ref(50000) // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
@@ -116,7 +51,7 @@ const { center, register: registerClick, unregister: unregisterClick } = useMapI
 //   municipios de entidades candidatas que aún no estaban en cache.
 const {
   municipiosEnRadar,
-  municipiosRecortadosEnRadar,        // NUEVO
+  municipiosRecortadosEnRadar, // NUEVO
   cargandoMunicipios,
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
@@ -251,11 +186,12 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: '#3b82f6',
-      fillColor: '#3b82f6',
-      fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '5, 10',
+      color: 'orange', //  #3b82f6
+      fillColor: 'orange',
+      fillOpacity: 0.1,
+      weight: 5,
+      opacity: 1,
+      /* dashArray: '5, 10', */ pane: 'radarPaneMain',
     }).addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
@@ -267,12 +203,19 @@ watch(center, (c) => {
       icon: radarCenterIcon,
       draggable: true,
       zIndexOffset: 1000, // Siempre encima
+      pane: 'radarPaneMain',
     })
       .addTo(map.value)
       .on('drag', (e) => {
         const latLng = e.target.getLatLng()
         // Actualizar círculo en tiempo real mientras arrastra
         radarCircle.value?.setLatLng(latLng)
+
+        // Limpiar capa anterior
+        if (municipiosRecortadosLayer.value) {
+          map.value.removeLayer(municipiosRecortadosLayer.value)
+          municipiosRecortadosLayer.value = null
+        }
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
@@ -328,17 +271,17 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
     style: {
-      color: '#2563eb',      // borde azul
-      fillColor: '#60a5fa',  // relleno azul claro
-      fillOpacity: 0.35,
+      color: 'orange', // borde azul color: '#2563eb',
+      fillColor: 'orange', // relleno azul claro #60a5fa'
+      fillOpacity: 0,
       weight: 1.5,
     },
-    onEachFeature: (feature, layer) => {
+    /*  onEachFeature: (feature, layer) => {
       layer.bindPopup(`
         <b>${feature.properties.NOMGEO}</b><br>
         <small>${feature.properties.NOM_ENT || ''}</small>
       `)
-    },
+    }, */
   }).addTo(map.value)
 })
 
@@ -399,75 +342,18 @@ async function toggleProyectos() {
   }
 }
 
-// Efecto magnético
-const handleMouseMove = (e) => {
-  const btn = e.currentTarget
-  const content = btn.querySelector('.magnetic')
-
-  if (!content) return
-
-  const rect = btn.getBoundingClientRect()
-
-  // centro del botón
-  const centerX = rect.left + rect.width / 2
-  const centerY = rect.top + rect.height / 2
-
-  // distancia del mouse al centro
-  const x = e.clientX - centerX
-  const y = e.clientY - centerY
-
-  // mueve el botón un poco
-  gsap.to(btn, {
-    x: x * 0.25,
-    y: y * 0.25,
-    duration: 0.3,
-    ease: 'power2.out',
-    overwrite: true,
-  })
-
-  // mueve el contenido un poco más para el efecto "magnético"
-  gsap.to(content, {
-    x: x * 0.35,
-    y: y * 0.35,
-    duration: 0.35,
-    ease: 'power2.out',
-    overwrite: true,
-  })
-}
-
-const handleMouseLeave = (e) => {
-  const btn = e.currentTarget
-  const content = btn.querySelector('.magnetic')
-
-  gsap.to(btn, {
-    x: 0,
-    y: 0,
-    duration: 0.6,
-    ease: 'elastic.out(1, 0.4)',
-    overwrite: true,
-  })
-
-  if (content) {
-    gsap.to(content, {
-      x: 0,
-      y: 0,
-      duration: 0.6,
-      ease: 'elastic.out(1, 0.4)',
-      overwrite: true,
-    })
-  }
-}
 // --- MAIN ---
 onMounted(async () => {
   initMap()
   /* registerClick() */
 
   /* infoLayer.addTo(map.value) */
-
+  map.value.createPane('radarPane').style.zIndex = 800
+  map.value.createPane('radarPaneMain').style.zIndex = 900
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
-  map.value.createPane('proyectosPane').style.zIndex = 700
-  map.value.createPane('radarPane').style.zIndex = 900
+
+  map.value.createPane('proyectosPane').style.zIndex = 550
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {
@@ -491,6 +377,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   unregisterClick()
+
   if (radarCircle.value && map.value) {
     map.value.removeLayer(radarCircle.value)
     radarCircle.value = null
@@ -603,7 +490,7 @@ onUnmounted(() => {
 .map-scroll-tooltip {
   position: fixed; /* Usamos fixed para que dependa directamente de clientX/clientY */
   transform: translate(0, -50%); /* Centra el diseño verticalmente respecto al cursor */
-  background-color: rgba(33, 33, 33, 0.9);
+  background-color: rgba(236, 7, 7, 0.9);
   color: #ffffff;
   padding: 8px 12px;
   border-radius: 4px;
@@ -630,7 +517,7 @@ onUnmounted(() => {
   left: 50%;
   width: 12px;
   height: 12px;
-  background: #3b82f6;
+  background: orange; /* #3b82f6; */
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);

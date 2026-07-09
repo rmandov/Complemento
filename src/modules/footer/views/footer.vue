@@ -169,7 +169,7 @@ footer {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 16px;
-  font-family: "Patria", sans-serif;
+  font-family: 'Patria', sans-serif;
 
   text-align: left;
   /* text-transform: uppercase; */
@@ -180,7 +180,7 @@ footer {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "NotoSans", sans-serif;
+  font-family: 'NotoSans', sans-serif;
 }
 
 .columna-footer ul li + li {
@@ -191,7 +191,7 @@ footer {
   color: #fff;
   text-decoration: none;
   font-size: 14px;
-  font-family: "NotoSans", sans-serif;
+  font-family: 'NotoSans', sans-serif;
 }
 
 .columna-footer a:hover {
@@ -242,7 +242,7 @@ footer {
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 12px;
-  font-family: "NotoSans", sans-serif;
+  font-family: 'NotoSans', sans-serif;
   text-align: left;
 }
 
