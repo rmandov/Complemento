@@ -1,5 +1,6 @@
 <script setup>
 import { MEXICO_ICON } from '@/assets/img/mexicoIcon'
+import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton'
 
 const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'button-mouseleave'])
 </script>
@@ -10,8 +11,8 @@ const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'bu
     <button
       class="focus-mexico shadow-lg"
       @click="emit('go-back')"
-      @mousemove="emit('button-mousemove', $event)"
-      @mouseleave="emit('button-mouseleave', $event)"
+      @mousemove="handleMouseMove"
+      @mouseleave="handleMouseLeave"
     >
       <div class="magnetic">
         <svg width="90" height="90" viewBox="150 -40 200 600" xmlns="http://www.w3.org/2000/svg">
@@ -24,8 +25,8 @@ const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'bu
     <button
       class="back-button shadow-lg"
       @click="emit('toggle-proyectos')"
-      @mousemove="emit('button-mousemove', $event)"
-      @mouseleave="emit('button-mouseleave', $event)"
+      @mousemove="handleMouseMove"
+      @mouseleave="handleMouseLeave"
     >
       <div class="magnetic">
         <svg

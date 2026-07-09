@@ -6,9 +6,6 @@ import L from 'leaflet'
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
-// Magnetic button effect
-import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton.js'
-
 // Components
 import InformationClick from '../components/InformationClick.vue'
 import TableMap from './TableMap.vue'
@@ -422,12 +419,7 @@ onUnmounted(() => {
       <InformationClick />
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
-      <MapButtons
-        @go-back="goBack"
-        @toggle-proyectos="toggleProyectos"
-        @button-mousemove="handleMouseMove"
-        @button-mouseleave="handleMouseLeave"
-      />
+      <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" />
     </div>
   </div>
 
