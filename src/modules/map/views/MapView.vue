@@ -6,17 +6,12 @@ import L from 'leaflet'
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
-// img
-import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js'
-
-// Magnetic button effect
-import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticButton.js'
-
 // Components
 import InformationClick from '../components/InformationClick.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
-
+import MapButtons from '../components/MapButtons.vue'
+import MapScrollTooltip from '../components/MapScrollTooltip.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -165,6 +160,12 @@ const radarCenterIcon = L.divIcon({
 })
 
 watch(center, (c) => {
+  // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
   if (!map.value || !c) {
     if (radarCircle.value) {
       map.value?.removeLayer(radarCircle.value)
@@ -192,7 +193,9 @@ watch(center, (c) => {
       weight: 5,
       opacity: 1,
       /* dashArray: '5, 10', */ pane: 'radarPaneMain',
-    }).addTo(map.value)
+    })
+
+    radarCircle.value.addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
   }
@@ -228,6 +231,12 @@ watch(center, (c) => {
 })
 
 watch(radius, (r) => {
+  // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
   }
@@ -290,6 +299,7 @@ let datosProyectos = null
 const proyectosVisibles = ref(false)
 
 async function crearCapaProyectos() {
+  // Descarga del geojson del los proyectos
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
     console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
@@ -345,7 +355,7 @@ async function toggleProyectos() {
 // --- MAIN ---
 onMounted(async () => {
   initMap()
-  /* registerClick() */
+  registerClick()
 
   /* infoLayer.addTo(map.value) */
   map.value.createPane('radarPane').style.zIndex = 800
@@ -362,6 +372,7 @@ onMounted(async () => {
       pane: 'entidadesPane',
       name: 'NOMGEO',
     })
+
     EntidadesMuncipiosLayer.addTo(map.value)
 
     // NUEVO: reutiliza el mismo entidades.json ya cargado para construir
@@ -369,10 +380,6 @@ onMounted(async () => {
     // este archivo por red.
     inicializarConEntidades(entidades)
   }
-
-  // INICIO - Movimiento de zoom con ctrl + wheel
-  mapContainer.value.addEventListener('wheel', handleWheel, { passive: false })
-  // FIN - Movimiento de zoom con ctrl + wheel
 })
 
 onUnmounted(() => {
@@ -397,16 +404,10 @@ onUnmounted(() => {
 <template>
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map"></div>
+      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
       <!-- Tooltip de advertencia para zoom -->
-      <div
-        v-if="showWarning"
-        class="map-scroll-tooltip"
-        :style="{ left: tooltipPos.x + 'px', top: tooltipPos.y + 'px' }"
-      >
-        Usa Ctrl + rueda del ratón para hacer zoom
-      </div>
+      <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
 
       <!-- Control de radio -->
       <RadiusControl v-model:radius="radius" :count="radioCantidad" />
@@ -429,53 +430,8 @@ onUnmounted(() => {
       <!-- Panel de información al hacer clic -->
       <InformationClick />
 
-      <div class="buttons">
-        <!-- Botón para regresar a vista México -->
-        <button
-          class="focus-mexico shadow-lg"
-          @click="goBack"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              width="90"
-              height="90"
-              viewBox="150 -40 200 600"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path fill="#afafaf" :d="MEXICO_ICON" />
-            </svg>
-          </div>
-        </button>
-
-        <!-- Botón magnético -->
-        <button
-          class="back-button shadow-lg"
-          @click="toggleProyectos"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="#005cc8"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
-              />
-            </svg>
-          </div>
-        </button>
-      </div>
+      <!-- Buttons para controlar el setView y carga de layer Proyectos -->
+      <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" />
     </div>
   </div>
 
@@ -486,24 +442,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Tooltip flotante */
-.map-scroll-tooltip {
-  position: fixed; /* Usamos fixed para que dependa directamente de clientX/clientY */
-  transform: translate(0, -50%); /* Centra el diseño verticalmente respecto al cursor */
-  background-color: rgba(236, 7, 7, 0.9);
-  color: #ffffff;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-family: sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  z-index: 9999; /* Máxima prioridad sobre controles e iconos de Leaflet */
-  pointer-events: none; /* Crucial para no bloquear los clics en el mapa */
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
 /* Marker del centro del radar - invisible pero captura eventos de drag */
 :global(.radar-center-marker) {
   background: transparent;
@@ -524,24 +462,6 @@ onUnmounted(() => {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
 }
-
-/* :global(.radar-center-marker::after) {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 32px;
-  height: 32px;
-
-  background-image: url('@/assets/img/cabeza.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  transform: translate(-50%, -50%);
-  cursor: move;
-} */
-
 /* NUEVO: panel del listado de municipios tocados por el radar */
 .municipios-radar-panel {
   position: absolute;
@@ -576,44 +496,6 @@ onUnmounted(() => {
   height: 100%;
 }
 
-.back-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background: white;
-  border: 1px solid #e41616;
-  cursor: pointer;
-}
-
-.focus-mexico {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  z-index: 1000;
-  background: rgb(255, 255, 255);
-  /* border: 1px solid blue; */
-  cursor: pointer;
-  border-radius: 100px;
-
-  overflow: hidden;
-
-  justify-items: center;
-  align-content: center;
-  /* padding: 1rem; */
-
-  height: 100px;
-  aspect-ratio: 1/1;
-
-  transform: scale(0.4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
-}
-
 .info {
   position: relative;
   /* border: solid 1px red; */
@@ -625,34 +507,5 @@ onUnmounted(() => {
 
 :deep(.leaflet-interactive:focus) {
   outline: none;
-}
-
-.back-button {
-  position: absolute;
-  top: 80px;
-  right: 20px;
-  z-index: 1000;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 100px;
-  overflow: hidden;
-  border: none;
-
-  height: 38px;
-  aspect-ratio: 1 / 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
-}
-
-.magnetic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  will-change: transform;
-  pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
 }
 </style>
