@@ -10,10 +10,13 @@ import { useMap } from './mapControler'
 
 const { getMunicipiosByEntidad } = useMunicipiosCache()
 
+import { useActivateClickLayer } from '@/stores/layerActivoStore'
+
 // Carga Entidades
 export function createLayer(poligonos_json, options = {}) {
   const poligonoStore = usePoligonoStore()
   const datosEntidad = useMapStore()
+  const ClickLayer = useActivateClickLayer()
   const { flyToBounds } = useMap()
 
   const {
@@ -22,10 +25,10 @@ export function createLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(106, 106, 106)',
+      fillColor: 'rgb(92, 142, 254)',
       fillOpacity: 0.5,
       color: 'white',
-      dashArray: '3',
+      /* dashArray: '3', */
     },
   } = options
 
@@ -44,7 +47,13 @@ export function createLayer(poligonos_json, options = {}) {
       })
 
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
+        if (ClickLayer.clickEnLayerActivo) {
+          // Este valor evita que el click se propage a map.value
+          L.DomEvent.stopPropagation(e)
+        }
+        if (!ClickLayer.clickEnLayerActivo) {
+          return
+        }
         const bounds = layer.getBounds()
         layer.setStyle(style)
 
@@ -100,6 +109,7 @@ function mouseout(e) {
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
+  const ClickLayer = useActivateClickLayer()
   const datosMunicipio = useMapStore()
   const poligonoStore = usePoligonoStore()
   // NUEVO: store centralizado de selección
@@ -111,7 +121,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(151, 151, 151)',
+      fillColor: 'rgb(133, 122, 253)',
       fillOpacity: 0.5,
       color: 'white',
       dashArray: '3',
@@ -133,7 +143,13 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
       })
 
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
+        if (ClickLayer.clickEnLayerActivo) {
+          // Este valor evita que el click se propage a map.value
+          L.DomEvent.stopPropagation(e)
+        }
+        if (!ClickLayer.clickEnLayerActivo) {
+          return
+        }
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
         if (poligonoStore.municipio) {
