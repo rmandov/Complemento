@@ -55,5 +55,16 @@ import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
   justify-content: center;
   text-align: center;
 }
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+  }
 
+  .hero-animacion,
+  .hero-texto {
+    flex: none;
+    width: 100%;
+  }
+
+}
 </style>
