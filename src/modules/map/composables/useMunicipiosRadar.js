@@ -11,7 +11,7 @@ export function useMunicipiosRadar() {
   // Lista de municipios completos que tocan el radar (para tablas/paneles)
   const municipiosEnRadar = shallowRef([])
 
-  // NUEVO: FeatureCollection de municipios RECORTADOS al límite del radar (para el mapa)
+  // FeatureCollection de municipios RECORTADOS al límite del radar (para el mapa)
   const municipiosRecortadosEnRadar = shallowRef(null)
 
   const cargandoMunicipios = ref(false)
@@ -49,7 +49,7 @@ export function useMunicipiosRadar() {
   }
 
   /* ───────────────────────────────────────────────
-     FASE A (igual)
+     FASE A
      ─────────────────────────────────────────────── */
   function obtenerEntidadesCandidatas(radarBbox) {
     const candidatas = []
@@ -62,7 +62,7 @@ export function useMunicipiosRadar() {
   }
 
   /* ───────────────────────────────────────────────
-     FASE B ORIGINAL — municipios completos que tocan el radar
+     FASE B — municipios completos que tocan el radar
      ─────────────────────────────────────────────── */
   function filtrarMunicipiosQueIntersectan(radarPolygon, radarBbox, municipiosGeoJson, cveEnt) {
     if (!municipiosGeoJson?.features?.length) return []
@@ -98,7 +98,6 @@ export function useMunicipiosRadar() {
       try {
         if (!turf.booleanIntersects(radarPolygon, municipioFeature)) return
 
-        // FIX: Turf v7+ espera un FeatureCollection, no dos argumentos
         const recorte = turf.intersect(turf.featureCollection([municipioFeature, radarPolygon]))
 
         if (recorte) {
@@ -121,7 +120,7 @@ export function useMunicipiosRadar() {
   }
 
   /* ───────────────────────────────────────────────
-     ORQUESTADOR ORIGINAL (lista de municipios)
+     ORQUESTADOR — lista de municipios
      ─────────────────────────────────────────────── */
   async function calcularMunicipiosEnRadar(center, radiusMetros) {
     if (!entidadesBboxIndex) {
@@ -178,7 +177,7 @@ export function useMunicipiosRadar() {
   }
 
   /* ───────────────────────────────────────────────
-     ORQUESTADOR NUEVO — devuelve FeatureCollection RECORTADA
+     ORQUESTADOR — FeatureCollection RECORTADA
      ─────────────────────────────────────────────── */
   async function calcularMunicipiosRecortadosEnRadar(center, radiusMetros) {
     if (!entidadesBboxIndex) {
@@ -237,7 +236,7 @@ export function useMunicipiosRadar() {
   }
 
   /* ───────────────────────────────────────────────
-     DEBOUNCE (timers separados)
+     DEBOUNCE
      ─────────────────────────────────────────────── */
   function actualizarMunicipiosEnRadar(center, radiusMetros, delay = 200) {
     clearTimeout(debounceTimer)
@@ -253,14 +252,48 @@ export function useMunicipiosRadar() {
     }, delay)
   }
 
+  /* ───────────────────────────────────────────────
+     NUEVO — resetRadar()
+     ─────────────────────────────────────────────── */
+  /**
+   * Cancela por completo cualquier proceso del radar que pudiera seguir
+   * corriendo "en segundo plano" y limpia los resultados guardados.
+   * Se usa al DESACTIVAR el radar (ver MapView.vue -> desactivarRadar()).
+   *
+   * Qué resuelve exactamente:
+   * 1. Cancela los timers de debounce pendientes (setTimeout) para que
+   *    no disparen un cálculo nuevo momentos después de apagar el radar.
+   * 2. Incrementa `ultimoToken`: cualquier llamada a
+   *    getMunicipiosByEntidad() que siga "en vuelo" (esperando una
+   *    respuesta de red) comparará su `miToken` contra el nuevo
+   *    `ultimoToken` al resolver, no coincidirá, y su resultado será
+   *    descartado — así una descarga lenta no puede "revivir" el radar
+   *    después de apagado.
+   * 3. Limpia inmediatamente (sin esperar ningún await) los resultados
+   *    reactivos, para que la UI se vacíe al instante.
+   */
+  function resetRadar() {
+    clearTimeout(debounceTimer)
+    clearTimeout(debounceTimerRecortados)
+    debounceTimer = null
+    debounceTimerRecortados = null
+
+    ultimoToken++
+
+    municipiosEnRadar.value = []
+    municipiosRecortadosEnRadar.value = turf.featureCollection([])
+    cargandoMunicipios.value = false
+  }
+
   return {
     municipiosEnRadar,
-    municipiosRecortadosEnRadar, // NUEVO
+    municipiosRecortadosEnRadar,
     cargandoMunicipios,
     inicializarConEntidades,
     actualizarMunicipiosEnRadar,
     calcularMunicipiosEnRadar,
-    actualizarMunicipiosRecortadosEnRadar, // NUEVO
-    calcularMunicipiosRecortadosEnRadar, // NUEVO
+    actualizarMunicipiosRecortadosEnRadar,
+    calcularMunicipiosRecortadosEnRadar,
+    resetRadar, // NUEVO
   }
 }

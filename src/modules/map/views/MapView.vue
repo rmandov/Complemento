@@ -20,13 +20,17 @@ const { getGeoJson } = useGeoJson()
 import { useMap as createMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useMapInteractions } from '../composables/useMapInteractions.js'
-// NUEVO: composable que calcula qué municipios toca el radar
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
+// NUEVO: constante con las coordenadas de CDMX (posición default del radar)
+import { CDMX_CENTER } from '../utils/geoUtils'
 
 // Stores
 import { usePointsStore } from '@/stores/pointsStore.js'
+// NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
+import { useSeleccionStore } from '@/stores/seleccionStore'
 
 const pointsProyectos = usePointsStore()
+const seleccionStore = useSeleccionStore()
 
 const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
@@ -39,18 +43,21 @@ const radius = ref(50000) // metros
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
 
-// --- RADAR: Municipios tocados por el área del radar (NUEVO) ---
-// municipiosEnRadar: array reactivo de features de municipios que
-//   intersectan el círculo (total, parcial o por el borde).
-// cargandoMunicipios: true mientras se están descargando archivos de
-//   municipios de entidades candidatas que aún no estaban en cache.
+// --- RADAR: activar/desactivar completamente (NUEVO) ---
+// Fuente de verdad ÚNICA de si el radar está encendido o apagado.
+// Todo lo demás (listener de click, watchers de cálculo, UI) se
+// deriva de este flag.
+const radarActivo = ref(false)
+
+// --- RADAR: Municipios tocados por el área del radar ---
 const {
   municipiosEnRadar,
-  municipiosRecortadosEnRadar, // NUEVO
+  municipiosRecortadosEnRadar,
   cargandoMunicipios,
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
-  actualizarMunicipiosRecortadosEnRadar, // NUEVO
+  actualizarMunicipiosRecortadosEnRadar,
+  resetRadar, // NUEVO: cancela cálculos en curso y limpia resultados
 } = useMunicipiosRadar()
 
 const filteredFeatures = shallowRef([])
@@ -85,7 +92,7 @@ watch(
 
     console.log('✅ Índice espacial actualizado con', rawFeatures.length, 'puntos')
 
-    if (center.value && radius.value != null) {
+    if (radarActivo.value && center.value && radius.value != null) {
       searchPoints()
     }
   },
@@ -100,10 +107,6 @@ function searchPoints() {
   }
   const radiusKm = radius.value / 1000
 
-  /* rawFeatures = JSON.parse(
-  JSON.stringify(toRaw(features))
-)
- */
   const results = geokdbush.around(
     spatialIndex,
     center.value.lng,
@@ -112,12 +115,10 @@ function searchPoints() {
     radiusKm,
   )
 
-  // ✅ results son índices numéricos; usamos rawFeatures global
-  filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean) // defensa: elimina undefined por si acaso
+  filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean)
 
   console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
 
-  // Se resta de la cantidad el proyecto mismo
   radioCantidad.value = filteredFeatures.value.length
 
   console.log(filteredFeatures.value)
@@ -125,12 +126,16 @@ function searchPoints() {
 
 // Reaccionar a cambios de centro o radio
 watch([center, radius], () => {
+  // ── NUEVO: Task 1 ────────────────────────────────────────────
+  // Si el radar está desactivado, no se ejecuta absolutamente
+  // ninguna lógica asociada (ni búsqueda de proyectos por KDBush,
+  // ni cálculo/descarga de municipios por Turf).
+  if (!radarActivo.value) return
+  // ─────────────────────────────────────────────────────────────
+
   if (spatialIndex) searchPoints()
 
-  // Lista de municipios (para el panel HTML)
   actualizarMunicipiosEnRadar(center.value, radius.value)
-
-  // NUEVO: geometría recortada para pintar en el mapa
   actualizarMunicipiosRecortadosEnRadar(center.value, radius.value)
 })
 
@@ -144,14 +149,7 @@ watch(
 // --- Círculo del radar + Marker draggable ---
 const radarCircle = shallowRef(null)
 const dragMarker = shallowRef(null)
-const municipiosRecortadosLayer = shallowRef(null) // NUEVO: capa de intersección
-
-// Icono invisible/pequeño para el centro del radar (arrastrable)
-/* const radarCenterIcon = L.icon({
-  iconUrl:"src/assets/img/cabeza.png",
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-}) */
+const municipiosRecortadosLayer = shallowRef(null)
 
 const radarCenterIcon = L.divIcon({
   className: 'radar-center-marker',
@@ -160,12 +158,14 @@ const radarCenterIcon = L.divIcon({
 })
 
 watch(center, (c) => {
-  // Limpiar capa anterior
+  // Limpiar capa anterior de municipios recortados
   if (municipiosRecortadosLayer.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
   }
 
+  // Cuando `center` se vuelve null (radar apagado, o mapa no listo),
+  // se eliminan del mapa todos los elementos visuales del radar.
   if (!map.value || !c) {
     if (radarCircle.value) {
       map.value?.removeLayer(radarCircle.value)
@@ -175,11 +175,6 @@ watch(center, (c) => {
       map.value?.removeLayer(dragMarker.value)
       dragMarker.value = null
     }
-    // NUEVO: limpiar municipios recortados cuando se desactiva el radar
-    if (municipiosRecortadosLayer.value) {
-      map.value?.removeLayer(municipiosRecortadosLayer.value)
-      municipiosRecortadosLayer.value = null
-    }
     return
   }
 
@@ -187,12 +182,12 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: 'orange', //  #3b82f6
+      color: 'orange',
       fillColor: 'orange',
       fillOpacity: 0.1,
       weight: 5,
       opacity: 1,
-      /* dashArray: '5, 10', */ pane: 'radarPaneMain',
+      pane: 'radarPaneMain',
     })
 
     radarCircle.value.addTo(map.value)
@@ -205,16 +200,14 @@ watch(center, (c) => {
     dragMarker.value = L.marker([c.lat, c.lng], {
       icon: radarCenterIcon,
       draggable: true,
-      zIndexOffset: 1000, // Siempre encima
+      zIndexOffset: 1000,
       pane: 'radarPaneMain',
     })
       .addTo(map.value)
       .on('drag', (e) => {
         const latLng = e.target.getLatLng()
-        // Actualizar círculo en tiempo real mientras arrastra
         radarCircle.value?.setLatLng(latLng)
 
-        // Limpiar capa anterior
         if (municipiosRecortadosLayer.value) {
           map.value.removeLayer(municipiosRecortadosLayer.value)
           municipiosRecortadosLayer.value = null
@@ -222,7 +215,6 @@ watch(center, (c) => {
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
-        // Actualizar el centro de búsqueda (dispara watch y searchPoints)
         center.value = { lat: latLng.lat, lng: latLng.lng }
       })
   } else {
@@ -231,7 +223,6 @@ watch(center, (c) => {
 })
 
 watch(radius, (r) => {
-  // Limpiar capa anterior
   if (municipiosRecortadosLayer.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
@@ -265,11 +256,10 @@ watch(filteredFeatures, (features) => {
   })
 })
 
-// NUEVO: cuando cambia el FeatureCollection recortado, lo pinta en el mapa
+// Cuando cambia el FeatureCollection recortado, lo pinta en el mapa
 watch(municipiosRecortadosEnRadar, (fc) => {
   if (!map.value) return
 
-  // Limpiar capa anterior
   if (municipiosRecortadosLayer.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
@@ -278,33 +268,90 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   if (!fc || !fc.features?.length) return
 
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
-    pane: 'radarPane', // zIndex 900, encima de entidades y proyectos
+    pane: 'radarPane',
     style: {
-      color: 'orange', // borde azul color: '#2563eb',
-      fillColor: 'orange', // relleno azul claro #60a5fa'
+      color: 'orange',
+      fillColor: 'orange',
       fillOpacity: 0,
       weight: 1.5,
     },
-    /*  onEachFeature: (feature, layer) => {
-      layer.bindPopup(`
-        <b>${feature.properties.NOMGEO}</b><br>
-        <small>${feature.properties.NOM_ENT || ''}</small>
-      `)
-    }, */
   }).addTo(map.value)
 })
+
+/* ═══════════════════════════════════════════════════════════════
+   NUEVO — Task 1: Activar / Desactivar el radar por completo
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Enciende el radar:
+ * - Empieza a escuchar clicks del mapa (para poder mover el centro).
+ * - Coloca el centro por defecto en la Ciudad de México.
+ *   Esto dispara automáticamente los watchers de `center`/`radius` que
+ *   dibujan el círculo, el marker y calculan proyectos/municipios.
+ */
+function activarRadar() {
+  if (radarActivo.value) return
+
+  radarActivo.value = true
+  registerClick()
+  center.value = { ...CDMX_CENTER }
+}
+
+/**
+ * Apaga el radar por completo:
+ * - Deja de escuchar clicks del mapa (unregisterClick real, no solo un
+ *   flag ignorado: el listener se desengancha de Leaflet).
+ * - Pone `center` en null, lo que dispara la limpieza ya existente del
+ *   círculo, el marker draggable y la capa de municipios recortados.
+ * - Cancela cualquier cálculo de municipios en curso (debounce +
+ *   promesas en vuelo) mediante resetRadar(), para que ninguna
+ *   respuesta tardía de red pueda "revivir" resultados después de
+ *   apagado.
+ * - Limpia el conteo/resaltado de proyectos en el radio.
+ */
+function desactivarRadar() {
+  if (!radarActivo.value) return
+
+  radarActivo.value = false
+  unregisterClick()
+  center.value = null
+
+  resetRadar()
+
+  filteredFeatures.value = []
+  radioCantidad.value = 0
+}
+
+function toggleRadar() {
+  if (radarActivo.value) {
+    desactivarRadar()
+  } else {
+    activarRadar()
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
 
 // --- Carga de proyectos ---
 let datosProyectos = null
 const proyectosVisibles = ref(false)
 
 async function crearCapaProyectos() {
-  // Descarga del geojson del los proyectos
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
     console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
-    pointsProyectos.loadPoints(datosProyectos) // ← Esto activa el índice espacial
-    // ... dentro de la función donde ya tienes datosProyectos
+
+    // ── NUEVO: Task 2 ──────────────────────────────────────────
+    // Se imprime el listado completo de ID_PPI_ESPACIAL disponibles
+    // al cargar el archivo, para confirmar que el campo existe y ver
+    // su ubicación real dentro de "properties".
+    console.log(
+      '🆔 IDs PPI espacial cargados:',
+      datosProyectos.features.map((f) => f.properties?.ID_PPI_ESPACIAL),
+    )
+    // ────────────────────────────────────────────────────────────
+
+    pointsProyectos.loadPoints(datosProyectos)
   }
   if (!map.value || !datosProyectos) return
 
@@ -327,6 +374,14 @@ async function crearCapaProyectos() {
       layer.bindTooltip(nombre)
       layer.on('click', () => {
         console.log('Proyecto seleccionado:', nombre)
+
+        // ── NUEVO: Task 2 + Task 4 ────────────────────────────
+        // Se obtiene el ID_PPI_ESPACIAL de ESTE proyecto en
+        // particular y se centraliza en Pinia.
+        const idPpiEspacial = feature.properties?.ID_PPI_ESPACIAL ?? null
+        console.log('🆔 ID_PPI_ESPACIAL del proyecto seleccionado:', idPpiEspacial)
+        seleccionStore.setIdPpiEspacial(idPpiEspacial)
+        // ────────────────────────────────────────────────────
       })
     },
     pane: 'proyectosPane',
@@ -355,14 +410,14 @@ async function toggleProyectos() {
 // --- MAIN ---
 onMounted(async () => {
   initMap()
-  registerClick()
+  // NOTA: ya NO se llama registerClick() aquí. El radar arranca
+  // DESACTIVADO por defecto; el listener de click del mapa solo se
+  // engancha cuando el usuario activa el radar (ver activarRadar()).
 
-  /* infoLayer.addTo(map.value) */
   map.value.createPane('radarPane').style.zIndex = 800
   map.value.createPane('radarPaneMain').style.zIndex = 900
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
-
   map.value.createPane('proyectosPane').style.zIndex = 550
 
   const entidades = await getGeoJson('entidades.json')
@@ -375,15 +430,13 @@ onMounted(async () => {
 
     EntidadesMuncipiosLayer.addTo(map.value)
 
-    // NUEVO: reutiliza el mismo entidades.json ya cargado para construir
-    // el índice de bbox que usa el radar (Fase A) — no se vuelve a pedir
-    // este archivo por red.
     inicializarConEntidades(entidades)
   }
 })
 
 onUnmounted(() => {
   unregisterClick()
+  resetRadar() // NUEVO: cancela timers/promesas pendientes al desmontar
 
   if (radarCircle.value && map.value) {
     map.value.removeLayer(radarCircle.value)
@@ -393,7 +446,6 @@ onUnmounted(() => {
     map.value.removeLayer(dragMarker.value)
     dragMarker.value = null
   }
-  // NUEVO
   if (municipiosRecortadosLayer.value && map.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
@@ -409,16 +461,26 @@ onUnmounted(() => {
       <!-- Tooltip de advertencia para zoom -->
       <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
 
-      <!-- Control de radio -->
-      <RadiusControl v-model:radius="radius" :count="radioCantidad" />
+      <!-- NUEVO: botón para activar/desactivar el radar por completo.
+           Si prefieres que viva dentro de MapButtons.vue, comparte ese
+           archivo y lo integro ahí como un emit más. -->
+      <button
+        class="radar-toggle-btn"
+        :class="{ 'radar-toggle-btn--activo': radarActivo }"
+        @click="toggleRadar"
+      >
+        {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
+      </button>
 
-      <!-- NUEVO: panel con el listado de municipios tocados por el radar.
-           Reemplázalo por TableMap.vue si prefieres mostrarlo ahí; el
-           dato ya está disponible en `municipiosEnRadar`. -->
-      <div v-if="cargandoMunicipios" class="municipios-radar-panel">
+      <!-- Control de radio: solo visible/interactuable con el radar activo -->
+      <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" />
+
+      <!-- Panel con el listado de municipios tocados por el radar:
+           solo tiene sentido mostrarlo con el radar activo -->
+      <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
         Cargando municipios del área...
       </div>
-      <div v-else-if="municipiosEnRadar.length" class="municipios-radar-panel">
+      <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
         <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
         <ul>
           <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
@@ -442,7 +504,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Marker del centro del radar - invisible pero captura eventos de drag */
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
@@ -455,14 +516,34 @@ onUnmounted(() => {
   left: 50%;
   width: 12px;
   height: 12px;
-  background: orange; /* #3b82f6; */
+  background: orange;
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
 }
-/* NUEVO: panel del listado de municipios tocados por el radar */
+
+/* NUEVO: botón de activar/desactivar radar */
+.radar-toggle-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #999;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.radar-toggle-btn--activo {
+  border-color: orange;
+  color: #b35c00;
+  font-weight: 600;
+}
+
 .municipios-radar-panel {
   position: absolute;
   top: 50%;
@@ -491,14 +572,12 @@ onUnmounted(() => {
 }
 
 .map {
-  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
 }
 
 .info {
   position: relative;
-  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
   border-radius: 10px;
