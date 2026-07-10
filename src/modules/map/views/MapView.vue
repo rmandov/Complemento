@@ -21,16 +21,17 @@ import { useMap as createMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useMapInteractions } from '../composables/useMapInteractions.js'
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
-// NUEVO: constante con las coordenadas de CDMX (posición default del radar)
-import { CDMX_CENTER } from '../utils/geoUtils'
 
 // Stores
 import { usePointsStore } from '@/stores/pointsStore.js'
+// NUEVO: constante con las coordenadas (posición del radar)
+import { useMapStore } from '@/stores/map.js'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
 const pointsProyectos = usePointsStore()
 const seleccionStore = useSeleccionStore()
+const mapStore = useMapStore()
 
 const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
@@ -294,7 +295,7 @@ function activarRadar() {
 
   radarActivo.value = true
   registerClick()
-  center.value = { ...CDMX_CENTER }
+  center.value = mapStore.view.center
 }
 
 /**

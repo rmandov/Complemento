@@ -196,7 +196,7 @@ onMounted(() => {
   width: auto;
 }
 .subnav-boton.subnav-boton-activo::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 100%;
   left: 0;

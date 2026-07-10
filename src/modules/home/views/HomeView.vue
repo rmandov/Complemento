@@ -90,7 +90,7 @@ onMounted(async () => {
 <template>
   <div class="home">
     <!-- Hero -->
-    <Hero/>
+    <Hero />
     <!-- Botones con efecto magnético -->
     <section class="boton-section">
       <div
@@ -121,7 +121,6 @@ onMounted(async () => {
       </p>
 
       <Carousel></Carousel>
-
     </section>
   </div>
 
@@ -231,7 +230,6 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  
   .boton-section {
     flex-direction: column;
     align-items: center;

@@ -1,6 +1,5 @@
 <script setup>
 import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
-
 </script>
 <template>
   <section class="hero-section">
@@ -65,6 +64,5 @@ import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
     flex: none;
     width: 100%;
   }
-
 }
 </style>
