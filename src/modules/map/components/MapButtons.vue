@@ -5,7 +5,18 @@ import { handleMouseMove, handleMouseLeave } from '../composables/gsap/magenticB
 import { useActivateClickLayer } from '@/stores/layerActivoStore'
 const ClickLayer = useActivateClickLayer()
 
-const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'button-mouseleave'])
+const emit = defineEmits([
+  'go-back',
+  'toggle-proyectos',
+  'button-mousemove',
+  'button-mouseleave',
+  'toggle-radar',
+])
+
+const activaRadar = () => {
+  ClickLayer.toggleClick()
+  emit('toggle-radar')
+}
 </script>
 
 <template>
@@ -53,8 +64,9 @@ const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'bu
 
     <!-- Botón magnético -->
     <button
-      class="radar shadow-lg"
-      @click="ClickLayer.toggleClick"
+      class="radar shadow-lg radar-toggle-btn"
+      :class="{ 'radar-toggle-btn--activo': !ClickLayer.clickEnLayerActivo }"
+      @click="activaRadar"
       @mousemove="handleMouseMove"
       @mouseleave="handleMouseLeave"
     >
@@ -63,7 +75,7 @@ const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'bu
           xmlns="http://www.w3.org/2000/svg"
           width="16"
           height="16"
-          fill="currentColor"
+          fill="white"
           class="bi bi-crosshair"
           viewBox="0 0 16 16"
         >
@@ -162,5 +174,14 @@ const emit = defineEmits(['go-back', 'toggle-proyectos', 'button-mousemove', 'bu
   justify-content: center;
   will-change: transform;
   pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
+}
+
+/* NUEVO: botón de activar/desactivar radar */
+.radar-toggle-btn {
+  background: rgb(255, 22, 22);
+}
+
+.radar-toggle-btn--activo {
+  background: rgb(0, 185, 31);
 }
 </style>

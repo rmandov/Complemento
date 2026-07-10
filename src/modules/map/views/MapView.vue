@@ -465,13 +465,13 @@ onUnmounted(() => {
       <!-- NUEVO: botón para activar/desactivar el radar por completo.
            Si prefieres que viva dentro de MapButtons.vue, comparte ese
            archivo y lo integro ahí como un emit más. -->
-      <button
+      <!-- <button
         class="radar-toggle-btn"
         :class="{ 'radar-toggle-btn--activo': radarActivo }"
         @click="toggleRadar"
       >
         {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
-      </button>
+      </button> -->
 
       <!-- Control de radio: solo visible/interactuable con el radar activo -->
       <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" />
@@ -494,7 +494,11 @@ onUnmounted(() => {
       <InformationClick />
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
-      <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" />
+      <MapButtons
+        @go-back="goBack"
+        @toggle-proyectos="toggleProyectos"
+        @toggle-radar="toggleRadar"
+      />
     </div>
   </div>
 
