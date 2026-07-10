@@ -160,6 +160,12 @@ const radarCenterIcon = L.divIcon({
 })
 
 watch(center, (c) => {
+  // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
   if (!map.value || !c) {
     if (radarCircle.value) {
       map.value?.removeLayer(radarCircle.value)
@@ -187,7 +193,9 @@ watch(center, (c) => {
       weight: 5,
       opacity: 1,
       /* dashArray: '5, 10', */ pane: 'radarPaneMain',
-    }).addTo(map.value)
+    })
+
+    radarCircle.value.addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
   }
@@ -223,6 +231,12 @@ watch(center, (c) => {
 })
 
 watch(radius, (r) => {
+  // Limpiar capa anterior
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
   }
@@ -285,6 +299,7 @@ let datosProyectos = null
 const proyectosVisibles = ref(false)
 
 async function crearCapaProyectos() {
+  // Descarga del geojson del los proyectos
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
     console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
@@ -340,7 +355,7 @@ async function toggleProyectos() {
 // --- MAIN ---
 onMounted(async () => {
   initMap()
-  /* registerClick() */
+  registerClick()
 
   /* infoLayer.addTo(map.value) */
   map.value.createPane('radarPane').style.zIndex = 800
@@ -357,6 +372,7 @@ onMounted(async () => {
       pane: 'entidadesPane',
       name: 'NOMGEO',
     })
+
     EntidadesMuncipiosLayer.addTo(map.value)
 
     // NUEVO: reutiliza el mismo entidades.json ya cargado para construir

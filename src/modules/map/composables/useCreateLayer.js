@@ -11,6 +11,8 @@ import { useMap } from './mapControler'
 
 const { getMunicipiosByEntidad } = useMunicipiosCache()
 
+import { useActivateClickLayer } from '@/stores/layerActivoStore'
+
 // ¿Que valores cambian?, esos valores son los que se usan de input
 /*
 1. poligonos.json => const [entidad, municipio, localida, etc] = await getGeoJson('[entidad, municipio, localida, etc].json')
@@ -29,6 +31,7 @@ const { getMunicipiosByEntidad } = useMunicipiosCache()
 export function createLayer(poligonos_json, options = {}) {
   const poligonoStore = usePoligonoStore()
   const datosEntidad = useMapStore()
+  const ClickLayer = useActivateClickLayer()
   const { flyToBounds } = useMap()
 
   const {
@@ -61,7 +64,14 @@ export function createLayer(poligonos_json, options = {}) {
       })
 
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
+        if (ClickLayer.clickEnLayerActivo) {
+          // Este valor evita que el click se propage a map.value
+          L.DomEvent.stopPropagation(e)
+        }
+        if (!ClickLayer.clickEnLayerActivo) {
+          return
+        }
+
         const bounds = layer.getBounds()
         layer.setStyle(style)
 
@@ -136,6 +146,7 @@ function mouseout(e) {
 
 // Carga municipios
 function createMunicipiosLayer(poligonos_json, options = {}) {
+  const ClickLayer = useActivateClickLayer()
   const datosMunicipio = useMapStore()
   const poligonoStore = usePoligonoStore()
   const { flyToBounds } = useMap()
@@ -167,7 +178,13 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
       })
 
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
+        if (ClickLayer.clickEnLayerActivo) {
+          // Este valor evita que el click se propage a map.value
+          L.DomEvent.stopPropagation(e)
+        }
+        if (!ClickLayer.clickEnLayerActivo) {
+          return
+        }
         const bounds = layer.getBounds()
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
         if (poligonoStore.municipio) {
