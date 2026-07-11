@@ -39,7 +39,7 @@ const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, too
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(50000) // metros
+const radius = ref(200_000) // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
