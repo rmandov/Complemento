@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
 
 import KDBush from 'kdbush'
@@ -28,6 +28,15 @@ import { usePointsStore } from '@/stores/pointsStore.js'
 import { useMapStore } from '@/stores/map.js'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
+
+const zoomActual = ref(5) //  zoom inicial por defecto de tu mapa (ej: 5)
+
+// El truco matemático: a menor zoom, la onda necesita escalar MENOS píxeles en pantalla
+const escalaOndaCss = computed(() => {
+  // Ajustamos el factor usando una potencia basada en el zoom actual
+  const factorZoom = Math.pow(2, zoomActual.value - 5)
+  return (radius.value / 30000) * factorZoom
+})
 
 const pointsProyectos = usePointsStore()
 const seleccionStore = useSeleccionStore()
@@ -158,6 +167,19 @@ const radarCenterIcon = L.divIcon({
   iconAnchor: [10, 10],
 })
 
+const dispararOndaRadar = (marker) => {
+  if (marker && marker._icon) {
+    // Forzamos la actualización del zoom actual en Vue antes de animar
+    zoomActual.value = map.value.getZoom()
+
+    if (marker._icon.classList.contains('marcador-onda-activa')) {
+      marker._icon.classList.remove('marcador-onda-activa')
+    }
+    void marker._icon.offsetWidth // Truco de reflow para reiniciar CSS
+    marker._icon.classList.add('marcador-onda-activa')
+  }
+}
+
 watch(center, (c) => {
   // Limpiar capa anterior de municipios recortados
   if (municipiosRecortadosLayer.value) {
@@ -204,8 +226,29 @@ watch(center, (c) => {
       zIndexOffset: 1000,
       pane: 'radarPaneMain',
     })
-      .addTo(map.value)
+      .on('dragstart', (e) => {
+        zoomActual.value = map.value.getZoom()
+        // 🔥 Cambia el color del icono a rojo/morado usando filtros CSS dinámicos
+        if (e.target._icon) {
+          // 1. Limpiamos cualquier onda vieja por seguridad
+          if (e.target._icon.classList.contains('marcador-onda-activa')) {
+            e.target._icon.classList.remove('marcador-onda-activa')
+          }
+
+          // 2. Forzamos un pequeño "reflow" en el navegador para reiniciar la animación
+          void e.target._icon.offsetWidth
+
+          // 3. Añadimos la clase que dispara la animación de onda
+          e.target._icon.classList.add('marcador-onda-activa')
+        }
+      })
       .on('drag', (e) => {
+        /* e.target.setStyle({
+
+          color: 'red', // Color del borde nuevo
+
+        }) */
+
         const latLng = e.target.getLatLng()
         radarCircle.value?.setLatLng(latLng)
 
@@ -217,7 +260,22 @@ watch(center, (c) => {
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
         center.value = { lat: latLng.lat, lng: latLng.lng }
+
+        if (e.target._icon) {
+          // Quitamos la clase al soltarlo para dejarlo listo para el siguiente drag
+          /* e.target._icon.classList.remove('marcador-onda-activa') */
+          if (e.target._icon.classList.contains('marcador-onda-activa')) {
+            e.target._icon.classList.remove('marcador-onda-activa')
+          }
+        }
       })
+      .addTo(map.value)
+
+    map.value.whenReady(() => {
+      setTimeout(() => {
+        dispararOndaRadar(dragMarker.value)
+      }, 100) // 50ms son suficientes para que el DOM esté listo
+    })
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
@@ -411,6 +469,9 @@ async function toggleProyectos() {
 // --- MAIN ---
 onMounted(async () => {
   initMap()
+  map.value.on('zoomend', () => {
+    zoomActual.value = map.value.getZoom()
+  })
   // NOTA: ya NO se llama registerClick() aquí. El radar arranca
   // DESACTIVADO por defecto; el listener de click del mapa solo se
   // engancha cuando el usuario activa el radar (ver activarRadar()).
@@ -512,6 +573,7 @@ onUnmounted(() => {
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
+  position: relative;
 }
 
 :global(.radar-center-marker::after) {
@@ -527,6 +589,7 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
+  z-index: 2;
 }
 
 /* NUEVO: botón de activar/desactivar radar */
@@ -592,4 +655,68 @@ onUnmounted(() => {
 :deep(.leaflet-interactive:focus) {
   outline: none;
 }
+
+:global(.dot-test) {
+  filter: hue-rotate(140deg) brightness(1.2) !important;
+}
+
+/* 1. Estilos base de tu marcador (Tu diseño original) */
+:global(.radar-center-marker) {
+  background: transparent;
+  border: none;
+  position: relative; /* Asegura que los pseudoelementos se alineen aquí */
+}
+
+/* El punto naranja estático se mantiene intacto usando ::after */
+:global(.radar-center-marker::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: orange;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  cursor: move;
+  z-index: 2; /* Se coloca por encima de la onda para que no lo tape */
+}
+
+/* 2. La animación de la onda utilizando ::before para no romper el ::after */
+:global(.marcador-onda-activa::before) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;  /* Tamaño base inicial del anillo */
+  height: 20px;
+  margin-top: -10px; /* Centrado perfecto respecto al punto naranja */
+  margin-left: -10px;
+
+  border: 2px solid #ff4136; /* Color rojo de la onda del radar */
+  border-radius: 50%;
+  background: rgba(255, 65, 54, 0.15);
+  z-index: 1; /* Queda por detrás del punto naranja */
+ z-index: 1;
+  /* Dispara la animación usando tu variable de Vue */
+  animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
+  pointer-events: none;
+}
+
+
+
+/* Definición de la animación con la escala reactiva de Vue */
+@keyframes pulsoOndaRadarVue {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(v-bind(escalaOndaCss));
+    opacity: 0;
+  }
+}
+
 </style>
