@@ -2,6 +2,7 @@
   <nav class="navbar" @mouseleave="closeMenuDelayed">
     <div class="navbar-container">
       <!-- Logo como imagen -->
+       <breadcrumb></breadcrumb>
       <a :href="logoHref" class="navbar-logo">
         <img :src="logoSrc" :alt="logoAlt" class="logo-img" @error="handleLogoError" />
       </a>
@@ -172,6 +173,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import menuData from './menuData.json'
+import breadcrumb from '../components/breadcrumb.vue'
 
 // ===== Props =====
 const props = defineProps({
