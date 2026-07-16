@@ -205,8 +205,8 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: 'orange',
-      fillColor: 'orange',
+      color: 'red',
+      fillColor: 'red',
       fillOpacity: 0.1,
       weight: 5,
       opacity: 1,
@@ -230,9 +230,19 @@ watch(center, (c) => {
       zIndexOffset: 1000,
       pane: 'radarPaneMain',
     })
-      .on('dragstart', (e) => {
-        /* zoomActual.value = map.value.getZoom() */
-        // 🔥 Cambia el color del icono a rojo/morado usando filtros CSS dinámicos
+      .on('drag', (e) => {
+        const latLng = e.target.getLatLng()
+        radarCircle.value?.setLatLng(latLng)
+
+        if (municipiosRecortadosLayer.value) {
+          map.value.removeLayer(municipiosRecortadosLayer.value)
+          municipiosRecortadosLayer.value = null
+        }
+      })
+      .on('dragend', (e) => {
+        const latLng = e.target.getLatLng()
+        center.value = { lat: latLng.lat, lng: latLng.lng }
+
         /* if (e.target._icon) {
           // 1. Limpiamos cualquier onda vieja por seguridad
           if (e.target._icon.classList.contains('marcador-onda-activa')) {
@@ -246,53 +256,9 @@ watch(center, (c) => {
           e.target._icon.classList.add('marcador-onda-activa')
         } */
       })
-      .on('drag', (e) => {
-        /* e.target.setStyle({
-
-          color: 'red', // Color del borde nuevo
-
-        }) */
-
-        const latLng = e.target.getLatLng()
-        radarCircle.value?.setLatLng(latLng)
-
-        if (municipiosRecortadosLayer.value) {
-          map.value.removeLayer(municipiosRecortadosLayer.value)
-          municipiosRecortadosLayer.value = null
-        }
-      })
-      .on('dragend', (e) => {
-        const latLng = e.target.getLatLng()
-        center.value = { lat: latLng.lat, lng: latLng.lng }
-
-        if (e.target._icon) {
-          // Quitamos la clase al soltarlo para dejarlo listo para el siguiente drag
-          /* e.target._icon.classList.remove('marcador-onda-activa') */
-          if (e.target._icon.classList.contains('marcador-onda-activa')) {
-            e.target._icon.classList.remove('marcador-onda-activa')
-          }
-        }
-
-        if (e.target._icon) {
-          // 1. Limpiamos cualquier onda vieja por seguridad
-          if (e.target._icon.classList.contains('marcador-onda-activa')) {
-            e.target._icon.classList.remove('marcador-onda-activa')
-          }
-
-          // 2. Forzamos un pequeño "reflow" en el navegador para reiniciar la animación
-          void e.target._icon.offsetWidth
-
-          // 3. Añadimos la clase que dispara la animación de onda
-          e.target._icon.classList.add('marcador-onda-activa')
-        }
-      })
       .addTo(map.value)
 
-    map.value.whenReady(() => {
-      setTimeout(() => {
-        dispararOndaRadar(dragMarker.value)
-      }, 100) // 50ms son suficientes para que el DOM esté listo
-    })
+
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
@@ -307,7 +273,7 @@ watch(radius, (r) => {
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
 
-    dispararOndaRadar(dragMarker.value);
+    /* dispararOndaRadar(dragMarker.value); */
   }
 })
 
@@ -345,17 +311,25 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
-  /* dispararOndaRadar(dragMarker.value); */
+      /*   setTimeout(() => {
+        dispararOndaRadar(dragMarker.value)
+      }, 100) // 50ms son suficientes para que el DOM esté listo */
 
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane',
     style: {
-      color: 'orange',
-      fillColor: 'orange',
+      color: 'red',
+      fillColor: 'red',
       fillOpacity: 0,
-      weight: 1.5,
+      weight: 1.2,
     },
   }).addTo(map.value)
+
+  map.value.whenReady(() => {
+    setTimeout(() => {
+      dispararOndaRadar(dragMarker.value);
+    }, 50); // 50ms son suficientes para que el DOM esté listo
+  });
 
   /* dispararOndaRadar(dragMarker.value); */
 })
@@ -599,21 +573,21 @@ onUnmounted(() => {
   position: relative;
 }
 
-:global(.radar-center-marker::after) {
+/* :global(.radar-center-marker::after) {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 12px;
   height: 12px;
-  background: orange;
+  background: red;
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
   z-index: 2;
-}
+} */
 
 /* NUEVO: botón de activar/desactivar radar */
 .radar-toggle-btn {
@@ -698,7 +672,7 @@ onUnmounted(() => {
   left: 50%;
   width: 12px;
   height: 12px;
-  background: orange;
+  background: red;
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
