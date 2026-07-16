@@ -232,8 +232,12 @@ watch(center, (c) => {
     })
 
     radarCircle.value.addTo(map.value)
+
+
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
+
+
   }
 
   // Crear o actualizar marker draggable en el centro
@@ -262,6 +266,8 @@ watch(center, (c) => {
         detenerOndaRadar()
       })
       .addTo(map.value)
+
+
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
@@ -314,7 +320,7 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
-  /*   setTimeout(() => {
+      /*   setTimeout(() => {
         dispararOndaRadar(dragMarker.value)
       }, 100) // 50ms son suficientes para que el DOM esté listo */
 
@@ -330,9 +336,9 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   map.value.whenReady(() => {
     setTimeout(() => {
-      dispararOndaRadar(dragMarker.value)
-    }, 50) // 50ms son suficientes para que el DOM esté listo
-  })
+      dispararOndaRadar(dragMarker.value);
+    }, 50); // 50ms son suficientes para que el DOM esté listo
+  });
 
   /* dispararOndaRadar(dragMarker.value); */
 })
@@ -697,14 +703,14 @@ onUnmounted(() => {
 
   border-radius: 50%;
 
-  /*  background: radial-gradient(
+ /*  background: radial-gradient(
     circle,
     rgba(255, 65, 54, 0.8) 55%,
     rgba(255, 65, 54, 0.35) 75%,
     rgba(255, 65, 54, 0) 100%
   ); */
 
-  background: radial-gradient(
+   background: radial-gradient(
     circle,
     rgba(255, 65, 54, 0.8) 55%,
     rgba(255, 65, 54, 0.35) 75%,
@@ -714,6 +720,8 @@ onUnmounted(() => {
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }
+
+
 
 @keyframes pulsoOndaRadarVue {
   0% {
@@ -727,4 +735,5 @@ onUnmounted(() => {
     opacity: 0;
   }
 }
+
 </style>
