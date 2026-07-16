@@ -2,12 +2,7 @@
   <nav v-if="breadcrumbs.length > 1" class="breadcrumb-nav">
     <ol>
       <li v-for="(crumb, index) in breadcrumbs" :key="index">
-
-        <router-link 
-          v-if="index < breadcrumbs.length - 1" 
-          :to="crumb.path"
-          class="crumb-link"
-        >
+        <router-link v-if="index < breadcrumbs.length - 1" :to="crumb.path" class="crumb-link">
           <HomeIcon v-if="index === 0" />
           <template v-else>{{ crumb.label }}</template>
         </router-link>
@@ -24,47 +19,50 @@
 </template>
 
 <script setup>
-import { computed, h } from "vue";
-import { useRoute } from "vue-router";
+import { computed, h } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute();
+const route = useRoute()
 
-const HomeIcon = () => h("svg", {
-  xmlns: "http://www.w3.org/2000/svg",
-  width: "14",
-  height: "14",
-  fill: "currentColor",
-  class: "bi bi-house",
-  viewBox: "0 0 16 16",
-  style: "display: block;"
-}, [
-  h("path", {
-    d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
-  })
-]);
+const HomeIcon = () =>
+  h(
+    'svg',
+    {
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: '14',
+      height: '14',
+      fill: 'currentColor',
+      class: 'bi bi-house',
+      viewBox: '0 0 16 16',
+      style: 'display: block;',
+    },
+    [
+      h('path', {
+        d: 'M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z',
+      }),
+    ],
+  )
 
 const breadcrumbs = computed(() => {
-  const crumbs = [{ label: "Home", path: "/" }];
+  const crumbs = [{ label: 'Home', path: '/' }]
 
   route.matched.forEach((record) => {
-    if (record.path === "/") return;
+    if (record.path === '/') return
 
-    const hasIdentifier = record.meta?.breadcrumb || record.name;
-    if (!hasIdentifier && record.path === "") return;
+    const hasIdentifier = record.meta?.breadcrumb || record.name
+    if (!hasIdentifier && record.path === '') return
 
     const label =
-      record.meta?.breadcrumb ||
-      record.name ||
-      record.path.split("/").filter(Boolean).pop();
+      record.meta?.breadcrumb || record.name || record.path.split('/').filter(Boolean).pop()
 
     crumbs.push({
       label,
       path: record.path,
-    });
-  });
+    })
+  })
 
-  return crumbs;
-});
+  return crumbs
+})
 </script>
 
 <style scoped>

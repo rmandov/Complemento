@@ -2,7 +2,7 @@
   <nav class="navbar" @mouseleave="closeMenuDelayed">
     <div class="navbar-container">
       <!-- Logo como imagen -->
-       
+
       <a :href="logoHref" class="navbar-logo">
         <img :src="logoSrc" :alt="logoAlt" class="logo-img" @error="handleLogoError" />
       </a>

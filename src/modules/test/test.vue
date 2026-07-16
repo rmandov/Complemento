@@ -1,9 +1,9 @@
 <template>
-<p>Soy una ficha</p>
+  <p>Soy una ficha</p>
   <p>hola</p>
 </template>
 <style scoped>
-p{
+p {
   width: 100%;
   height: 200px;
   background-color: aquamarine;
