@@ -63,7 +63,8 @@ const handleMouseLeave = (e) => {
     
 <template>
   <p>Soy una ficha</p>
-  <section class="boton-section">
+  <p>hola</p>
+ <!--  <section class="boton-section">
       <div
         v-for="(btn, index) in botones"
         :key="index"
@@ -81,7 +82,7 @@ const handleMouseLeave = (e) => {
         </RouterLink>
       </div>
     </section>
-    <RouterView />
+    <RouterView /> -->
 </template>
 
 <style scoped>
@@ -161,5 +162,13 @@ const handleMouseLeave = (e) => {
 
 .boton-flecha {
   flex-shrink: 0;
+}
+p{
+  width: 100%;
+  height: 200px;
+  background-color: aquamarine;
+  flex: auto;
+  text-align: center;
+ 
 }
 </style>
