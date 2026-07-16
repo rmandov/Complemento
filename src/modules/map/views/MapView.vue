@@ -687,31 +687,42 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 20px;  /* Tamaño base inicial del anillo */
+  width: 20px;
   height: 20px;
-  margin-top: -10px; /* Centrado perfecto respecto al punto naranja */
+  margin-top: -10px;
   margin-left: -10px;
 
-  border: 2px solid #ff4136; /* Color rojo de la onda del radar */
   border-radius: 50%;
-  background: rgba(255, 65, 54, 0.15);
-  z-index: 1; /* Queda por detrás del punto naranja */
- z-index: 1;
-  /* Dispara la animación usando tu variable de Vue */
+
+ /*  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  ); */
+
+   background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  );
+
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }
 
 
 
-/* Definición de la animación con la escala reactiva de Vue */
 @keyframes pulsoOndaRadarVue {
   0% {
     transform: scale(1);
+    background-position: 0% 50%;
     opacity: 1;
   }
   100% {
     transform: scale(v-bind(escalaOndaCss));
+    background-position: 300% 50%;
     opacity: 0;
   }
 }
