@@ -214,8 +214,12 @@ watch(center, (c) => {
     })
 
     radarCircle.value.addTo(map.value)
+
+
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
+
+
   }
 
   // Crear o actualizar marker draggable en el centro
@@ -227,9 +231,9 @@ watch(center, (c) => {
       pane: 'radarPaneMain',
     })
       .on('dragstart', (e) => {
-        zoomActual.value = map.value.getZoom()
+        /* zoomActual.value = map.value.getZoom() */
         // 🔥 Cambia el color del icono a rojo/morado usando filtros CSS dinámicos
-        if (e.target._icon) {
+        /* if (e.target._icon) {
           // 1. Limpiamos cualquier onda vieja por seguridad
           if (e.target._icon.classList.contains('marcador-onda-activa')) {
             e.target._icon.classList.remove('marcador-onda-activa')
@@ -240,7 +244,7 @@ watch(center, (c) => {
 
           // 3. Añadimos la clase que dispara la animación de onda
           e.target._icon.classList.add('marcador-onda-activa')
-        }
+        } */
       })
       .on('drag', (e) => {
         /* e.target.setStyle({
@@ -268,6 +272,19 @@ watch(center, (c) => {
             e.target._icon.classList.remove('marcador-onda-activa')
           }
         }
+
+        if (e.target._icon) {
+          // 1. Limpiamos cualquier onda vieja por seguridad
+          if (e.target._icon.classList.contains('marcador-onda-activa')) {
+            e.target._icon.classList.remove('marcador-onda-activa')
+          }
+
+          // 2. Forzamos un pequeño "reflow" en el navegador para reiniciar la animación
+          void e.target._icon.offsetWidth
+
+          // 3. Añadimos la clase que dispara la animación de onda
+          e.target._icon.classList.add('marcador-onda-activa')
+        }
       })
       .addTo(map.value)
 
@@ -289,6 +306,8 @@ watch(radius, (r) => {
 
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
+
+    dispararOndaRadar(dragMarker.value);
   }
 })
 
@@ -326,6 +345,8 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
+  /* dispararOndaRadar(dragMarker.value); */
+
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane',
     style: {
@@ -335,6 +356,8 @@ watch(municipiosRecortadosEnRadar, (fc) => {
       weight: 1.5,
     },
   }).addTo(map.value)
+
+  /* dispararOndaRadar(dragMarker.value); */
 })
 
 /* ═══════════════════════════════════════════════════════════════
