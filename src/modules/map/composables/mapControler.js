@@ -30,7 +30,7 @@ export function useMap(containerRef) {
     map.value = L.map(containerRef.value, {
       minZoom: 5,
       maxBounds: mexicoBounds,
-      maxBoundsViscosity: 1,
+      maxBoundsViscosity: 0.9,
       scrollWheelZoom: false,
       zoomControl: true,
     });
