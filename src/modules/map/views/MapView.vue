@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
 
 import KDBush from 'kdbush'
@@ -29,6 +29,15 @@ import { useMapStore } from '@/stores/map.js'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
+const zoomActual = ref(5) //  zoom inicial por defecto de tu mapa (ej: 5)
+
+// El truco matemático: a menor zoom, la onda necesita escalar MENOS píxeles en pantalla
+const escalaOndaCss = computed(() => {
+  // Ajustamos el factor usando una potencia basada en el zoom actual
+  const factorZoom = Math.pow(2, zoomActual.value - 5)
+  return (radius.value / 30000) * factorZoom
+})
+
 const pointsProyectos = usePointsStore()
 const seleccionStore = useSeleccionStore()
 const mapStore = useMapStore()
@@ -39,7 +48,7 @@ const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, too
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(50000) // metros
+const radius = ref(200_000) // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
@@ -158,6 +167,37 @@ const radarCenterIcon = L.divIcon({
   iconAnchor: [10, 10],
 })
 
+const dispararOndaRadar = (marker) => {
+  if (marker && marker._icon) {
+    // Forzamos la actualización del zoom actual en Vue antes de animar
+    zoomActual.value = map.value.getZoom()
+
+    if (marker._icon.classList.contains('marcador-onda-activa')) {
+      marker._icon.classList.remove('marcador-onda-activa')
+    }
+    void marker._icon.offsetWidth // Truco de reflow para reiniciar CSS
+    marker._icon.classList.add('marcador-onda-activa')
+  }
+}
+
+let radarInterval = null
+
+function iniciarOndaRadar(marker) {
+  // Evita crear varios intervalos
+  if (radarInterval) return
+
+  dispararOndaRadar(marker)
+
+  radarInterval = setInterval(() => {
+    dispararOndaRadar(marker)
+  }, 800) // Debe coincidir con la duración de la animación CSS
+}
+
+function detenerOndaRadar() {
+  clearInterval(radarInterval)
+  radarInterval = null
+}
+
 watch(center, (c) => {
   // Limpiar capa anterior de municipios recortados
   if (municipiosRecortadosLayer.value) {
@@ -183,8 +223,8 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: 'orange',
-      fillColor: 'orange',
+      color: 'red',
+      fillColor: 'red',
       fillOpacity: 0.1,
       weight: 5,
       opacity: 1,
@@ -204,7 +244,6 @@ watch(center, (c) => {
       zIndexOffset: 1000,
       pane: 'radarPaneMain',
     })
-      .addTo(map.value)
       .on('drag', (e) => {
         const latLng = e.target.getLatLng()
         radarCircle.value?.setLatLng(latLng)
@@ -213,11 +252,16 @@ watch(center, (c) => {
           map.value.removeLayer(municipiosRecortadosLayer.value)
           municipiosRecortadosLayer.value = null
         }
+
+        iniciarOndaRadar(e.target)
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
         center.value = { lat: latLng.lat, lng: latLng.lng }
+
+        detenerOndaRadar()
       })
+      .addTo(map.value)
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
@@ -231,6 +275,8 @@ watch(radius, (r) => {
 
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
+
+    /* dispararOndaRadar(dragMarker.value); */
   }
 })
 
@@ -268,15 +314,27 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
+  /*   setTimeout(() => {
+        dispararOndaRadar(dragMarker.value)
+      }, 100) // 50ms son suficientes para que el DOM esté listo */
+
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane',
     style: {
-      color: 'orange',
-      fillColor: 'orange',
+      color: 'red',
+      fillColor: 'red',
       fillOpacity: 0,
-      weight: 1.5,
+      weight: 1.2,
     },
   }).addTo(map.value)
+
+  map.value.whenReady(() => {
+    setTimeout(() => {
+      dispararOndaRadar(dragMarker.value)
+    }, 50) // 50ms son suficientes para que el DOM esté listo
+  })
+
+  /* dispararOndaRadar(dragMarker.value); */
 })
 
 /* ═══════════════════════════════════════════════════════════════
@@ -411,6 +469,9 @@ async function toggleProyectos() {
 // --- MAIN ---
 onMounted(async () => {
   initMap()
+  map.value.on('zoomend', () => {
+    zoomActual.value = map.value.getZoom()
+  })
   // NOTA: ya NO se llama registerClick() aquí. El radar arranca
   // DESACTIVADO por defecto; el listener de click del mapa solo se
   // engancha cuando el usuario activa el radar (ver activarRadar()).
@@ -465,13 +526,13 @@ onUnmounted(() => {
       <!-- NUEVO: botón para activar/desactivar el radar por completo.
            Si prefieres que viva dentro de MapButtons.vue, comparte ese
            archivo y lo integro ahí como un emit más. -->
-      <button
+      <!-- <button
         class="radar-toggle-btn"
         :class="{ 'radar-toggle-btn--activo': radarActivo }"
         @click="toggleRadar"
       >
         {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
-      </button>
+      </button> -->
 
       <!-- Control de radio: solo visible/interactuable con el radar activo -->
       <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" />
@@ -494,7 +555,11 @@ onUnmounted(() => {
       <InformationClick />
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
-      <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" />
+      <MapButtons
+        @go-back="goBack"
+        @toggle-proyectos="toggleProyectos"
+        @toggle-radar="toggleRadar"
+      />
     </div>
   </div>
 
@@ -508,22 +573,24 @@ onUnmounted(() => {
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
+  position: relative;
 }
 
-:global(.radar-center-marker::after) {
+/* :global(.radar-center-marker::after) {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 12px;
   height: 12px;
-  background: orange;
+  background: red;
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
-}
+  z-index: 2;
+} */
 
 /* NUEVO: botón de activar/desactivar radar */
 .radar-toggle-btn {
@@ -587,5 +654,77 @@ onUnmounted(() => {
 
 :deep(.leaflet-interactive:focus) {
   outline: none;
+}
+
+:global(.dot-test) {
+  filter: hue-rotate(140deg) brightness(1.2) !important;
+}
+
+/* 1. Estilos base de tu marcador (Tu diseño original) */
+:global(.radar-center-marker) {
+  background: transparent;
+  border: none;
+  position: relative; /* Asegura que los pseudoelementos se alineen aquí */
+}
+
+/* El punto naranja estático se mantiene intacto usando ::after */
+:global(.radar-center-marker::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: red;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  cursor: move;
+  z-index: 2; /* Se coloca por encima de la onda para que no lo tape */
+}
+
+/* 2. La animación de la onda utilizando ::before para no romper el ::after */
+:global(.marcador-onda-activa::before) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+
+  border-radius: 50%;
+
+  /*  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  ); */
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  );
+
+  animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes pulsoOndaRadarVue {
+  0% {
+    transform: scale(1);
+    background-position: 0% 50%;
+    opacity: 1;
+  }
+  100% {
+    transform: scale(v-bind(escalaOndaCss));
+    background-position: 300% 50%;
+    opacity: 0;
+  }
 }
 </style>
