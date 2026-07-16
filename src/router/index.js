@@ -8,7 +8,7 @@ import Test from "@/modules/test/test.vue";
 const routes = [
   { path: "/", component: HomeView },
   { path: "/mapa", component: MapView },
-  { path: "/fichas", component: FichaView, children: [{ path: "test", componente: Test }] },
+  { path: "/fichas", component: FichaView, children: [{ path: "test", component: Test }] },
 ];
 
 const router = createRouter({

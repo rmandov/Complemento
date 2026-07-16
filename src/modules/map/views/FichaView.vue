@@ -6,7 +6,7 @@ import gsap from 'gsap'
 // Configuración de los botones
 const botones = [
   {
-    to: '/test',
+    to: '/fichas/test',
     img: new URL('../../../assets/img/img_circle.png', import.meta.url).href,
     label: 'Test',
   }
@@ -64,7 +64,7 @@ const handleMouseLeave = (e) => {
 <template>
   <p>Soy una ficha</p>
   <p>hola</p>
- <!--  <section class="boton-section">
+  <section class="boton-section">
       <div
         v-for="(btn, index) in botones"
         :key="index"
@@ -82,7 +82,7 @@ const handleMouseLeave = (e) => {
         </RouterLink>
       </div>
     </section>
-    <RouterView /> -->
+    <RouterView />
 </template>
 
 <style scoped>
@@ -169,6 +169,5 @@ p{
   background-color: aquamarine;
   flex: auto;
   text-align: center;
- 
 }
 </style>
