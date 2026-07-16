@@ -1,5 +1,5 @@
 <template>
-  <nav class="breadcrumb-nav">
+  <nav v-if="breadcrumbs.length > 1" class="breadcrumb-nav">
     <ol>
       <li v-for="(crumb, index) in breadcrumbs" :key="index">
 
@@ -46,16 +46,12 @@ const HomeIcon = () => h("svg", {
 const breadcrumbs = computed(() => {
   const crumbs = [{ label: "Home", path: "/" }];
 
-  // Usamos route.matched que YA trae la jerarquía completa padre → hijo
   route.matched.forEach((record) => {
-    // No duplicar la raíz porque ya la pusimos como Home
     if (record.path === "/") return;
 
-    // Si es un layout "fantasma" sin nombre ni breadcrumb, lo saltamos
     const hasIdentifier = record.meta?.breadcrumb || record.name;
     if (!hasIdentifier && record.path === "") return;
 
-    // Label: meta.breadcrumb > name > último segmento del path
     const label =
       record.meta?.breadcrumb ||
       record.name ||
