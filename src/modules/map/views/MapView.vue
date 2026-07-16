@@ -180,6 +180,24 @@ const dispararOndaRadar = (marker) => {
   }
 }
 
+let radarInterval = null
+
+function iniciarOndaRadar(marker) {
+  // Evita crear varios intervalos
+  if (radarInterval) return
+
+  dispararOndaRadar(marker)
+
+  radarInterval = setInterval(() => {
+    dispararOndaRadar(marker)
+  }, 800) // Debe coincidir con la duración de la animación CSS
+}
+
+function detenerOndaRadar() {
+  clearInterval(radarInterval)
+  radarInterval = null
+}
+
 watch(center, (c) => {
   // Limpiar capa anterior de municipios recortados
   if (municipiosRecortadosLayer.value) {
@@ -214,12 +232,8 @@ watch(center, (c) => {
     })
 
     radarCircle.value.addTo(map.value)
-
-
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
-
-
   }
 
   // Crear o actualizar marker draggable en el centro
@@ -238,27 +252,16 @@ watch(center, (c) => {
           map.value.removeLayer(municipiosRecortadosLayer.value)
           municipiosRecortadosLayer.value = null
         }
+
+        iniciarOndaRadar(e.target)
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
         center.value = { lat: latLng.lat, lng: latLng.lng }
 
-        /* if (e.target._icon) {
-          // 1. Limpiamos cualquier onda vieja por seguridad
-          if (e.target._icon.classList.contains('marcador-onda-activa')) {
-            e.target._icon.classList.remove('marcador-onda-activa')
-          }
-
-          // 2. Forzamos un pequeño "reflow" en el navegador para reiniciar la animación
-          void e.target._icon.offsetWidth
-
-          // 3. Añadimos la clase que dispara la animación de onda
-          e.target._icon.classList.add('marcador-onda-activa')
-        } */
+        detenerOndaRadar()
       })
       .addTo(map.value)
-
-
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
@@ -311,7 +314,7 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
-      /*   setTimeout(() => {
+  /*   setTimeout(() => {
         dispararOndaRadar(dragMarker.value)
       }, 100) // 50ms son suficientes para que el DOM esté listo */
 
@@ -327,9 +330,9 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   map.value.whenReady(() => {
     setTimeout(() => {
-      dispararOndaRadar(dragMarker.value);
-    }, 50); // 50ms son suficientes para que el DOM esté listo
-  });
+      dispararOndaRadar(dragMarker.value)
+    }, 50) // 50ms son suficientes para que el DOM esté listo
+  })
 
   /* dispararOndaRadar(dragMarker.value); */
 })
@@ -694,14 +697,14 @@ onUnmounted(() => {
 
   border-radius: 50%;
 
- /*  background: radial-gradient(
+  /*  background: radial-gradient(
     circle,
     rgba(255, 65, 54, 0.8) 55%,
     rgba(255, 65, 54, 0.35) 75%,
     rgba(255, 65, 54, 0) 100%
   ); */
 
-   background: radial-gradient(
+  background: radial-gradient(
     circle,
     rgba(255, 65, 54, 0.8) 55%,
     rgba(255, 65, 54, 0.35) 75%,
@@ -711,8 +714,6 @@ onUnmounted(() => {
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }
-
-
 
 @keyframes pulsoOndaRadarVue {
   0% {
@@ -726,5 +727,4 @@ onUnmounted(() => {
     opacity: 0;
   }
 }
-
 </style>
