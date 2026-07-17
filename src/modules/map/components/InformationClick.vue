@@ -30,7 +30,7 @@ onMounted(() => {
     </div>
   </section>
 </template>
-<style scoped>
+<style>
 .barra-lateral {
   position: relative;
   /*  height: calc(100% - 30px); */
@@ -44,7 +44,7 @@ onMounted(() => {
   left: 15px; */
 
   /*  z-index: 500;  */ /* Más alto que todo */
-  pointer-events: none;
+  /* pointer-events: none; */
   border-radius: 10px;
   overflow: auto;
 
@@ -53,9 +53,6 @@ onMounted(() => {
   background-color: rgb(231, 231, 231);
 }
 
-.card {
-  /* border: solid 1px red; */
-}
 .title {
   /* border: solid 1px rgb(136, 255, 0); */
 
@@ -71,8 +68,6 @@ onMounted(() => {
 }
 
 .body {
-  /* border: solid 1px rgb(0, 89, 255); */
-
   padding: 1rem;
 }
 </style>

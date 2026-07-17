@@ -526,9 +526,9 @@ onUnmounted(() => {
   <!-- Panel de información al hacer clic -->
 
   <div class="map-wraper" @mousemove="updateMousePosition">
-    <InformationClick />
+    <InformationClick class="info" />
 
-    <div class="info" @mouseenter="active = true" @mouseleave="active = false">
+    <div class="display-mapa" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
       <!-- Tooltip de advertencia para zoom -->
@@ -590,22 +590,6 @@ onUnmounted(() => {
   position: relative;
 }
 
-/* :global(.radar-center-marker::after) {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  background: red;
-  border: 2px solid white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-  cursor: move;
-  z-index: 2;
-} */
-
 /* NUEVO: botón de activar/desactivar radar */
 .radar-toggle-btn {
   position: absolute;
@@ -647,11 +631,11 @@ onUnmounted(() => {
 
 .map-wraper {
   display: flex;
-  border: solid 1px blue;
+  /* border: solid 1px blue; */
   width: calc(100dvw - (100dvw - 100%));
   height: calc(100dvh - var(--nav-height));
   padding: 1rem;
-
+  flex-direction: row;
   gap: 10px;
 }
 
@@ -661,11 +645,32 @@ onUnmounted(() => {
 }
 
 .info {
+  order: 1;
+}
+
+.display-mapa {
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 10px;
   overflow: hidden;
+
+  order: 2;
+}
+
+@media (max-width: 1000px) {
+  .map-wraper {
+    flex-direction: column;
+  }
+  /* Para que B quede arriba y A abajo, invertimos el order */
+  .info {
+    order: 2;
+    width: 100%;
+  }
+  .display-mapa {
+    order: 1;
+  }
+  /* O también: .item-b { order: -1; } y .item-a { order: 0; } */
 }
 
 :deep(.leaflet-interactive:focus) {
