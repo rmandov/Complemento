@@ -23,6 +23,13 @@ import { useMapInteractions } from '../composables/useMapInteractions.js'
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
+// radius
+import { storeToRefs } from 'pinia'
+import { useRadiusStore } from '@/stores/radiusStore.js'
+const radiusStore = useRadiusStore()
+const { radius, minRadius, maxRadius } = storeToRefs(radiusStore)
+console.log('Este es el radius:', radius.value)
+
 import { usePointsStore } from '@/stores/pointsStore.js'
 // NUEVO: constante con las coordenadas (posición del radar)
 import { useMapStore } from '@/stores/map.js'
@@ -48,7 +55,7 @@ const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, too
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(200_000) // metros
+/* const radius = ref(200_000) */ // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
@@ -115,7 +122,7 @@ function searchPoints() {
     filteredFeatures.value = []
     return
   }
-  const radiusKm = radius.value / 1000
+  const radiusKm = radius.value
 
   const results = geokdbush.around(
     spatialIndex,
@@ -516,7 +523,11 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Panel de información al hacer clic -->
+
   <div class="map-wraper" @mousemove="updateMousePosition">
+    <InformationClick />
+
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
@@ -535,7 +546,13 @@ onUnmounted(() => {
       </button> -->
 
       <!-- Control de radio: solo visible/interactuable con el radar activo -->
-      <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" />
+      <RadiusControl
+        v-if="radarActivo"
+        v-model:radius="radius"
+        :count="radioCantidad"
+        :min="minRadius"
+        :max="maxRadius"
+      />
 
       <!-- Panel con el listado de municipios tocados por el radar:
            solo tiene sentido mostrarlo con el radar activo -->
@@ -551,8 +568,7 @@ onUnmounted(() => {
         </ul>
       </div>
 
-      <!-- Panel de información al hacer clic -->
-      <InformationClick />
+
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
       <MapButtons
@@ -637,6 +653,8 @@ onUnmounted(() => {
   width: calc(100dvw - (100dvw - 100%));
   height: calc(100dvh - var(--nav-height));
   padding: 1rem;
+
+  gap: 10px;
 }
 
 .map {

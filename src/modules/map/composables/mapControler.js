@@ -4,17 +4,27 @@ import L from 'leaflet'
 import { useMapStore } from '@/stores/map'
 import { usePoligonoStore } from '@/stores/poligonoStore'
 
+import { storeToRefs } from 'pinia'
+import { useRadiusStore } from '@/stores/radiusStore'
+
 export function useMap(containerRef) {
   const map = shallowRef(null)
   const mapStore = useMapStore()
   const poligonoStore = usePoligonoStore()
 
+  const radiusStore = useRadiusStore()
+  const { radius, minRadius, maxRadius } = storeToRefs(radiusStore)
   // Mexico bounds
   const defaultView = {
     /* center: [23.6345, -102.5528], */
     center: [23.6345, -102.5528],
     zoom: 5,
   }
+
+  const mexicoBounds = L.latLngBounds(
+    [14.5, -118.5], // Suroeste
+    [32.8, -86.5], // Noreste
+  )
 
   // Inicializador del mapa
   const initMap = () => {
@@ -24,11 +34,13 @@ export function useMap(containerRef) {
     // Definimos el mapa y su encuadre
     map.value = L.map(containerRef.value, {
       minZoom: 5,
-
+      maxBounds: mexicoBounds,
+      maxBoundsViscosity: 0.5,
       scrollWheelZoom: false,
       zoomControl: true,
     })
-    map.value.setView(defaultView.center, defaultView.zoom)
+    /* map.value.setView(defaultView.center, defaultView.zoom); */
+    map.value.fitBounds(mexicoBounds)
 
     // 1. Capa de fondo (SIN ETIQUETAS)
     const callesFondo = L.tileLayer(
@@ -61,23 +73,45 @@ export function useMap(containerRef) {
   // Retorno al encuadre original - Mexico Bounds
   const resetView = () => {
     if (!map.value) return
+    flyToBounds(map.value, mexicoBounds, true)
+  }
 
-    map.value.flyTo(defaultView.center, defaultView.zoom, {
-      animate: true,
+  // Movernos al encuadre que querramos
+  const flyToBounds = (map, bounds, mexico = false) => {
+    if (!map || !bounds) return console.log('No se tiene bounds o mapa')
+
+    map.setMaxBounds(null)
+
+    map.flyToBounds(bounds, {
+      padding: [0, 0],
       duration: 0.5,
-      easeLinearity: 0.1,
     })
 
-    map.value.once('moveend', () => {
-      // Actualizar store inmediatamente (o después de la animación)
+    map.once('moveend', () => {
+      map.setMaxBounds(bounds)
+
       mapStore.setView({
-        center: map.value.getCenter(),
-        zoom: map.value.getZoom(),
-        /* center: defaultView.center,
-      zoom: defaultView.zoom, */
-        bounds: map.value.getBounds(),
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+        bounds: bounds,
       })
     })
+
+    if (mexico) {
+      /* radius.value = 200_000; */
+    } else {
+      const sw = bounds.getSouthWest()
+      const ne = bounds.getNorthEast()
+
+      // Distancia de la diagonal (en metros) medio
+      const maxRadius_2 = sw.distanceTo(ne) / 6 // entre 1000 para m
+      const truncated = Math.trunc(maxRadius_2 * 10) / 10
+      radius.value = truncated
+      minRadius.value = maxRadius_2 / 2
+      maxRadius.value = maxRadius_2 * 1.5
+    }
+
+    console.log('Este es el radio km: ', radius.value)
   }
 
   // Recibe el map.value para gestionar el uso de poligonos
@@ -92,24 +126,6 @@ export function useMap(containerRef) {
     poligonoStore.clear()
     // Cambia el setView enfocando a Mexico
     resetView()
-  }
-
-  // Movernos al encuadre que querramos
-  const flyToBounds = (map, bounds) => {
-    if (!map || !bounds) return console.log('No se tiene bounds o mapa')
-
-    map.flyToBounds(bounds, {
-      padding: [0, 0],
-      duration: 0.5,
-    })
-
-    map.once('moveend', () => {
-      mapStore.setView({
-        center: map.getCenter(),
-        zoom: map.getZoom(),
-        bounds: bounds,
-      })
-    })
   }
 
   // Limpieza para evitar fugas de memoria

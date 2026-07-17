@@ -32,23 +32,25 @@ onMounted(() => {
 </template>
 <style scoped>
 .barra-lateral {
-  position: absolute;
-  height: calc(100% - 30px);
+  position: relative;
+ /*  height: calc(100% - 30px); */
   /* width: 300px; */
   width: 20%;
   /* border: solid 1px purple; */
   /* background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px); */
   transition: all 0.3s ease;
-  bottom: 15px;
-  left: 15px;
+  /* bottom: 15px;
+  left: 15px; */
 
-  z-index: 500; /* Más alto que todo */
+ /*  z-index: 500;  *//* Más alto que todo */
   pointer-events: none;
   border-radius: 10px;
   overflow: auto;
 
   padding: 1rem;
+
+  background-color: rgb(231, 231, 231);
 }
 
 .card {
