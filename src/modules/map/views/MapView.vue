@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed,  } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
 
 import KDBush from 'kdbush'
@@ -24,13 +24,11 @@ import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
 // radius
-import { storeToRefs } from "pinia";
+import { storeToRefs } from 'pinia'
 import { useRadiusStore } from '@/stores/radiusStore.js'
-const radiusStore = useRadiusStore();
-const { radius,  minRadius, maxRadius } = storeToRefs(radiusStore);
-console.log("Este es el radius:", radius.value);
-
-
+const radiusStore = useRadiusStore()
+const { radius, minRadius, maxRadius } = storeToRefs(radiusStore)
+console.log('Este es el radius:', radius.value)
 
 import { usePointsStore } from '@/stores/pointsStore.js'
 // NUEVO: constante con las coordenadas (posición del radar)
@@ -544,7 +542,13 @@ onUnmounted(() => {
       </button> -->
 
       <!-- Control de radio: solo visible/interactuable con el radar activo -->
-      <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" :min="minRadius" :max="maxRadius" />
+      <RadiusControl
+        v-if="radarActivo"
+        v-model:radius="radius"
+        :count="radioCantidad"
+        :min="minRadius"
+        :max="maxRadius"
+      />
 
       <!-- Panel con el listado de municipios tocados por el radar:
            solo tiene sentido mostrarlo con el radar activo -->
