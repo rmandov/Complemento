@@ -122,7 +122,7 @@ function searchPoints() {
     filteredFeatures.value = []
     return
   }
-  const radiusKm = radius.value
+  const radiusKm = radius.value / 1_000
 
   const results = geokdbush.around(
     spatialIndex,
@@ -567,8 +567,6 @@ onUnmounted(() => {
           </li>
         </ul>
       </div>
-
-
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
       <MapButtons
