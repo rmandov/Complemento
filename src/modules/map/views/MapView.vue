@@ -523,7 +523,11 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Panel de información al hacer clic -->
+
   <div class="map-wraper" @mousemove="updateMousePosition">
+    <InformationClick />
+
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
       <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
@@ -564,8 +568,7 @@ onUnmounted(() => {
         </ul>
       </div>
 
-      <!-- Panel de información al hacer clic -->
-      <InformationClick />
+
 
       <!-- Buttons para controlar el setView y carga de layer Proyectos -->
       <MapButtons
@@ -650,6 +653,8 @@ onUnmounted(() => {
   width: calc(100dvw - (100dvw - 100%));
   height: calc(100dvh - var(--nav-height));
   padding: 1rem;
+
+  gap: 10px;
 }
 
 .map {
