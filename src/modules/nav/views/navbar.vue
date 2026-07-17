@@ -303,7 +303,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 36px;
 }
 
 /* ===== Logo ===== */
@@ -315,7 +315,7 @@ onUnmounted(() => {
 }
 
 .logo-img {
-  height: 40px;
+  height: 28px;
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -343,7 +343,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.75rem 1rem;
+  padding: 0.1rem 0.5rem;
   color: #575757;
   text-decoration: none;
   font-size: 1rem;
