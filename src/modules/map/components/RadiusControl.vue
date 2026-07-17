@@ -1,16 +1,12 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-/* defineProps({
-
-})
-defineEmits(['update:radius']) */
 
 const props = defineProps({
   radius: Number,
   count: Number,
-  min: { default: 100 },
-  max: { default: 1000000 },
+  min: { default: 50_000 },
+  max: { default: 300_000 },
   step: { default: 100 },
 })
 
@@ -25,11 +21,11 @@ watch(
 </script>
 <template>
   <div class="radius-control">
-    <label>Radio: {{ radius / 1000 }} Km</label>
+    <label>Radio: {{Math.trunc(radius / 1000  * 10) / 10}} Km</label>
     <input
       type="range"
-      :min="min"
-      :max="max"
+      :min="props.min"
+:max="props.max"
       :step="step"
       :value="localRadius"
       @input="localRadius = Number($event.target.value)"
