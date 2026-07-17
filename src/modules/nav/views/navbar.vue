@@ -7,6 +7,8 @@
         <img :src="logoSrc" :alt="logoAlt" class="logo-img" @error="handleLogoError" />
       </a>
 
+      <breadcrumb></breadcrumb>
+
       <!-- Botón hamburguesa (solo móvil) -->
       <button
         class="hamburger-btn"
@@ -168,7 +170,7 @@
       </div>
     </Transition>
   </nav>
-  <breadcrumb></breadcrumb>
+  
 </template>
 
 <script setup>

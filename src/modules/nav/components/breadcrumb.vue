@@ -67,15 +67,15 @@ const breadcrumbs = computed(() => {
 
 <style scoped>
 .breadcrumb-nav {
-  position: absolute;
-  top: 5rem;
+  /* top: 5rem;
   left: 1rem;
+  position: absolute;
   z-index: 9999;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 25px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.06); */
   padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
 }
