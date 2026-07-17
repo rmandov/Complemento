@@ -36,39 +36,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import gsap from "gsap";
-import { Draggable } from "gsap/Draggable";
-import cardsData from "./cards.json";
+import { ref, onMounted, computed } from 'vue'
+import gsap from 'gsap'
+import { Draggable } from 'gsap/Draggable'
+import cardsData from './cards.json'
 
-gsap.registerPlugin(Draggable);
+gsap.registerPlugin(Draggable)
 
-const galleryRef = ref(null);
-const cardsRef = ref(null);
-const dragProxyRef = ref(null);
-const cardElements = ref([]);
+const galleryRef = ref(null)
+const cardsRef = ref(null)
+const dragProxyRef = ref(null)
+const cardElements = ref([])
 
 const setCardRef = (el, index) => {
-  if (el) cardElements.value[index] = el;
-};
+  if (el) cardElements.value[index] = el
+}
 
-const spacing = 0.1;
+const spacing = 0.1
 
 const loopCards = computed(() => {
-  const minItems = Math.ceil(1.5 / spacing) + 1;
-  const items = [];
+  const minItems = Math.ceil(1.5 / spacing) + 1
+  const items = []
   while (items.length < minItems) {
-    items.push(...cardsData);
+    items.push(...cardsData)
   }
-  return items.slice(0, Math.max(minItems, cardsData.length * 3));
-});
+  return items.slice(0, Math.max(minItems, cardsData.length * 3))
+})
 
-const playhead = { offset: 0 };
-let iteration = 0;
-let seamlessLoop, wrapTime, snapTime;
+const playhead = { offset: 0 }
+let iteration = 0
+let seamlessLoop, wrapTime, snapTime
 
 const animateFunc = (element) => {
-  const tl = gsap.timeline();
+  const tl = gsap.timeline()
   tl.fromTo(
     element,
     { scale: 0, opacity: 0 },
@@ -79,17 +79,17 @@ const animateFunc = (element) => {
       duration: 0.5,
       yoyo: true,
       repeat: 1,
-      ease: "power1.in",
+      ease: 'power1.in',
       immediateRender: false,
     },
   ).fromTo(
     element,
     { xPercent: 400 },
-    { xPercent: -400, duration: 1, ease: "none", immediateRender: false },
+    { xPercent: -400, duration: 1, ease: 'none', immediateRender: false },
     0,
-  );
-  return tl;
-};
+  )
+  return tl
+}
 
 const buildSeamlessLoop = (items, spacing, animateFunc) => {
   let overlap = Math.ceil(1 / spacing),
@@ -100,33 +100,33 @@ const buildSeamlessLoop = (items, spacing, animateFunc) => {
       paused: true,
       repeat: -1,
       onRepeat() {
-        const tl = this;
+        const tl = this
         if (tl._time === tl._dur) {
-          tl._tTime += tl._dur - 0.01;
+          tl._tTime += tl._dur - 0.01
         }
       },
     }),
     l = items.length + overlap * 2,
     time,
     i,
-    index;
+    index
 
   for (i = 0; i < l; i++) {
-    index = i % items.length;
-    time = i * spacing;
-    rawSequence.add(animateFunc(items[index]), time);
+    index = i % items.length
+    time = i * spacing
+    rawSequence.add(animateFunc(items[index]), time)
 
     if (i <= items.length) {
-      seamlessLoop.add("label" + i, time);
+      seamlessLoop.add('label' + i, time)
     }
   }
 
-  rawSequence.time(startTime);
+  rawSequence.time(startTime)
   seamlessLoop
     .to(rawSequence, {
       time: loopTime,
       duration: loopTime - startTime,
-      ease: "none",
+      ease: 'none',
     })
     .fromTo(
       rawSequence,
@@ -135,83 +135,82 @@ const buildSeamlessLoop = (items, spacing, animateFunc) => {
         time: startTime,
         duration: startTime - (overlap * spacing + 1),
         immediateRender: false,
-        ease: "none",
+        ease: 'none',
       },
-    );
-  return seamlessLoop;
-};
+    )
+  return seamlessLoop
+}
 
 const updateCarousel = (offset) => {
-  seamlessLoop.time(wrapTime(offset));
-};
+  seamlessLoop.time(wrapTime(offset))
+}
 
 const animateToOffset = (offset) => {
-  let snappedTime = snapTime(offset);
-  let progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
+  let snappedTime = snapTime(offset)
+  let progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration()
 
   if (progress >= 1 || progress < 0) {
-    iteration += Math.floor(progress);
+    iteration += Math.floor(progress)
   }
 
-  let newProgress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
-  let wrappedProgress = gsap.utils.wrap(0, 1, newProgress);
-  let targetOffset =
-    seamlessLoop.duration() * iteration + wrappedProgress * seamlessLoop.duration();
+  let newProgress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration()
+  let wrappedProgress = gsap.utils.wrap(0, 1, newProgress)
+  let targetOffset = seamlessLoop.duration() * iteration + wrappedProgress * seamlessLoop.duration()
 
-  targetOffset = snapTime(targetOffset);
+  targetOffset = snapTime(targetOffset)
 
   gsap.to(playhead, {
     offset: targetOffset,
     duration: 0.6,
-    ease: "power3.out",
+    ease: 'power3.out',
     onUpdate: () => updateCarousel(playhead.offset),
-  });
-};
+  })
+}
 
 const goToCard = (clickedIndex) => {
-  const total = loopCards.value.length;
-  const currentVirtualIndex = Math.round(playhead.offset / spacing);
-  const currentRelative = ((currentVirtualIndex % total) + total) % total;
-  let diff = clickedIndex - currentRelative;
+  const total = loopCards.value.length
+  const currentVirtualIndex = Math.round(playhead.offset / spacing)
+  const currentRelative = ((currentVirtualIndex % total) + total) % total
+  let diff = clickedIndex - currentRelative
 
-  if (diff > total / 2) diff -= total;
-  if (diff < -total / 2) diff += total;
-  if (diff === 0) return;
+  if (diff > total / 2) diff -= total
+  if (diff < -total / 2) diff += total
+  if (diff === 0) return
 
-  animateToOffset(playhead.offset + diff * spacing);
-};
+  animateToOffset(playhead.offset + diff * spacing)
+}
 
-const next = () => animateToOffset(playhead.offset + spacing);
-const prev = () => animateToOffset(playhead.offset - spacing);
+const next = () => animateToOffset(playhead.offset + spacing)
+const prev = () => animateToOffset(playhead.offset - spacing)
 
 const initCarousel = () => {
-  gsap.set(cardElements.value, { xPercent: 400, opacity: 0, scale: 0 });
+  gsap.set(cardElements.value, { xPercent: 400, opacity: 0, scale: 0 })
 
-  seamlessLoop = buildSeamlessLoop(cardElements.value, spacing, animateFunc);
-  wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
-  snapTime = gsap.utils.snap(spacing);
+  seamlessLoop = buildSeamlessLoop(cardElements.value, spacing, animateFunc)
+  wrapTime = gsap.utils.wrap(0, seamlessLoop.duration())
+  snapTime = gsap.utils.snap(spacing)
 
-  updateCarousel(0);
+  updateCarousel(0)
 
   Draggable.create(dragProxyRef.value, {
-    type: "x",
+    type: 'x',
     trigger: cardsRef.value,
     onPress() {
-      this.startOffset = playhead.offset;
+      this.startOffset = playhead.offset
     },
     onDrag() {
-      playhead.offset = this.startOffset + (this.startX - this.x) * 0.001;
-      updateCarousel(playhead.offset);
+      playhead.offset = this.startOffset + (this.startX - this.x) * 0.001
+      updateCarousel(playhead.offset)
     },
     onDragEnd() {
-      animateToOffset(playhead.offset);
+      animateToOffset(playhead.offset)
     },
-  });
-};
+  })
+}
 
 onMounted(() => {
-  initCarousel();
-});
+  initCarousel()
+})
 </script>
 
 <style scoped>
@@ -251,7 +250,7 @@ onMounted(() => {
   left: 0;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: #1a1a1a;
+  background: #696969;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -260,7 +259,7 @@ onMounted(() => {
 }
 
 .cards li:hover {
-  box-shadow: 0 15px 40px rgba(136, 206, 2, 0.4);
+  box-shadow: 0 15px 40px rgb(63, 63, 63);
 }
 
 .cards li img {
@@ -279,6 +278,7 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
   pointer-events: none;
+  background-color: #5e5e5e;
 }
 
 .card-content h3 {
@@ -291,14 +291,14 @@ onMounted(() => {
 .card-content p {
   margin: 0;
   font-size: 0.8rem;
-  color: #aaa;
+  color: #e4e4e4;
   line-height: 1.4;
 }
 
 /* ─── Desktop ─── */
 .actions {
   position: absolute;
-  bottom: 25px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -309,19 +309,21 @@ onMounted(() => {
 }
 
 .actions button {
-  background: #88ce02;
+  background: #dddddd;
   border: none;
   padding: 0.6rem 1.4rem;
   border-radius: 2rem;
-  color: #111;
+  color: #000000;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .actions button:hover {
   transform: scale(1.05);
-  background: #9be02a;
+  background: #aaaaaa;
 }
 
 .arrow {
@@ -341,7 +343,9 @@ onMounted(() => {
   justify-content: center;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  transition: opacity 0.3s, background 0.3s;
+  transition:
+    opacity 0.3s,
+    background 0.3s;
 }
 
 .arrow svg {
@@ -410,7 +414,7 @@ onMounted(() => {
   }
 
   .cards::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: -30px;
     left: 50%;

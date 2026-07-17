@@ -1,22 +1,17 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
-import gsap from 'gsap'
-
-// img
-import { MEXICO_ICON } from '@/assets/img/mexicoIcon.js'
 
 // Components
 import InformationClick from '../components/InformationClick.vue'
-import InformationProjects from '../components/InformationProjects.vue'
 import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
-
+import MapButtons from '../components/MapButtons.vue'
+import MapScrollTooltip from '../components/MapScrollTooltip.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -25,100 +20,54 @@ const { getGeoJson } = useGeoJson()
 import { useMap as createMap } from '@/modules/map/composables/mapControler'
 import { createLayer } from '../composables/useCreateLayer'
 import { useMapInteractions } from '../composables/useMapInteractions.js'
-// NUEVO: composable que calcula qué municipios toca el radar
 import { useMunicipiosRadar } from '../composables/useMunicipiosRadar'
 
 // Stores
-import { usePoligonoStore } from '@/stores/poligonoStore.js'
 import { usePointsStore } from '@/stores/pointsStore.js'
+// NUEVO: constante con las coordenadas (posición del radar)
+import { useMapStore } from '@/stores/map.js'
+// NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
+import { useSeleccionStore } from '@/stores/seleccionStore'
 
-// Se inicializan valores de pinia
+const zoomActual = ref(5) //  zoom inicial por defecto de tu mapa (ej: 5)
+
+// El truco matemático: a menor zoom, la onda necesita escalar MENOS píxeles en pantalla
+const escalaOndaCss = computed(() => {
+  // Ajustamos el factor usando una potencia basada en el zoom actual
+  const factorZoom = Math.pow(2, zoomActual.value - 5)
+  return (radius.value / 30000) * factorZoom
+})
+
 const pointsProyectos = usePointsStore()
-const poligonoStore = usePoligonoStore()
+const seleccionStore = useSeleccionStore()
+const mapStore = useMapStore()
 
-// INICIO useMap()
-
-// 1. Se inicializa el mapa mandando mapContainer que es un ref de un div
-/*
-initMap - crea el mapa tomando el mapContainer.
-map - es el mapa en donde podemos aplicar los layers
-resetView- retorna la vista al encuadre de todo México
-*/
 const mapContainer = ref(null)
-const { initMap, resetView, map } = createMap(mapContainer)
-
-// goBack revisa si existe alguna entidad/municipio clickeado para entonces
-// devolver el poligono eliminado
-// despues realiza el resetView()
-function goBack() {
-  if (poligonoStore.municipio || poligonoStore.entidad) {
-    map.value.removeLayer(poligonoStore.municipiosLayer)
-    poligonoStore.entidad.addTo(map.value)
-  }
-  poligonoStore.clear()
-  resetView()
-}
-
-// FIN useMap()
-
-// INICIO - Movimiento de zoom con ctrl + wheel
-
-const showWarning = ref(false)
-let warningTimeout = null
-const tooltipPos = ref({ x: 0, y: 0 })
-
-// Actualiza las coordenadas X e Y relativas al contenedor del mapa
-const updateMousePosition = (event) => {
-  // Ajustamos un pequeño desfase (15px) para que el tooltip no tape la punta del cursor
-  tooltipPos.value = {
-    x: event.clientX + 15,
-    y: event.clientY + 15,
-  }
-}
-
-function handleWheel(event) {
-  // Si la tecla Ctrl está presionada, permitimos el zoom manual
-  if (event.ctrlKey) {
-    event.preventDefault() // Evita que la página web haga scroll
-
-    const currentZoom = map.value.getZoom()
-    // event.deltaY < 0 significa scroll hacia arriba (Zoom In)
-    if (event.deltaY < 0) {
-      map.value.setZoom(currentZoom + 1)
-    } else {
-      map.value.setZoom(currentZoom - 1)
-    }
-    showWarning.value = false
-  } else {
-    // Si NO está presionada la tecla Ctrl, mostramos la advertencia
-    showWarning.value = true
-
-    // Ocultar el aviso después de 2 segundos de inactividad
-    clearTimeout(warningTimeout)
-    warningTimeout = setTimeout(() => {
-      showWarning.value = false
-    }, 1000)
-  }
-}
-// FIN - Movimiento de zoom con ctrl + wheel
+const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
+  createMap(mapContainer)
 
 const capaProyectos = shallowRef(null)
 
-const radius = ref(5000) // metros
+const radius = ref(200_000) // metros
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
 
-// --- RADAR: Municipios tocados por el área del radar (NUEVO) ---
-// municipiosEnRadar: array reactivo de features de municipios que
-//   intersectan el círculo (total, parcial o por el borde).
-// cargandoMunicipios: true mientras se están descargando archivos de
-//   municipios de entidades candidatas que aún no estaban en cache.
+// --- RADAR: activar/desactivar completamente (NUEVO) ---
+// Fuente de verdad ÚNICA de si el radar está encendido o apagado.
+// Todo lo demás (listener de click, watchers de cálculo, UI) se
+// deriva de este flag.
+const radarActivo = ref(false)
+
+// --- RADAR: Municipios tocados por el área del radar ---
 const {
   municipiosEnRadar,
+  municipiosRecortadosEnRadar,
   cargandoMunicipios,
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
+  actualizarMunicipiosRecortadosEnRadar,
+  resetRadar, // NUEVO: cancela cálculos en curso y limpia resultados
 } = useMunicipiosRadar()
 
 const filteredFeatures = shallowRef([])
@@ -153,7 +102,7 @@ watch(
 
     console.log('✅ Índice espacial actualizado con', rawFeatures.length, 'puntos')
 
-    if (center.value && radius.value != null) {
+    if (radarActivo.value && center.value && radius.value != null) {
       searchPoints()
     }
   },
@@ -168,10 +117,6 @@ function searchPoints() {
   }
   const radiusKm = radius.value / 1000
 
-  /* rawFeatures = JSON.parse(
-  JSON.stringify(toRaw(features))
-)
- */
   const results = geokdbush.around(
     spatialIndex,
     center.value.lng,
@@ -180,12 +125,10 @@ function searchPoints() {
     radiusKm,
   )
 
-  // ✅ results son índices numéricos; usamos rawFeatures global
-  filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean) // defensa: elimina undefined por si acaso
+  filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean)
 
   console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
 
-  // Se resta de la cantidad el proyecto mismo
   radioCantidad.value = filteredFeatures.value.length
 
   console.log(filteredFeatures.value)
@@ -193,12 +136,17 @@ function searchPoints() {
 
 // Reaccionar a cambios de centro o radio
 watch([center, radius], () => {
+  // ── NUEVO: Task 1 ────────────────────────────────────────────
+  // Si el radar está desactivado, no se ejecuta absolutamente
+  // ninguna lógica asociada (ni búsqueda de proyectos por KDBush,
+  // ni cálculo/descarga de municipios por Turf).
+  if (!radarActivo.value) return
+  // ─────────────────────────────────────────────────────────────
+
   if (spatialIndex) searchPoints()
 
-  // NUEVO: recalcula (con debounce interno) qué municipios toca el radar.
-  // Usa lazy-loading de las entidades candidatas, así que puede tardar
-  // un poco la primera vez que el radar entra a un estado nuevo.
   actualizarMunicipiosEnRadar(center.value, radius.value)
+  actualizarMunicipiosRecortadosEnRadar(center.value, radius.value)
 })
 
 watch(
@@ -211,13 +159,7 @@ watch(
 // --- Círculo del radar + Marker draggable ---
 const radarCircle = shallowRef(null)
 const dragMarker = shallowRef(null)
-
-// Icono invisible/pequeño para el centro del radar (arrastrable)
-/* const radarCenterIcon = L.icon({
-  iconUrl:"src/assets/img/cabeza.png",
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-}) */
+const municipiosRecortadosLayer = shallowRef(null)
 
 const radarCenterIcon = L.divIcon({
   className: 'radar-center-marker',
@@ -225,7 +167,46 @@ const radarCenterIcon = L.divIcon({
   iconAnchor: [10, 10],
 })
 
+const dispararOndaRadar = (marker) => {
+  if (marker && marker._icon) {
+    // Forzamos la actualización del zoom actual en Vue antes de animar
+    zoomActual.value = map.value.getZoom()
+
+    if (marker._icon.classList.contains('marcador-onda-activa')) {
+      marker._icon.classList.remove('marcador-onda-activa')
+    }
+    void marker._icon.offsetWidth // Truco de reflow para reiniciar CSS
+    marker._icon.classList.add('marcador-onda-activa')
+  }
+}
+
+let radarInterval = null
+
+function iniciarOndaRadar(marker) {
+  // Evita crear varios intervalos
+  if (radarInterval) return
+
+  dispararOndaRadar(marker)
+
+  radarInterval = setInterval(() => {
+    dispararOndaRadar(marker)
+  }, 800) // Debe coincidir con la duración de la animación CSS
+}
+
+function detenerOndaRadar() {
+  clearInterval(radarInterval)
+  radarInterval = null
+}
+
 watch(center, (c) => {
+  // Limpiar capa anterior de municipios recortados
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
+  // Cuando `center` se vuelve null (radar apagado, o mapa no listo),
+  // se eliminan del mapa todos los elementos visuales del radar.
   if (!map.value || !c) {
     if (radarCircle.value) {
       map.value?.removeLayer(radarCircle.value)
@@ -242,12 +223,15 @@ watch(center, (c) => {
   if (!radarCircle.value) {
     radarCircle.value = L.circle([c.lat, c.lng], {
       radius: radius.value,
-      color: '#3b82f6',
-      fillColor: '#3b82f6',
-      fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '5, 10',
-    }).addTo(map.value)
+      color: 'red',
+      fillColor: 'red',
+      fillOpacity: 0.1,
+      weight: 5,
+      opacity: 1,
+      pane: 'radarPaneMain',
+    })
+
+    radarCircle.value.addTo(map.value)
   } else {
     radarCircle.value.setLatLng([c.lat, c.lng])
   }
@@ -257,27 +241,42 @@ watch(center, (c) => {
     dragMarker.value = L.marker([c.lat, c.lng], {
       icon: radarCenterIcon,
       draggable: true,
-      zIndexOffset: 1000, // Siempre encima
+      zIndexOffset: 1000,
+      pane: 'radarPaneMain',
     })
-      .addTo(map.value)
       .on('drag', (e) => {
         const latLng = e.target.getLatLng()
-        // Actualizar círculo en tiempo real mientras arrastra
         radarCircle.value?.setLatLng(latLng)
+
+        if (municipiosRecortadosLayer.value) {
+          map.value.removeLayer(municipiosRecortadosLayer.value)
+          municipiosRecortadosLayer.value = null
+        }
+
+        iniciarOndaRadar(e.target)
       })
       .on('dragend', (e) => {
         const latLng = e.target.getLatLng()
-        // Actualizar el centro de búsqueda (dispara watch y searchPoints)
         center.value = { lat: latLng.lat, lng: latLng.lng }
+
+        detenerOndaRadar()
       })
+      .addTo(map.value)
   } else {
     dragMarker.value.setLatLng([c.lat, c.lng])
   }
 })
 
 watch(radius, (r) => {
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
+
+    /* dispararOndaRadar(dragMarker.value); */
   }
 })
 
@@ -304,6 +303,94 @@ watch(filteredFeatures, (features) => {
   })
 })
 
+// Cuando cambia el FeatureCollection recortado, lo pinta en el mapa
+watch(municipiosRecortadosEnRadar, (fc) => {
+  if (!map.value) return
+
+  if (municipiosRecortadosLayer.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
+
+  if (!fc || !fc.features?.length) return
+
+  /*   setTimeout(() => {
+        dispararOndaRadar(dragMarker.value)
+      }, 100) // 50ms son suficientes para que el DOM esté listo */
+
+  municipiosRecortadosLayer.value = L.geoJSON(fc, {
+    pane: 'radarPane',
+    style: {
+      color: 'red',
+      fillColor: 'red',
+      fillOpacity: 0,
+      weight: 1.2,
+    },
+  }).addTo(map.value)
+
+  map.value.whenReady(() => {
+    setTimeout(() => {
+      dispararOndaRadar(dragMarker.value)
+    }, 50) // 50ms son suficientes para que el DOM esté listo
+  })
+
+  /* dispararOndaRadar(dragMarker.value); */
+})
+
+/* ═══════════════════════════════════════════════════════════════
+   NUEVO — Task 1: Activar / Desactivar el radar por completo
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Enciende el radar:
+ * - Empieza a escuchar clicks del mapa (para poder mover el centro).
+ * - Coloca el centro por defecto en la Ciudad de México.
+ *   Esto dispara automáticamente los watchers de `center`/`radius` que
+ *   dibujan el círculo, el marker y calculan proyectos/municipios.
+ */
+function activarRadar() {
+  if (radarActivo.value) return
+
+  radarActivo.value = true
+  registerClick()
+  center.value = mapStore.view.center
+}
+
+/**
+ * Apaga el radar por completo:
+ * - Deja de escuchar clicks del mapa (unregisterClick real, no solo un
+ *   flag ignorado: el listener se desengancha de Leaflet).
+ * - Pone `center` en null, lo que dispara la limpieza ya existente del
+ *   círculo, el marker draggable y la capa de municipios recortados.
+ * - Cancela cualquier cálculo de municipios en curso (debounce +
+ *   promesas en vuelo) mediante resetRadar(), para que ninguna
+ *   respuesta tardía de red pueda "revivir" resultados después de
+ *   apagado.
+ * - Limpia el conteo/resaltado de proyectos en el radio.
+ */
+function desactivarRadar() {
+  if (!radarActivo.value) return
+
+  radarActivo.value = false
+  unregisterClick()
+  center.value = null
+
+  resetRadar()
+
+  filteredFeatures.value = []
+  radioCantidad.value = 0
+}
+
+function toggleRadar() {
+  if (radarActivo.value) {
+    desactivarRadar()
+  } else {
+    activarRadar()
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+
 // --- Carga de proyectos ---
 let datosProyectos = null
 const proyectosVisibles = ref(false)
@@ -312,8 +399,18 @@ async function crearCapaProyectos() {
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
     console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
-    pointsProyectos.loadPoints(datosProyectos) // ← Esto activa el índice espacial
-    // ... dentro de la función donde ya tienes datosProyectos
+
+    // ── NUEVO: Task 2 ──────────────────────────────────────────
+    // Se imprime el listado completo de ID_PPI_ESPACIAL disponibles
+    // al cargar el archivo, para confirmar que el campo existe y ver
+    // su ubicación real dentro de "properties".
+    console.log(
+      '🆔 IDs PPI espacial cargados:',
+      datosProyectos.features.map((f) => f.properties?.ID_PPI_ESPACIAL),
+    )
+    // ────────────────────────────────────────────────────────────
+
+    pointsProyectos.loadPoints(datosProyectos)
   }
   if (!map.value || !datosProyectos) return
 
@@ -336,6 +433,14 @@ async function crearCapaProyectos() {
       layer.bindTooltip(nombre)
       layer.on('click', () => {
         console.log('Proyecto seleccionado:', nombre)
+
+        // ── NUEVO: Task 2 + Task 4 ────────────────────────────
+        // Se obtiene el ID_PPI_ESPACIAL de ESTE proyecto en
+        // particular y se centraliza en Pinia.
+        const idPpiEspacial = feature.properties?.ID_PPI_ESPACIAL ?? null
+        console.log('🆔 ID_PPI_ESPACIAL del proyecto seleccionado:', idPpiEspacial)
+        seleccionStore.setIdPpiEspacial(idPpiEspacial)
+        // ────────────────────────────────────────────────────
       })
     },
     pane: 'proyectosPane',
@@ -361,75 +466,21 @@ async function toggleProyectos() {
   }
 }
 
-// Efecto magnético
-const handleMouseMove = (e) => {
-  const btn = e.currentTarget
-  const content = btn.querySelector('.magnetic')
-
-  if (!content) return
-
-  const rect = btn.getBoundingClientRect()
-
-  // centro del botón
-  const centerX = rect.left + rect.width / 2
-  const centerY = rect.top + rect.height / 2
-
-  // distancia del mouse al centro
-  const x = e.clientX - centerX
-  const y = e.clientY - centerY
-
-  // mueve el botón un poco
-  gsap.to(btn, {
-    x: x * 0.25,
-    y: y * 0.25,
-    duration: 0.3,
-    ease: 'power2.out',
-    overwrite: true,
-  })
-
-  // mueve el contenido un poco más para el efecto "magnético"
-  gsap.to(content, {
-    x: x * 0.35,
-    y: y * 0.35,
-    duration: 0.35,
-    ease: 'power2.out',
-    overwrite: true,
-  })
-}
-
-const handleMouseLeave = (e) => {
-  const btn = e.currentTarget
-  const content = btn.querySelector('.magnetic')
-
-  gsap.to(btn, {
-    x: 0,
-    y: 0,
-    duration: 0.6,
-    ease: 'elastic.out(1, 0.4)',
-    overwrite: true,
-  })
-
-  if (content) {
-    gsap.to(content, {
-      x: 0,
-      y: 0,
-      duration: 0.6,
-      ease: 'elastic.out(1, 0.4)',
-      overwrite: true,
-    })
-  }
-}
 // --- MAIN ---
 onMounted(async () => {
   initMap()
-  /* registerClick() */
+  map.value.on('zoomend', () => {
+    zoomActual.value = map.value.getZoom()
+  })
+  // NOTA: ya NO se llama registerClick() aquí. El radar arranca
+  // DESACTIVADO por defecto; el listener de click del mapa solo se
+  // engancha cuando el usuario activa el radar (ver activarRadar()).
 
-  /* infoLayer.addTo(map.value) */
-
+  map.value.createPane('radarPane').style.zIndex = 800
+  map.value.createPane('radarPaneMain').style.zIndex = 900
   map.value.createPane('poligonosPane').style.zIndex = 400
   map.value.createPane('entidadesPane').style.zIndex = 500
-  map.value.createPane('proyectosPane').style.zIndex = 700
-  map.value.createPane('radarPane').style.zIndex = 900
+  map.value.createPane('proyectosPane').style.zIndex = 550
 
   const entidades = await getGeoJson('entidades.json')
   if (entidades) {
@@ -438,21 +489,17 @@ onMounted(async () => {
       pane: 'entidadesPane',
       name: 'NOMGEO',
     })
+
     EntidadesMuncipiosLayer.addTo(map.value)
 
-    // NUEVO: reutiliza el mismo entidades.json ya cargado para construir
-    // el índice de bbox que usa el radar (Fase A) — no se vuelve a pedir
-    // este archivo por red.
     inicializarConEntidades(entidades)
   }
-
-  // INICIO - Movimiento de zoom con ctrl + wheel
-  mapContainer.value.addEventListener('wheel', handleWheel, { passive: false })
-  // FIN - Movimiento de zoom con ctrl + wheel
 })
 
 onUnmounted(() => {
   unregisterClick()
+  resetRadar() // NUEVO: cancela timers/promesas pendientes al desmontar
+
   if (radarCircle.value && map.value) {
     map.value.removeLayer(radarCircle.value)
     radarCircle.value = null
@@ -461,33 +508,41 @@ onUnmounted(() => {
     map.value.removeLayer(dragMarker.value)
     dragMarker.value = null
   }
+  if (municipiosRecortadosLayer.value && map.value) {
+    map.value.removeLayer(municipiosRecortadosLayer.value)
+    municipiosRecortadosLayer.value = null
+  }
 })
 </script>
 
 <template>
   <div class="map-wraper" @mousemove="updateMousePosition">
     <div class="info" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map"></div>
+      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
       <!-- Tooltip de advertencia para zoom -->
-      <div
-        v-if="showWarning"
-        class="map-scroll-tooltip"
-        :style="{ left: tooltipPos.x + 'px', top: tooltipPos.y + 'px' }"
+      <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
+
+      <!-- NUEVO: botón para activar/desactivar el radar por completo.
+           Si prefieres que viva dentro de MapButtons.vue, comparte ese
+           archivo y lo integro ahí como un emit más. -->
+      <!-- <button
+        class="radar-toggle-btn"
+        :class="{ 'radar-toggle-btn--activo': radarActivo }"
+        @click="toggleRadar"
       >
-        Usa Ctrl + rueda del ratón para hacer zoom
-      </div>
+        {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
+      </button> -->
 
-      <!-- Control de radio -->
-      <RadiusControl v-model:radius="radius" :count="radioCantidad" />
+      <!-- Control de radio: solo visible/interactuable con el radar activo -->
+      <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" />
 
-      <!-- NUEVO: panel con el listado de municipios tocados por el radar.
-           Reemplázalo por TableMap.vue si prefieres mostrarlo ahí; el
-           dato ya está disponible en `municipiosEnRadar`. -->
-      <div v-if="cargandoMunicipios" class="municipios-radar-panel">
+      <!-- Panel con el listado de municipios tocados por el radar:
+           solo tiene sentido mostrarlo con el radar activo -->
+      <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
         Cargando municipios del área...
       </div>
-      <div v-else-if="municipiosEnRadar.length" class="municipios-radar-panel">
+      <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
         <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
         <ul>
           <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
@@ -499,53 +554,12 @@ onUnmounted(() => {
       <!-- Panel de información al hacer clic -->
       <InformationClick />
 
-      <div class="buttons">
-        <!-- Botón para regresar a vista México -->
-        <button
-          class="focus-mexico shadow-lg"
-          @click="goBack"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              width="90"
-              height="90"
-              viewBox="150 -40 200 600"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path fill="#afafaf" :d="MEXICO_ICON" />
-            </svg>
-          </div>
-        </button>
-
-        <!-- Botón magnético -->
-        <button
-          class="back-button shadow-lg"
-          @click="toggleProyectos"
-          @mousemove="handleMouseMove"
-          @mouseleave="handleMouseLeave"
-        >
-          <div class="magnetic">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="#005cc8"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
-              />
-            </svg>
-          </div>
-        </button>
-      </div>
+      <!-- Buttons para controlar el setView y carga de layer Proyectos -->
+      <MapButtons
+        @go-back="goBack"
+        @toggle-proyectos="toggleProyectos"
+        @toggle-radar="toggleRadar"
+      />
     </div>
   </div>
 
@@ -556,43 +570,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Tooltip flotante */
-.map-scroll-tooltip {
-  position: fixed; /* Usamos fixed para que dependa directamente de clientX/clientY */
-  transform: translate(0, -50%); /* Centra el diseño verticalmente respecto al cursor */
-  background-color: rgba(33, 33, 33, 0.9);
-  color: #ffffff;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-family: sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  z-index: 9999; /* Máxima prioridad sobre controles e iconos de Leaflet */
-  pointer-events: none; /* Crucial para no bloquear los clics en el mapa */
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
-/* Marker del centro del radar - invisible pero captura eventos de drag */
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
-}
-
-:global(.radar-center-marker::after) {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  background: #3b82f6;
-  border: 2px solid white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-  cursor: move;
+  position: relative;
 }
 
 /* :global(.radar-center-marker::after) {
@@ -600,19 +581,37 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 32px;
-  height: 32px;
-
-  background-image: url('@/assets/img/cabeza.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
+  width: 12px;
+  height: 12px;
+  background: red;
+  border: 2px solid white;
+  border-radius: 50%;
   transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
+  z-index: 2;
 } */
 
-/* NUEVO: panel del listado de municipios tocados por el radar */
+/* NUEVO: botón de activar/desactivar radar */
+.radar-toggle-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #999;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.radar-toggle-btn--activo {
+  border-color: orange;
+  color: #b35c00;
+  font-weight: 600;
+}
+
 .municipios-radar-panel {
   position: absolute;
   top: 50%;
@@ -641,52 +640,12 @@ onUnmounted(() => {
 }
 
 .map {
-  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
 }
 
-.back-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background: white;
-  border: 1px solid #e41616;
-  cursor: pointer;
-}
-
-.focus-mexico {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  z-index: 1000;
-  background: rgb(255, 255, 255);
-  /* border: 1px solid blue; */
-  cursor: pointer;
-  border-radius: 100px;
-
-  overflow: hidden;
-
-  justify-items: center;
-  align-content: center;
-  /* padding: 1rem; */
-
-  height: 100px;
-  aspect-ratio: 1/1;
-
-  transform: scale(0.4);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
-}
-
 .info {
   position: relative;
-  /* border: solid 1px red; */
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -697,32 +656,75 @@ onUnmounted(() => {
   outline: none;
 }
 
-.back-button {
-  position: absolute;
-  top: 80px;
-  right: 20px;
-  z-index: 1000;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 100px;
-  overflow: hidden;
-  border: none;
-
-  height: 38px;
-  aspect-ratio: 1 / 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: transform;
+:global(.dot-test) {
+  filter: hue-rotate(140deg) brightness(1.2) !important;
 }
 
-.magnetic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  will-change: transform;
-  pointer-events: none; /* importante para que el mouse siga "perteneciendo" al botón */
+/* 1. Estilos base de tu marcador (Tu diseño original) */
+:global(.radar-center-marker) {
+  background: transparent;
+  border: none;
+  position: relative; /* Asegura que los pseudoelementos se alineen aquí */
+}
+
+/* El punto naranja estático se mantiene intacto usando ::after */
+:global(.radar-center-marker::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: red;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  cursor: move;
+  z-index: 2; /* Se coloca por encima de la onda para que no lo tape */
+}
+
+/* 2. La animación de la onda utilizando ::before para no romper el ::after */
+:global(.marcador-onda-activa::before) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+
+  border-radius: 50%;
+
+  /*  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  ); */
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  );
+
+  animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes pulsoOndaRadarVue {
+  0% {
+    transform: scale(1);
+    background-position: 0% 50%;
+    opacity: 1;
+  }
+  100% {
+    transform: scale(v-bind(escalaOndaCss));
+    background-position: 300% 50%;
+    opacity: 0;
+  }
 }
 </style>

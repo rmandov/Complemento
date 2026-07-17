@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 export const useMapStore = defineStore('map', () => {
   // State
   const view = ref({
-    center: [23.6345, -102.5528],
+    center: { lat: 23.6345, lng: -102.5528 },
     zoom: 5,
     bounds: null,
   })
@@ -45,6 +45,7 @@ export const useMapStore = defineStore('map', () => {
 
   function setCVE_ENT(newCVE_ENT) {
     CVE_ENT.value = newCVE_ENT
+    municipio.value = 'municipio'
   }
 
   return {

@@ -2,10 +2,8 @@
 import { RouterView, RouterLink } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
-import CantidadProyectos from '../../home/components/CantidadProyectos.vue'
-import Carousel from '@/modules/home/components/Carousel.vue'
-import Carousel2 from '@/modules/home/components/Carousel2.vue'
-import VidaCarousel from '@/modules/home/components/VidaCarousel.vue'
+import Hero from '@/modules/home/components/Hero.vue'
+import Carousel from '@/modules/home/components/Carousel2.vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
 
@@ -92,23 +90,7 @@ onMounted(async () => {
 <template>
   <div class="home">
     <!-- Hero -->
-    <section class="hero-section">
-      <div class="hero-animacion">
-        <div class="animacion">Aquí irá una animación</div>
-      </div>
-      <div class="hero-texto">
-        <h1 class="hero-title text-4xl font-bold">
-          Complementariedad y sinergia entre Programas y Proyectos de Inversión (PPI)
-        </h1>
-        <p class="hero-description">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
-          fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam
-          soluta alias vitae culpa facere esse neque?
-        </p>
-        <CantidadProyectos />
-      </div>
-    </section>
-
+    <Hero />
     <!-- Botones con efecto magnético -->
     <section class="boton-section">
       <div
@@ -137,20 +119,8 @@ onMounted(async () => {
         perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
         mollitia blanditiis atque quidem aut!
       </p>
-      <!-- <VidaCarousel></VidaCarousel> -->
 
-      <Carousel2></Carousel2>
-
-      <!-- Antiguo carrusel -->
-      <!-- <div v-if="loading" class="loading-state">Cargando proyectos...</div>
-
-      <Carousel
-        v-else-if="projects.length"
-        :items="projects"
-        :autoplay="false"
-        :autoplay-speed="5000"
-      />
-      <div v-else class="empty-state">No hay proyectos disponibles.</div> -->
+      <Carousel></Carousel>
     </section>
   </div>
 
@@ -164,40 +134,6 @@ onMounted(async () => {
   max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
-}
-
-/* Hero */
-.hero-section {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.hero-animacion {
-  flex: 2;
-  min-width: 0;
-}
-
-.hero-texto {
-  flex: 3;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hero-title {
-  font-family: NotoSansBold;
-}
-
-.animacion {
-  width: 100%;
-  height: 100%;
-  background-color: rgb(242, 242, 242);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
 }
 
 /* Botones */
@@ -294,16 +230,6 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .hero-section {
-    flex-direction: column;
-  }
-
-  .hero-animacion,
-  .hero-texto {
-    flex: none;
-    width: 100%;
-  }
-
   .boton-section {
     flex-direction: column;
     align-items: center;

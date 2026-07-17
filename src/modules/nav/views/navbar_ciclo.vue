@@ -81,7 +81,12 @@ onMounted(() => {
             <div class="flex items-center">{{ item.label }}</div>
             <nav v-if="item.children" class="subnav-contenedor">
               <ul class="subnav">
-                <li v-for="(subitem, idx) in item.children" :key="subitem.id" class="subnav-item">
+                <li
+                  v-for="(subitem, idx) in item.children"
+                  :key="subitem.id"
+                  class="subnav-item"
+                  @mouseleave="leaveMouse"
+                >
                   <button
                     type="button"
                     class="subnav-boton"
@@ -104,7 +109,6 @@ onMounted(() => {
                   <div
                     class="submenu-contenedor"
                     :class="{ 'subnav-activo': itemActivo === subitem.id }"
-                    @mouseleave="leaveMouse"
                   >
                     <p v-html="subitem.description" class="submenu-descripcion"></p>
                     <ul class="detail-list" v-if="subitem.children?.length">
@@ -189,7 +193,21 @@ onMounted(() => {
 .subnav-item {
   position: relative;
   flex: 0 0 auto;
+  width: auto;
+}
+.subnav-boton.subnav-boton-activo::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+
+  /* mismo ancho que el submenú */
   width: 100%;
+
+  /* alto máximo del submenú */
+  height: 100%;
+
+  background: transparent;
 }
 
 .subnav-boton {
@@ -231,8 +249,8 @@ onMounted(() => {
 
 .submenu-contenedor {
   position: absolute;
-  top: 2.5rem;
-  right: 0;
+  top: 0;
+  left: 100%;
   min-width: 50dvw;
   max-width: 20rem;
   max-height: 0;
@@ -426,7 +444,6 @@ onMounted(() => {
   .submenu-contenedor {
     top: calc(100% + 1rem);
     left: 0;
-    right: unset;
     min-width: 20rem;
   }
   .etiqueta-conenedor {
