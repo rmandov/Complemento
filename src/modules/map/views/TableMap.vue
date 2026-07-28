@@ -32,7 +32,7 @@ const sqlQuery = computed(
     ELSE 'ALTO'
   END AS nivel_impacto
 FROM dataset
-WHERE ENTIDAD_FEDERATIVA_ID = '${entidadDefault.value}';
+WHERE ID_ENTIDAD_FEDERATIVA = '${entidadDefault.value}';
 `,
 )
 
@@ -82,13 +82,9 @@ watch(
   <section>
     <h2>Consulta SQL</h2>
 
-    <textarea
-      v-model="sqlQuery"
-      rows="5"
-      cols="70"
+    <textarea v-model="sqlQuery" rows="5" cols="70"
       placeholder="Escribe tu query y presiona Ctrl+Enter para ejecutar..."
-      @keydown.ctrl.enter.prevent="ejecutar"
-    ></textarea>
+      @keydown.ctrl.enter.prevent="ejecutar"></textarea>
 
     <div style="margin-top: 8px">
       <button @click="ejecutar" :disabled="cargando">
@@ -102,11 +98,8 @@ watch(
       <table border="1" cellpadding="8" cellspacing="0">
         <thead>
           <tr>
-            <th
-              v-for="(col, i) in resultados[0]?.Schema?.fields.map((f) => f.name) ??
-              Object.keys(resultados[0])"
-              :key="i"
-            >
+            <th v-for="(col, i) in resultados[0]?.Schema?.fields.map((f) => f.name) ??
+              Object.keys(resultados[0])" :key="i">
               {{ col }}
             </th>
           </tr>
