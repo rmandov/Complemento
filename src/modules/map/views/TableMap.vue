@@ -23,14 +23,8 @@ const sqlQuery = computed(
   () => `
   SELECT
   ID_PPI_ESPACIAL,
-  NOMBRE_CORTO,
-  FASE_DESC,
-  CASE
-    WHEN POBLACION_BENEFICIADA = 0 THEN 'SIN BENEFICIO'
-    WHEN POBLACION_BENEFICIADA < ${cantidad} THEN 'BAJO'
-    WHEN POBLACION_BENEFICIADA < 10000 THEN 'MEDIO'
-    ELSE 'ALTO'
-  END AS nivel_impacto
+  NOMBRE_PPI,
+  ESTATUS_OPERACION,
 FROM dataset
 WHERE ID_ENTIDAD_FEDERATIVA = '${entidadDefault.value}';
 `,
@@ -79,7 +73,7 @@ watch(
 </script>
 
 <template>
-  <section>
+  <section class="table-map">
     <h2>Consulta SQL</h2>
 
     <textarea v-model="sqlQuery" rows="5" cols="70"
@@ -115,6 +109,14 @@ watch(
     </div>
   </section>
 </template>
+
+<style scoped>
+.table-map {
+  max-height: 83vh;
+  overflow-y: auto;
+  width: 100%;
+}
+</style>
 
 <!-- <textarea
   v-model="sqlQuery"
