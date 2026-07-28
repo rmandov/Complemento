@@ -579,12 +579,20 @@ onUnmounted(() => {
           <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" @toggle-radar="toggleRadar" />
         </div>
       </template>
+      <!-- Tabla de informacion -->
+      <template #proyectos>
+        <div>
+          <TableMap />
+        </div>
+      </template>
+      <!-- Tercer pestaña -->
+      <template #estadisticas>
+        <div>
+          <p>lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet
+            consectetur adipisicing elit. Quisquam, quod. </p>
+        </div>
+      </template>
     </Tabs>
-  </div>
-
-  <!-- Tabla de información -->
-  <div>
-    <TableMap />
   </div>
 </template>
 
