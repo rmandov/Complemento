@@ -4,7 +4,6 @@ import { ref, onMounted } from "vue";
 
 import Hero from "@/modules/home/components/Hero.vue";
 import Tren from "@/modules/home/components/Tren.vue";
-import Botones from "@/modules/home/components/Botones.vue";
 import Carousel from "@/modules/home/components/Carousel2.vue";
 import { useGeoJson } from "@/modules/map/composables/useGeoJson";
 const { getGeoJson } = useGeoJson();
