@@ -148,6 +148,8 @@ watch([center, radius], () => {
   // ninguna lógica asociada (ni búsqueda de proyectos por KDBush,
   // ni cálculo/descarga de municipios por Turf).
   if (!radarActivo.value) return
+
+  if (!proyectosVisibles.value) return
   // ─────────────────────────────────────────────────────────────
 
   if (spatialIndex) searchPoints()
@@ -470,6 +472,7 @@ async function toggleProyectos() {
       capaProyectos.value.addTo(map.value)
     }
     proyectosVisibles.value = true
+    searchPoints()
   }
 }
 
