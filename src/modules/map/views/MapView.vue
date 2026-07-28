@@ -12,6 +12,7 @@ import TableMap from './TableMap.vue'
 import RadiusControl from '../components/RadiusControl.vue'
 import MapButtons from '../components/MapButtons.vue'
 import MapScrollTooltip from '../components/MapScrollTooltip.vue'
+import Tabs from '../components/Tabs.vue'
 // Para cargar los GeoJson
 import { useGeoJson } from '../composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -35,6 +36,15 @@ import { usePointsStore } from '@/stores/pointsStore.js'
 import { useMapStore } from '@/stores/map.js'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
+
+//Constantes para Tabs
+const activeTab = ref('mapa')
+
+const tabList = [
+  { id: 'mapa', label: 'Mapa' },
+  { id: 'proyectos', label: 'Proyectos' },
+  { id: 'estadisticas', label: 'Estadísticas' },
+]
 
 const zoomActual = ref(5) //  zoom inicial por defecto de tu mapa (ej: 5)
 
@@ -527,17 +537,19 @@ onUnmounted(() => {
 
   <div class="map-wraper" @mousemove="updateMousePosition">
     <InformationClick />
+    <Tabs v-model="activeTab" :tabs="tabList">
+      <!-- MAPA -->
+      <template #mapa>
+        <div class="info" @mouseenter="active = true" @mouseleave="active = false">
+          <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
-    <div class="info" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
+          <!-- Tooltip de advertencia para zoom -->
+          <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
 
-      <!-- Tooltip de advertencia para zoom -->
-      <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
-
-      <!-- NUEVO: botón para activar/desactivar el radar por completo.
+          <!-- NUEVO: botón para activar/desactivar el radar por completo.
            Si prefieres que viva dentro de MapButtons.vue, comparte ese
            archivo y lo integro ahí como un emit más. -->
-      <!-- <button
+          <!-- <button
         class="radar-toggle-btn"
         :class="{ 'radar-toggle-btn--activo': radarActivo }"
         @click="toggleRadar"
@@ -545,36 +557,29 @@ onUnmounted(() => {
         {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
       </button> -->
 
-      <!-- Control de radio: solo visible/interactuable con el radar activo -->
-      <RadiusControl
-        v-if="radarActivo"
-        v-model:radius="radius"
-        :count="radioCantidad"
-        :min="minRadius"
-        :max="maxRadius"
-      />
+          <!-- Control de radio: solo visible/interactuable con el radar activo -->
+          <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" :min="minRadius"
+            :max="maxRadius" />
 
-      <!-- Panel con el listado de municipios tocados por el radar:
+          <!-- Panel con el listado de municipios tocados por el radar:
            solo tiene sentido mostrarlo con el radar activo -->
-      <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
-        Cargando municipios del área...
-      </div>
-      <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
-        <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
-        <ul>
-          <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
-            {{ m.properties.NOMGEO }}
-          </li>
-        </ul>
-      </div>
+          <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
+            Cargando municipios del área...
+          </div>
+          <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
+            <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
+            <ul>
+              <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
+                {{ m.properties.NOMGEO }}
+              </li>
+            </ul>
+          </div>
 
-      <!-- Buttons para controlar el setView y carga de layer Proyectos -->
-      <MapButtons
-        @go-back="goBack"
-        @toggle-proyectos="toggleProyectos"
-        @toggle-radar="toggleRadar"
-      />
-    </div>
+          <!-- Buttons para controlar el setView y carga de layer Proyectos -->
+          <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" @toggle-radar="toggleRadar" />
+        </div>
+      </template>
+    </Tabs>
   </div>
 
   <!-- Tabla de información -->
@@ -680,7 +685,8 @@ onUnmounted(() => {
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
-  position: relative; /* Asegura que los pseudoelementos se alineen aquí */
+  position: relative;
+  /* Asegura que los pseudoelementos se alineen aquí */
 }
 
 /* El punto naranja estático se mantiene intacto usando ::after */
@@ -697,7 +703,8 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
-  z-index: 2; /* Se coloca por encima de la onda para que no lo tape */
+  z-index: 2;
+  /* Se coloca por encima de la onda para que no lo tape */
 }
 
 /* 2. La animación de la onda utilizando ::before para no romper el ::after */
@@ -720,12 +727,10 @@ onUnmounted(() => {
     rgba(255, 65, 54, 0) 100%
   ); */
 
-  background: radial-gradient(
-    circle,
-    rgba(255, 65, 54, 0.8) 55%,
-    rgba(255, 65, 54, 0.35) 75%,
-    rgba(255, 65, 54, 0) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 65, 54, 0.8) 55%,
+      rgba(255, 65, 54, 0.35) 75%,
+      rgba(255, 65, 54, 0) 100%);
 
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
@@ -737,6 +742,7 @@ onUnmounted(() => {
     background-position: 0% 50%;
     opacity: 1;
   }
+
   100% {
     transform: scale(v-bind(escalaOndaCss));
     background-position: 300% 50%;
