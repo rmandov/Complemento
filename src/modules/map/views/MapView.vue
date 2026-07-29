@@ -565,10 +565,12 @@ onUnmounted(() => {
   <!-- Panel de información al hacer clic -->
 
   <div class="map-wraper" @mousemove="updateMousePosition">
-    <InformationClick class="info" />
-
-    <div class="display-mapa" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
+    <InformationClick />
+    <Tabs v-model="activeTab" :tabs="tabList">
+      <!-- MAPA -->
+      <template #mapa>
+        <div class="info" @mouseenter="active = true" @mouseleave="active = false">
+          <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
           <!-- Tooltip de advertencia para zoom -->
           <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
@@ -606,21 +608,21 @@ onUnmounted(() => {
           <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" @toggle-radar="toggleRadar" />
         </div>
       </template>
-<!-- Tabla de informacion -->
-<template #proyectos>
+      <!-- Tabla de informacion -->
+      <template #proyectos>
         <div>
           <TableMap />
         </div>
       </template>
-<!-- Tercer pestaña -->
-<template #estadisticas>
-  <div>
-    <p>lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet
-      consectetur adipisicing elit. Quisquam, quod. </p>
+      <!-- Tercer pestaña -->
+      <template #estadisticas>
+        <div>
+          <p>lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet
+            consectetur adipisicing elit. Quisquam, quod. </p>
+        </div>
+      </template>
+    </Tabs>
   </div>
-</template>
-</Tabs>
-</div>
 </template>
 
 <style scoped>

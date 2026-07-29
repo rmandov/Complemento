@@ -75,12 +75,8 @@ watch(
 </script>
 
 <template>
-<<<<<<< HEAD
-  <section class="table-map">
-=======
   <!-- <MapView></MapView> -->
   <section>
->>>>>>> armando
     <h2>Consulta SQL</h2>
 
     <textarea v-model="sqlQuery" rows="5" cols="70"
