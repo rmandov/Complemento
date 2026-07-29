@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, nextTick } from 'vue'
 import L from 'leaflet'
 
 // Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
@@ -416,6 +416,15 @@ function toggleRadar() {
   }
 }
 
+function onTabChange(id) {
+  if (id === 'mapa') {
+    // El contenedor pudo cambiar de tamaño mientras estaba oculto
+    // (display:none). nextTick asegura que el DOM ya se actualizó
+    // antes de pedirle a Leaflet que recalcule su tamaño.
+    nextTick(() => map.value?.invalidateSize())
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════ */
 
 // --- Carga de proyectos ---
@@ -566,7 +575,7 @@ onUnmounted(() => {
 
   <div class="map-wraper" @mousemove="updateMousePosition">
     <InformationClick />
-    <Tabs v-model="activeTab" :tabs="tabList">
+    <Tabs v-model="activeTab" :tabs="tabList" @change="onTabChange">
       <!-- MAPA -->
       <template #mapa>
         <div class="info" @mouseenter="active = true" @mouseleave="active = false">
@@ -687,7 +696,9 @@ onUnmounted(() => {
 }
 
 .info {
-  order: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .display-mapa {
@@ -709,6 +720,7 @@ onUnmounted(() => {
   .info {
     order: 2;
     width: 100%;
+    height: 100%;
   }
 
   .display-mapa {
