@@ -170,7 +170,6 @@
       </div>
     </Transition>
   </nav>
-  
 </template>
 
 <script setup>

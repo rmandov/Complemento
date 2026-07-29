@@ -1,9 +1,16 @@
 <template>
   <div class="tabs-wrapper">
     <nav class="tabs-nav" role="tablist">
-      <button v-for="tab in tabs" :key="tab.id" class="tab-btn" role="tab" type="button"
-        :aria-selected="modelValue === tab.id" :class="{ 'tab-btn--active': modelValue === tab.id }"
-        @click="selectTab(tab.id)">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        class="tab-btn"
+        role="tab"
+        type="button"
+        :aria-selected="modelValue === tab.id"
+        :class="{ 'tab-btn--active': modelValue === tab.id }"
+        @click="selectTab(tab.id)"
+      >
         {{ tab.label }}
       </button>
     </nav>
@@ -26,7 +33,13 @@
         monte hasta que el usuario lo abra por primera vez, usa la prop
         `lazy` del tab (ver más abajo, sección "Escalabilidad").
       -->
-      <div v-for="tab in tabs" :key="tab.id" v-show="modelValue === tab.id" class="tab-panel" role="tabpanel">
+      <div
+        v-for="tab in tabs"
+        :key="tab.id"
+        v-show="modelValue === tab.id"
+        class="tab-panel"
+        role="tabpanel"
+      >
         <!--
           Renderizado perezoso opcional:
           Si tab.lazy === true, no se monta el slot hasta que ese tab

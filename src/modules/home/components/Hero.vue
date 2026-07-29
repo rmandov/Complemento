@@ -29,8 +29,8 @@ import SplitText from '@/modules/home/components/SplitText.vue'
       <p>
         <SplitText>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
-          fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta
-          alias vitae culpa facere esse neque?
+          fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam
+          soluta alias vitae culpa facere esse neque?
         </SplitText>
       </p>
     </div>

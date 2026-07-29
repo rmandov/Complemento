@@ -1,30 +1,30 @@
 <script setup>
-import { RouterView } from "vue-router";
-import { ref, onMounted } from "vue";
+import { RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue'
 
-import Hero from "@/modules/home/components/Hero.vue";
-import Tren from "@/modules/home/components/Tren.vue";
-import Carousel from "@/modules/home/components/Carousel2.vue";
-import { useGeoJson } from "@/modules/map/composables/useGeoJson";
-const { getGeoJson } = useGeoJson();
+import Hero from '@/modules/home/components/Hero.vue'
+import Tren from '@/modules/home/components/Tren.vue'
+import Carousel from '@/modules/home/components/Carousel2.vue'
+import { useGeoJson } from '@/modules/map/composables/useGeoJson'
+const { getGeoJson } = useGeoJson()
 
-const projects = ref([]);
-const loading = ref(true);
+const projects = ref([])
+const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await getGeoJson("proyectos_carrusel.json");
+    const res = await getGeoJson('proyectos_carrusel.json')
     if (res) {
-      projects.value = res;
+      projects.value = res
     } else {
-      console.warn("El JSON no es un array:", res);
+      console.warn('El JSON no es un array:', res)
     }
   } catch (error) {
-    console.error("Error cargando proyectos:", error);
+    console.error('Error cargando proyectos:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-});
+})
 </script>
 
 <template>

@@ -3,6 +3,13 @@
 import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
 
+// Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
+// muchos cerca entre sí. Los dos CSS son necesarios para que el círculo
+// del cluster se vea bien (sin ellos funciona, pero sin estilos).
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+import 'leaflet.markercluster'
+
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
@@ -53,7 +60,8 @@ const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
   createMap(mapContainer)
 
-const capaProyectos = shallowRef(null)
+const capaProyectos = shallowRef(null) // geoJSON "plano": sigue usándose para eachLayer/highlight, sin cambios
+const clusterProyectos = shallowRef(null) // NUEVO: agrupador de esos mismos círculos; esto es lo que se agrega/quita del mapa
 
 /* const radius = ref(200_000) */ // metros
 
@@ -456,20 +464,32 @@ async function crearCapaProyectos() {
   })
 
   capaProyectos.value = proyectosLayer
+
+  // NUEVO: agrupamos esos mismos círculos en clusters. Se agregan uno
+  // por uno con eachLayer (en vez de clusterProyectos.value.addLayer(
+  // proyectosLayer) directo) porque es la forma documentada de
+  // alimentar un markerClusterGroup con capas ya creadas.
+  clusterProyectos.value = L.markerClusterGroup({
+    clusterPane: 'proyectosPane', // mismo pane que tus círculos, para no romper el orden con el radar (800/900)
+    maxClusterRadius: 50,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+  })
+  proyectosLayer.eachLayer((marker) => clusterProyectos.value.addLayer(marker))
 }
 
 async function toggleProyectos() {
   if (proyectosVisibles.value) {
-    if (capaProyectos.value) {
-      map.value.removeLayer(capaProyectos.value)
+    if (clusterProyectos.value) {
+      map.value.removeLayer(clusterProyectos.value) // antes: capaProyectos.value
     }
     proyectosVisibles.value = false
   } else {
     if (!capaProyectos.value) {
       await crearCapaProyectos()
     }
-    if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
-      capaProyectos.value.addTo(map.value)
+    if (clusterProyectos.value && !map.value.hasLayer(clusterProyectos.value)) {
+      clusterProyectos.value.addTo(map.value) // antes: capaProyectos.value.addTo(...)
     }
     proyectosVisibles.value = true
     searchPoints()
@@ -521,6 +541,12 @@ onUnmounted(() => {
   if (municipiosRecortadosLayer.value && map.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
+  }
+  // NUEVO: si el componente se desmonta con "Proyectos" visible, sin esto
+  // el cluster se queda enganchado al mapa viejo.
+  if (clusterProyectos.value && map.value) {
+    map.value.removeLayer(clusterProyectos.value)
+    clusterProyectos.value = null
   }
 })
 </script>
