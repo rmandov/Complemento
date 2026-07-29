@@ -33,9 +33,9 @@ export function useMap(containerRef) {
 
     // Definimos el mapa y su encuadre
     map.value = L.map(containerRef.value, {
-      minZoom: 1,
+      minZoom: 5,
       maxBounds: mexicoBounds,
-      maxBoundsViscosity: 0.2,
+      maxBoundsViscosity: 0.5,
       scrollWheelZoom: false,
       zoomControl: true,
     })

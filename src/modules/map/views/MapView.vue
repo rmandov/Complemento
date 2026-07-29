@@ -70,18 +70,13 @@ const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
   createMap(mapContainer)
 
-const capaProyectos = shallowRef(null) // geoJSON "plano": sigue usándose para eachLayer/highlight, sin cambios
-const clusterProyectos = shallowRef(null) // NUEVO: agrupador de esos mismos círculos; esto es lo que se agrega/quita del mapa
-
-/* const radius = ref(200_000) */ // metros
+const capaProyectos = shallowRef(null)
+const clusterProyectos = shallowRef(null)
 
 // --- RADAR: Interacciones y búsqueda ---
 const { center, register: registerClick, unregister: unregisterClick } = useMapInteractions(map)
 
-// --- RADAR: activar/desactivar completamente (NUEVO) ---
 // Fuente de verdad ÚNICA de si el radar está encendido o apagado.
-// Todo lo demás (listener de click, watchers de cálculo, UI) se
-// deriva de este flag.
 const radarActivo = ref(false)
 
 // --- RADAR: Municipios tocados por el área del radar ---
@@ -92,13 +87,13 @@ const {
   inicializarConEntidades,
   actualizarMunicipiosEnRadar,
   actualizarMunicipiosRecortadosEnRadar,
-  resetRadar, // NUEVO: cancela cálculos en curso y limpia resultados
+  resetRadar,
 } = useMunicipiosRadar()
 
 const filteredFeatures = shallowRef([])
 let rawFeatures = []
 let spatialIndex = null
-let radioCantidad = ref(0)
+const radioCantidad = ref(0)
 
 // Construir el índice cuando las features estén listas
 watch(
@@ -117,12 +112,10 @@ watch(
 
     for (const feature of rawFeatures) {
       const [lng, lat] = feature.geometry.coordinates
-
       index.add(lng, lat)
     }
 
     index.finish()
-
     spatialIndex = index
 
     console.log('✅ Índice espacial actualizado con', rawFeatures.length, 'puntos')
@@ -134,10 +127,11 @@ watch(
   { immediate: true },
 )
 
-// Función de búsqueda pura
+// Función de búsqueda pura (solo proyectos)
 function searchPoints() {
   if (!spatialIndex || !center.value || radius.value == null) {
     filteredFeatures.value = []
+    radioCantidad.value = 0
     return
   }
   const radiusKm = radius.value / 1_000
@@ -151,27 +145,23 @@ function searchPoints() {
   )
 
   filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean)
-
-  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
-
   radioCantidad.value = filteredFeatures.value.length
 
+  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
   console.log(filteredFeatures.value)
 }
 
 // Reaccionar a cambios de centro o radio
 watch([center, radius], () => {
-  // ── NUEVO: Task 1 ────────────────────────────────────────────
-  // Si el radar está desactivado, no se ejecuta absolutamente
-  // ninguna lógica asociada (ni búsqueda de proyectos por KDBush,
-  // ni cálculo/descarga de municipios por Turf).
+  // Si el radar está desactivado, no se ejecuta nada
   if (!radarActivo.value) return
 
-  if (!proyectosVisibles.value) return
-  // ─────────────────────────────────────────────────────────────
+  // 1. Buscar proyectos SOLO si están visibles
+  if (proyectosVisibles.value && spatialIndex) {
+    searchPoints()
+  }
 
-  if (spatialIndex) searchPoints()
-
+  // 2. Calcular municipios SIEMPRE (independiente de proyectos)
   actualizarMunicipiosEnRadar(center.value, radius.value)
   actualizarMunicipiosRecortadosEnRadar(center.value, radius.value)
 })
@@ -196,13 +186,12 @@ const radarCenterIcon = L.divIcon({
 
 const dispararOndaRadar = (marker) => {
   if (marker && marker._icon) {
-    // Forzamos la actualización del zoom actual en Vue antes de animar
     zoomActual.value = map.value.getZoom()
 
     if (marker._icon.classList.contains('marcador-onda-activa')) {
       marker._icon.classList.remove('marcador-onda-activa')
     }
-    void marker._icon.offsetWidth // Truco de reflow para reiniciar CSS
+    void marker._icon.offsetWidth
     marker._icon.classList.add('marcador-onda-activa')
   }
 }
@@ -210,14 +199,13 @@ const dispararOndaRadar = (marker) => {
 let radarInterval = null
 
 function iniciarOndaRadar(marker) {
-  // Evita crear varios intervalos
   if (radarInterval) return
 
   dispararOndaRadar(marker)
 
   radarInterval = setInterval(() => {
     dispararOndaRadar(marker)
-  }, 800) // Debe coincidir con la duración de la animación CSS
+  }, 800)
 }
 
 function detenerOndaRadar() {
@@ -226,14 +214,11 @@ function detenerOndaRadar() {
 }
 
 watch(center, (c) => {
-  // Limpiar capa anterior de municipios recortados
   if (municipiosRecortadosLayer.value) {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
   }
 
-  // Cuando `center` se vuelve null (radar apagado, o mapa no listo),
-  // se eliminan del mapa todos los elementos visuales del radar.
   if (!map.value || !c) {
     if (radarCircle.value) {
       map.value?.removeLayer(radarCircle.value)
@@ -302,8 +287,6 @@ watch(radius, (r) => {
 
   if (radarCircle.value) {
     radarCircle.value.setRadius(r)
-
-    /* dispararOndaRadar(dragMarker.value); */
   }
 })
 
@@ -341,10 +324,6 @@ watch(municipiosRecortadosEnRadar, (fc) => {
 
   if (!fc || !fc.features?.length) return
 
-  /*   setTimeout(() => {
-        dispararOndaRadar(dragMarker.value)
-      }, 100) // 50ms son suficientes para que el DOM esté listo */
-
   municipiosRecortadosLayer.value = L.geoJSON(fc, {
     pane: 'radarPane',
     style: {
@@ -358,23 +337,14 @@ watch(municipiosRecortadosEnRadar, (fc) => {
   map.value.whenReady(() => {
     setTimeout(() => {
       dispararOndaRadar(dragMarker.value)
-    }, 50) // 50ms son suficientes para que el DOM esté listo
+    }, 50)
   })
-
-  /* dispararOndaRadar(dragMarker.value); */
 })
 
-/* ═══════════════════════════════════════════════════════════════
-   NUEVO — Task 1: Activar / Desactivar el radar por completo
-   ═══════════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════════
+// Task 1: Activar / Desactivar el radar por completo
+// ═══════════════════════════════════════════════════════════════
 
-/**
- * Enciende el radar:
- * - Empieza a escuchar clicks del mapa (para poder mover el centro).
- * - Coloca el centro por defecto en la Ciudad de México.
- *   Esto dispara automáticamente los watchers de `center`/`radius` que
- *   dibujan el círculo, el marker y calculan proyectos/municipios.
- */
 function activarRadar() {
   if (radarActivo.value) return
 
@@ -383,18 +353,6 @@ function activarRadar() {
   center.value = mapStore.view.center
 }
 
-/**
- * Apaga el radar por completo:
- * - Deja de escuchar clicks del mapa (unregisterClick real, no solo un
- *   flag ignorado: el listener se desengancha de Leaflet).
- * - Pone `center` en null, lo que dispara la limpieza ya existente del
- *   círculo, el marker draggable y la capa de municipios recortados.
- * - Cancela cualquier cálculo de municipios en curso (debounce +
- *   promesas en vuelo) mediante resetRadar(), para que ninguna
- *   respuesta tardía de red pueda "revivir" resultados después de
- *   apagado.
- * - Limpia el conteo/resaltado de proyectos en el radio.
- */
 function desactivarRadar() {
   if (!radarActivo.value) return
 
@@ -416,8 +374,6 @@ function toggleRadar() {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════ */
-
 // --- Carga de proyectos ---
 let datosProyectos = null
 const proyectosVisibles = ref(false)
@@ -427,15 +383,10 @@ async function crearCapaProyectos() {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
     console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
 
-    // ── NUEVO: Task 2 ──────────────────────────────────────────
-    // Se imprime el listado completo de ID_PPI_ESPACIAL disponibles
-    // al cargar el archivo, para confirmar que el campo existe y ver
-    // su ubicación real dentro de "properties".
     console.log(
       '🆔 IDs PPI espacial cargados:',
       datosProyectos.features.map((f) => f.properties?.ID_PPI_ESPACIAL),
     )
-    // ────────────────────────────────────────────────────────────
 
     pointsProyectos.loadPoints(datosProyectos)
   }
@@ -461,13 +412,9 @@ async function crearCapaProyectos() {
       layer.on('click', () => {
         console.log('Proyecto seleccionado:', nombre)
 
-        // ── NUEVO: Task 2 + Task 4 ────────────────────────────
-        // Se obtiene el ID_PPI_ESPACIAL de ESTE proyecto en
-        // particular y se centraliza en Pinia.
         const idPpiEspacial = feature.properties?.ID_PPI_ESPACIAL ?? null
         console.log('🆔 ID_PPI_ESPACIAL del proyecto seleccionado:', idPpiEspacial)
         seleccionStore.setIdPpiEspacial(idPpiEspacial)
-        // ────────────────────────────────────────────────────
       })
     },
     pane: 'proyectosPane',
@@ -475,12 +422,8 @@ async function crearCapaProyectos() {
 
   capaProyectos.value = proyectosLayer
 
-  // NUEVO: agrupamos esos mismos círculos en clusters. Se agregan uno
-  // por uno con eachLayer (en vez de clusterProyectos.value.addLayer(
-  // proyectosLayer) directo) porque es la forma documentada de
-  // alimentar un markerClusterGroup con capas ya creadas.
   clusterProyectos.value = L.markerClusterGroup({
-    clusterPane: 'proyectosPane', // mismo pane que tus círculos, para no romper el orden con el radar (800/900)
+    clusterPane: 'proyectosPane',
     maxClusterRadius: 50,
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
@@ -491,7 +434,7 @@ async function crearCapaProyectos() {
 async function toggleProyectos() {
   if (proyectosVisibles.value) {
     if (clusterProyectos.value) {
-      map.value.removeLayer(clusterProyectos.value) // antes: capaProyectos.value
+      map.value.removeLayer(clusterProyectos.value)
     }
     proyectosVisibles.value = false
   } else {
@@ -499,7 +442,7 @@ async function toggleProyectos() {
       await crearCapaProyectos()
     }
     if (clusterProyectos.value && !map.value.hasLayer(clusterProyectos.value)) {
-      clusterProyectos.value.addTo(map.value) // antes: capaProyectos.value.addTo(...)
+      clusterProyectos.value.addTo(map.value)
     }
     proyectosVisibles.value = true
     searchPoints()
@@ -512,9 +455,6 @@ onMounted(async () => {
   map.value.on('zoomend', () => {
     zoomActual.value = map.value.getZoom()
   })
-  // NOTA: ya NO se llama registerClick() aquí. El radar arranca
-  // DESACTIVADO por defecto; el listener de click del mapa solo se
-  // engancha cuando el usuario activa el radar (ver activarRadar()).
 
   map.value.createPane('radarPane').style.zIndex = 800
   map.value.createPane('radarPaneMain').style.zIndex = 900
@@ -538,7 +478,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   unregisterClick()
-  resetRadar() // NUEVO: cancela timers/promesas pendientes al desmontar
+  resetRadar()
 
   if (radarCircle.value && map.value) {
     map.value.removeLayer(radarCircle.value)
@@ -552,8 +492,6 @@ onUnmounted(() => {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
   }
-  // NUEVO: si el componente se desmonta con "Proyectos" visible, sin esto
-  // el cluster se queda enganchado al mapa viejo.
   if (clusterProyectos.value && map.value) {
     map.value.removeLayer(clusterProyectos.value)
     clusterProyectos.value = null
