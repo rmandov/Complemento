@@ -36,16 +36,27 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ─── Cambios principales aquí ─── */
 .cards {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 16px;
+  /* Se quitó position: absolute */
+
+  /* Fondo sólido para que no se vea el hero detrás */
+  padding: 20px;
+
+  /* Efecto de tarjeta flotante */
+  min-width: 180px;
 }
 
 .card {
   padding: 16px;
-  border: 1px solid #dcdce6;
+  border: 1px solid #2d2deb;
+  background-color: #ffffff;
   border-radius: 20px;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -64,12 +75,19 @@ onMounted(async () => {
 
 .cards-leyenda {
   font-size: 0.875rem;
-  color: #666;
+  color: #000000;
+  margin-top: 12px;
+  /* Separación respecto a las cards */
+  text-align: center;
 }
 
 @media (max-width: 768px) {
   .cards {
     flex-direction: column;
+    box-shadow: none;
+    /* Opcional: sin sombra en móvil si prefieres */
+    padding: 0;
+    background-color: transparent;
   }
 }
 </style>

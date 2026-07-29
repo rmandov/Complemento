@@ -1,165 +1,92 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import gsap from 'gsap'
-// Configuración de los botones
+
 const botones = [
   {
     to: '/fichas',
     img: new URL('../../../assets/img/img_circle.png', import.meta.url).href,
-    label: 'Categorías',
+    label: 'Categoría',
+    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.!',
   },
   {
     to: '/mapa',
     img: new URL('../../../assets/img/Mexico.png', import.meta.url).href,
     label: 'Territorio',
+    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.!',
   },
 ]
-
-// Efecto magnético
-const handleMouseMove = (e) => {
-  const zone = e.currentTarget // .magnetic-zone
-  const btn = zone.querySelector('.boton')
-  const text = zone.querySelector('.boton-imgtxt')
-
-  if (!btn || !text) return
-
-  const rect = zone.getBoundingClientRect()
-
-  const x = gsap.utils.mapRange(rect.left, rect.right, -rect.width / 2, rect.width / 2, e.clientX)
-
-  const y = gsap.utils.mapRange(rect.top, rect.bottom, -rect.height / 2, rect.height / 2, e.clientY)
-
-  // El botón se mueve suavemente
-  gsap.to(btn, {
-    x: x * 0.15,
-    y: y * 0.15,
-    duration: 0.4,
-    ease: 'power2.out',
-  })
-
-  // El texto se mueve más para "rebotar" dentro del botón
-  gsap.to(text, {
-    x: x * 0.15,
-    y: y * 0.15,
-    duration: 0.5,
-    ease: 'power2.out',
-  })
-}
-
-const handleMouseLeave = (e) => {
-  const zone = e.currentTarget
-  const btn = zone.querySelector('.boton')
-  const text = zone.querySelector('.boton-imgtxt')
-
-  if (!btn || !text) return
-
-  gsap.to([btn, text], {
-    x: 0,
-    y: 0,
-    duration: 0.7,
-    ease: 'elastic.out(1, 0.4)',
-    overwrite: true,
-  })
-}
 </script>
+
 <template>
   <section class="boton-section">
-    <div
-      v-for="(btn, index) in botones"
-      :key="index"
-      class="magnetic-zone"
-      @mousemove="handleMouseMove"
-      @mouseleave="handleMouseLeave"
-    >
-      <RouterLink class="boton" :to="btn.to">
-        <div class="boton-contenido">
-          <div class="boton-imgtxt">
-            <img class="boton-imagen" :src="btn.img" :alt="btn.label" />
-            <span class="boton-texto">{{ btn.label }}</span>
-          </div>
-        </div>
-      </RouterLink>
-    </div>
+    <RouterLink v-for="(btn, index) in botones" :key="index" class="boton-card" :to="btn.to">
+      <div class="boton-icono">
+        <img :src="btn.img" :alt="btn.label" />
+      </div>
+
+      <div class="boton-info">
+        <h3 class="boton-titulo">{{ btn.label }}</h3>
+        <p class="boton-descripcion">{{ btn.description }}</p>
+      </div>
+    </RouterLink>
   </section>
 </template>
 
 <style scoped>
-/* Botones */
 .boton-section {
   display: flex;
-  gap: 16rem;
-  margin: 64px 0 64px 0;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
+  gap: 24px;
 }
 
-.magnetic-zone {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  /* border: 1px dashed #ccc; */ /* Descomenta si quieres ver el área de captura */
-}
-
-.boton {
+.boton-card {
   flex: 1;
-  min-width: 100%;
   display: flex;
-  padding: 16px 38px 16px 40px;
-  border-radius: 100px;
+  align-items: center;
+  gap: 20px;
+  padding: 32px;
+  border-radius: 24px;
+  background-color: rgb(224, 224, 224);
   text-decoration: none;
   color: inherit;
-  /* ===== IMPORTANTE para el efecto magnético ===== */
-  position: relative;
+}
+
+.boton-icono {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  will-change: transform;
-  background-image: linear-gradient(
-    144.02deg,
-    /* rgb(10, 228, 72) 7.56%,
-          rgb(171, 255, 132) 56.98% */ rgb(75, 95, 166),
-    rgb(131, 202, 231)
-  );
 }
 
-.boton-imgtxt {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-}
-.boton-imgtxt {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+.boton-icono img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
-.boton-contenido {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.boton-info {
   min-width: 0;
 }
 
-.boton-imagen {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  flex-shrink: 0;
-  filter: brightness(1000);
-  transform: translate(0, -2px);
+.boton-titulo {
+  font-family: NotoSansBold;
+  font-size: 1.5rem;
+  margin: 0 0 8px 0;
 }
 
-.boton-texto {
-  font-size: 1rem;
-  /* ===== IMPORTANTE para que GSAP transforme el span ===== */
-  display: inline-block;
-  will-change: transform;
+.boton-descripcion {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
 }
 
-.boton-flecha {
-  flex-shrink: 0;
+@media (max-width: 768px) {
+  .boton-section {
+    flex-direction: column;
+  }
 }
 </style>
