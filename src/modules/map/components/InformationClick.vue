@@ -12,7 +12,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="barra-lateral shadow-sm bg-white/100">
+  <section
+    class="barra-lateral shadow-sm bg-white/100 scrollbar-thin scrollbar-thumb-sky-700 scrollbar-track-sky-100"
+  >
     <div class="card flex flex-col h-full">
       <div class="title h-20 text-center">
         <h2 class="font-bold" v-if="entidad_clave !== '00'">{{ entidad_clave }}. {{ entidad }}</h2>
@@ -30,7 +32,7 @@ onMounted(() => {
     </div>
   </section>
 </template>
-<style scoped>
+<style>
 .barra-lateral {
   position: relative;
   /*  height: calc(100% - 30px); */
@@ -44,7 +46,7 @@ onMounted(() => {
   left: 15px; */
 
   /*  z-index: 500;  */ /* Más alto que todo */
-  pointer-events: none;
+  /* pointer-events: none; */
   border-radius: 10px;
   overflow: auto;
 
@@ -53,9 +55,6 @@ onMounted(() => {
   background-color: rgb(231, 231, 231);
 }
 
-.card {
-  /* border: solid 1px red; */
-}
 .title {
   /* border: solid 1px rgb(136, 255, 0); */
 
@@ -71,8 +70,6 @@ onMounted(() => {
 }
 
 .body {
-  /* border: solid 1px rgb(0, 89, 255); */
-
   padding: 1rem;
 }
 </style>

@@ -4,6 +4,8 @@ import { query } from '@/data/duckdb'
 import { useMapStore } from '@/stores/map'
 import { storeToRefs } from 'pinia'
 
+import MapView from '../layer/components/MapView.vue'
+
 const mapStore = useMapStore()
 
 // Desestructurar la ref específica que necesitas
@@ -73,7 +75,12 @@ watch(
 </script>
 
 <template>
+<<<<<<< HEAD
   <section class="table-map">
+=======
+  <!-- <MapView></MapView> -->
+  <section>
+>>>>>>> armando
     <h2>Consulta SQL</h2>
 
     <textarea v-model="sqlQuery" rows="5" cols="70"
