@@ -21,7 +21,7 @@ const error = ref('')
 const cantidad = 5000
 
 // ✅ Query computada: se actualiza automáticamente cuando cambia entidadDefault
-const sqlQuery = computed(
+/* const sqlQuery = computed(
   () => `
   SELECT
   ID_PPI_ESPACIAL,
@@ -30,7 +30,19 @@ const sqlQuery = computed(
 FROM dataset
 WHERE ID_ENTIDAD_FEDERATIVA = '${entidadDefault.value}';
 `,
+) */
+
+const sqlQuery = computed(
+  () => `
+ SELECT
+  ENTIDAD_FEDERATIVA,
+  COUNT(DISTINCT CLAVE_CARTERA) AS PPI
+FROM dataset
+GROUP BY ENTIDAD_FEDERATIVA;
+`,
 )
+
+
 
 function toPlainObjects(arrowResult) {
   return arrowResult.toArray().map((row) => {
