@@ -1,5 +1,6 @@
 <script setup>
 import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
+import SplitText from '@/modules/home/components/SplitText.vue'
 </script>
 <template>
   <section class="hero-section">
@@ -8,12 +9,17 @@ import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
     </div>
     <div class="hero-texto">
       <h1 class="hero-title text-4xl font-bold">
-        Complementariedad y sinergia entre Programas y Proyectos de Inversión (PPI)
+        <SplitText>
+          Complementariedad y sinergia entre Programas y Proyectos de Inversión (PPI)
+        </SplitText>
       </h1>
+
       <p class="hero-description">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
-        fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta
-        alias vitae culpa facere esse neque?
+        <SplitText>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
+          fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam
+          soluta alias vitae culpa facere esse neque?
+        </SplitText>
       </p>
       <CantidadProyectos />
     </div>
@@ -54,6 +60,7 @@ import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
   justify-content: center;
   text-align: center;
 }
+
 @media (max-width: 768px) {
   .hero-section {
     flex-direction: column;

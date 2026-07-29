@@ -1,7 +1,8 @@
 <script setup lang="ts">
 //@ts-ignore
 import logoImg from '@/assets/img/logo.png'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import breadcrumb from '../components/breadcrumb.vue'
 export interface MenuItem {
   id: number
   label: string
@@ -46,18 +47,25 @@ const handleAbrirMenu = () => {
   menuAbierto.value = !menuAbierto.value
   itemActivo.value = null
 }
+const handleResize = () => {
+  menuAbierto.value = false
+}
 onMounted(() => {
   obtenerNav()
+  window.addEventListener('resize', handleResize)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 <template>
   <header class="navbar shadow-sm">
-    <a
-      href="https://www.transparenciapresupuestaria.gob.mx/"
-      class="navbar-logo flex items-center justify-center lg:justify-start flex-1"
-    >
-      <img :src="logoImg" alt="Logo Gobierno" class="logo-img" />
-    </a>
+    <div class="flex items-center justify-center lg:justify-start flex-1">
+      <a href="https://www.transparenciapresupuestaria.gob.mx/" class="navbar-logo">
+        <img :src="logoImg" alt="Logo Gobierno" class="logo-img" />
+      </a>
+      <breadcrumb></breadcrumb>
+    </div>
     <!-- Botón hamburguesa (solo móvil) -->
     <button
       class="flex lg:hidden hamburger-btn"
@@ -92,7 +100,6 @@ onMounted(() => {
                     class="subnav-boton"
                     :class="{ 'subnav-boton-activo': itemActivo === subitem.id }"
                     @click="handleClickItem(subitem.id)"
-                    @pointerenter="(e) => enterMouse(subitem.id, e)"
                     :style="{ '--color-borde-btn': subitem.texto }"
                   >
                     <span style="flex: 1">{{ idx + 1 }}</span>
@@ -238,8 +245,7 @@ onMounted(() => {
 
 .subnav-boton:hover,
 .subnav-boton-activo {
-  transform: scale(1.1);
-  margin: 0 0.5rem;
+  transform: scaleY(1.1);
   border-color: var(--color-borde-activo);
   box-shadow: var(--sombra-boton-nav-hover);
 }
@@ -394,7 +400,7 @@ onMounted(() => {
     border-color 0.3s ease-in-out;
 }
 .nav-boton:hover {
-  transform: scale(1.1);
+  transform: scaleY(1.1);
   border-color: var(--color-borde-activo);
   box-shadow: var(--sombra-boton-nav-hover);
 }

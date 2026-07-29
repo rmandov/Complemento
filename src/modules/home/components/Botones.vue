@@ -1,14 +1,17 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import gsap from 'gsap'
-
 // Configuración de los botones
 const botones = [
   {
-    to: '/fichas/test',
+    to: '/fichas',
     img: new URL('../../../assets/img/img_circle.png', import.meta.url).href,
-    label: 'Test',
+    label: 'Categorías',
+  },
+  {
+    to: '/mapa',
+    img: new URL('../../../assets/img/Mexico.png', import.meta.url).href,
+    label: 'Territorio',
   },
 ]
 
@@ -59,10 +62,7 @@ const handleMouseLeave = (e) => {
   })
 }
 </script>
-
 <template>
-  <p>Soy una ficha</p>
-  <p>hola</p>
   <section class="boton-section">
     <div
       v-for="(btn, index) in botones"
@@ -81,10 +81,10 @@ const handleMouseLeave = (e) => {
       </RouterLink>
     </div>
   </section>
-  <RouterView />
 </template>
 
 <style scoped>
+/* Botones */
 .boton-section {
   display: flex;
   gap: 16rem;
@@ -161,12 +161,5 @@ const handleMouseLeave = (e) => {
 
 .boton-flecha {
   flex-shrink: 0;
-}
-p {
-  width: 100%;
-  height: 200px;
-  background-color: aquamarine;
-  flex: auto;
-  text-align: center;
 }
 </style>

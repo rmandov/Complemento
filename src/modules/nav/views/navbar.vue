@@ -2,9 +2,12 @@
   <nav class="navbar" @mouseleave="closeMenuDelayed">
     <div class="navbar-container">
       <!-- Logo como imagen -->
+
       <a :href="logoHref" class="navbar-logo">
         <img :src="logoSrc" :alt="logoAlt" class="logo-img" @error="handleLogoError" />
       </a>
+
+      <breadcrumb></breadcrumb>
 
       <!-- Botón hamburguesa (solo móvil) -->
       <button
@@ -172,6 +175,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import menuData from './menuData.json'
+import breadcrumb from '../components/breadcrumb.vue'
 
 // ===== Props =====
 const props = defineProps({
@@ -300,7 +304,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 36px;
 }
 
 /* ===== Logo ===== */
@@ -312,7 +316,7 @@ onUnmounted(() => {
 }
 
 .logo-img {
-  height: 40px;
+  height: 28px;
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -340,7 +344,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.75rem 1rem;
+  padding: 0.1rem 0.5rem;
   color: #575757;
   text-decoration: none;
   font-size: 1rem;

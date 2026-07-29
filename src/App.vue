@@ -7,7 +7,7 @@ import Footer from './modules/footer/views/footer.vue'
 </script>
 
 <template>
-  <navbar_basic :logoSrc="logoImg"></navbar_basic>
+  <Navbar :logoSrc="logoImg"></Navbar>
   <!-- <Navbar
     :logoSrc="logoImg"
     logoAlt="Logo Gobierno"
