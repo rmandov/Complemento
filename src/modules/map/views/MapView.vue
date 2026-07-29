@@ -416,15 +416,6 @@ function toggleRadar() {
   }
 }
 
-function onTabChange(id) {
-  if (id === 'mapa') {
-    // El contenedor pudo cambiar de tamaño mientras estaba oculto
-    // (display:none). nextTick asegura que el DOM ya se actualizó
-    // antes de pedirle a Leaflet que recalcule su tamaño.
-    nextTick(() => map.value?.invalidateSize())
-  }
-}
-
 /* ═══════════════════════════════════════════════════════════════ */
 
 // --- Carga de proyectos ---
@@ -571,101 +562,130 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Panel de información al hacer clic -->
-
   <div class="map-wraper" @mousemove="updateMousePosition">
-<<<<<<< HEAD
+    <!-- Añadida la clase "info" para que el CSS responsivo funcione -->
     <InformationClick class="info" />
 
-    <div class="display-mapa" @mouseenter="active = true" @mouseleave="active = false">
-      <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
-=======
-    <InformationClick />
-    <Tabs v-model="activeTab" :tabs="tabList" @change="onTabChange">
-      <!-- MAPA -->
-      <template #mapa>
-        <div class="info" @mouseenter="active = true" @mouseleave="active = false">
-          <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
+    <!-- Nuevo contenedor flexible para las pestañas -->
+    <div class="tabs-wrapper">
+      <Tabs v-model="activeTab" :tabs="tabList" @change="onTabChange">
+        <!-- MAPA -->
+        <template #mapa>
+          <div class="display-mapa">
+            <div ref="mapContainer" class="map" @wheel="handleWheel"></div>
 
-          <!-- Tooltip de advertencia para zoom -->
-          <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
->>>>>>> santiago
+            <MapScrollTooltip :show="showWarning" :tooltip-pos="tooltipPos" />
 
-          <!-- NUEVO: botón para activar/desactivar el radar por completo.
-           Si prefieres que viva dentro de MapButtons.vue, comparte ese
-           archivo y lo integro ahí como un emit más. -->
-          <!-- <button
-        class="radar-toggle-btn"
-        :class="{ 'radar-toggle-btn--activo': radarActivo }"
-        @click="toggleRadar"
-      >
-        {{ radarActivo ? '🛑 Desactivar radar' : '📡 Activar radar' }}
-      </button> -->
+            <RadiusControl
+              v-if="radarActivo"
+              v-model:radius="radius"
+              :count="radioCantidad"
+              :min="minRadius"
+              :max="maxRadius"
+            />
 
-          <!-- Control de radio: solo visible/interactuable con el radar activo -->
-          <RadiusControl v-if="radarActivo" v-model:radius="radius" :count="radioCantidad" :min="minRadius"
-            :max="maxRadius" />
+            <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
+              Cargando municipios del área...
+            </div>
+            <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
+              <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
+              <ul>
+                <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
+                  {{ m.properties.NOMGEO }}
+                </li>
+              </ul>
+            </div>
 
-          <!-- Panel con el listado de municipios tocados por el radar:
-           solo tiene sentido mostrarlo con el radar activo -->
-          <div v-if="radarActivo && cargandoMunicipios" class="municipios-radar-panel">
-            Cargando municipios del área...
+            <MapButtons
+              @go-back="goBack"
+              @toggle-proyectos="toggleProyectos"
+              @toggle-radar="toggleRadar"
+            />
           </div>
-          <div v-else-if="radarActivo && municipiosEnRadar.length" class="municipios-radar-panel">
-            <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
-            <ul>
-              <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
-                {{ m.properties.NOMGEO }}
-              </li>
-            </ul>
-          </div>
+        </template>
 
-          <!-- Buttons para controlar el setView y carga de layer Proyectos -->
-          <MapButtons @go-back="goBack" @toggle-proyectos="toggleProyectos" @toggle-radar="toggleRadar" />
-        </div>
-      </template>
-      <!-- Tabla de informacion -->
-      <template #proyectos>
-        <div>
-          <TableMap />
-        </div>
-      </template>
-      <!-- Tercer pestaña -->
-      <template #estadisticas>
-        <div>
-          <p>lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet
-            consectetur adipisicing elit. Quisquam, quod. </p>
-        </div>
-      </template>
-    </Tabs>
+        <!-- Tabla de informacion -->
+        <template #proyectos>
+          <div>
+            <TableMap />
+          </div>
+        </template>
+
+        <!-- Tercer pestaña -->
+        <template #estadisticas>
+          <div>
+            <p>lorem ipsum dolor sit amet...</p>
+          </div>
+        </template>
+      </Tabs>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Layout principal: fila en escritorio, columna en móvil */
+.map-wraper {
+  display: flex;
+  width: calc(100dvw - (100dvw - 100%));
+  height: calc(100dvh - var(--nav-height));
+  padding: 1rem;
+  flex-direction: row;
+  gap: 10px;
+}
+
+/* Panel de información (izquierda en escritorio) */
+.info {
+  order: 1;
+  /* Ajusta un ancho base si lo deseas, por ejemplo: */
+  /* flex: 0 0 320px; */
+}
+
+/* Contenedor del mapa y pestañas (derecha en escritorio, ocupa el resto) */
+.tabs-wrapper {
+  flex: 1;
+  order: 2;
+  min-width: 0; /* Evita desbordamiento */
+  display: flex;
+  flex-direction: column;
+}
+
+/* El área del mapa ocupa todo el espacio de su pestaña */
+.display-mapa {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1000px) {
+  .map-wraper {
+    flex-direction: column;
+  }
+
+  .info {
+    order: 2; /* Se va abajo */
+    width: 100%;
+    height: auto; /* O 100% si prefieres que ocupe toda la altura disponible */
+  }
+
+  .tabs-wrapper {
+    order: 1; /* Mapa y pestañas arriba */
+    height: 100%; /* O un valor fijo, según necesites */
+  }
+}
+
+/* ========== Estilos del radar y otros ========== */
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
   position: relative;
-}
-
-/* NUEVO: botón de activar/desactivar radar */
-.radar-toggle-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background: white;
-  border: 1px solid #999;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.radar-toggle-btn--activo {
-  border-color: orange;
-  color: #b35c00;
-  font-weight: 600;
 }
 
 .municipios-radar-panel {
@@ -687,70 +707,6 @@ onUnmounted(() => {
   padding-left: 18px;
 }
 
-.map-wraper {
-  display: flex;
-  /* border: solid 1px blue; */
-  width: calc(100dvw - (100dvw - 100%));
-  height: calc(100dvh - var(--nav-height));
-  padding: 1rem;
-  flex-direction: row;
-  gap: 10px;
-}
-
-.map {
-  width: 100%;
-  height: 100%;
-}
-
-.info {
-  order: 1;
-}
-
-.display-mapa {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.display-mapa {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  overflow: hidden;
-
-  order: 2;
-}
-
-@media (max-width: 1000px) {
-  .map-wraper {
-    flex-direction: column;
-  }
-<<<<<<< HEAD
-=======
-
->>>>>>> santiago
-  /* Para que B quede arriba y A abajo, invertimos el order */
-  .info {
-    order: 2;
-    width: 100%;
-<<<<<<< HEAD
-  }
-  .display-mapa {
-    order: 1;
-  }
-=======
-    height: 100%;
-  }
-
-  .display-mapa {
-    order: 1;
-  }
-
->>>>>>> santiago
-  /* O también: .item-b { order: -1; } y .item-a { order: 0; } */
-}
-
 :deep(.leaflet-interactive:focus) {
   outline: none;
 }
@@ -759,15 +715,12 @@ onUnmounted(() => {
   filter: hue-rotate(140deg) brightness(1.2) !important;
 }
 
-/* 1. Estilos base de tu marcador (Tu diseño original) */
 :global(.radar-center-marker) {
   background: transparent;
   border: none;
   position: relative;
-  /* Asegura que los pseudoelementos se alineen aquí */
 }
 
-/* El punto naranja estático se mantiene intacto usando ::after */
 :global(.radar-center-marker::after) {
   content: '';
   position: absolute;
@@ -782,10 +735,8 @@ onUnmounted(() => {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   cursor: move;
   z-index: 2;
-  /* Se coloca por encima de la onda para que no lo tape */
 }
 
-/* 2. La animación de la onda utilizando ::before para no romper el ::after */
 :global(.marcador-onda-activa::before) {
   content: '';
   position: absolute;
@@ -795,21 +746,11 @@ onUnmounted(() => {
   height: 20px;
   margin-top: -10px;
   margin-left: -10px;
-
   border-radius: 50%;
-
-  /*  background: radial-gradient(
-    circle,
-    rgba(255, 65, 54, 0.8) 55%,
-    rgba(255, 65, 54, 0.35) 75%,
-    rgba(255, 65, 54, 0) 100%
-  ); */
-
   background: radial-gradient(circle,
       rgba(255, 65, 54, 0.8) 55%,
       rgba(255, 65, 54, 0.35) 75%,
       rgba(255, 65, 54, 0) 100%);
-
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }
@@ -817,13 +758,10 @@ onUnmounted(() => {
 @keyframes pulsoOndaRadarVue {
   0% {
     transform: scale(1);
-    background-position: 0% 50%;
     opacity: 1;
   }
-
   100% {
     transform: scale(v-bind(escalaOndaCss));
-    background-position: 300% 50%;
     opacity: 0;
   }
 }

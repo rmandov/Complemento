@@ -3,7 +3,6 @@
 import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed } from 'vue'
 import L from 'leaflet'
 
-<<<<<<< HEAD
 // Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
 // muchos cerca entre sí. Los dos CSS son necesarios para que el círculo
 // del cluster se vea bien (sin ellos funciona, pero sin estilos).
@@ -11,8 +10,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
 
-=======
->>>>>>> santiago
 import KDBush from 'kdbush'
 import * as geokdbush from 'geokdbush'
 
@@ -63,12 +60,8 @@ const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
   createMap(mapContainer)
 
-<<<<<<< HEAD
 const capaProyectos = shallowRef(null) // geoJSON "plano": sigue usándose para eachLayer/highlight, sin cambios
 const clusterProyectos = shallowRef(null) // NUEVO: agrupador de esos mismos círculos; esto es lo que se agrega/quita del mapa
-=======
-const capaProyectos = shallowRef(null)
->>>>>>> santiago
 
 /* const radius = ref(200_000) */ // metros
 
@@ -471,7 +464,6 @@ async function crearCapaProyectos() {
   })
 
   capaProyectos.value = proyectosLayer
-<<<<<<< HEAD
 
   // NUEVO: agrupamos esos mismos círculos en clusters. Se agregan uno
   // por uno con eachLayer (en vez de clusterProyectos.value.addLayer(
@@ -484,32 +476,20 @@ async function crearCapaProyectos() {
     showCoverageOnHover: false,
   })
   proyectosLayer.eachLayer((marker) => clusterProyectos.value.addLayer(marker))
-=======
->>>>>>> santiago
 }
 
 async function toggleProyectos() {
   if (proyectosVisibles.value) {
-<<<<<<< HEAD
     if (clusterProyectos.value) {
       map.value.removeLayer(clusterProyectos.value) // antes: capaProyectos.value
-=======
-    if (capaProyectos.value) {
-      map.value.removeLayer(capaProyectos.value)
->>>>>>> santiago
     }
     proyectosVisibles.value = false
   } else {
     if (!capaProyectos.value) {
       await crearCapaProyectos()
     }
-<<<<<<< HEAD
     if (clusterProyectos.value && !map.value.hasLayer(clusterProyectos.value)) {
       clusterProyectos.value.addTo(map.value) // antes: capaProyectos.value.addTo(...)
-=======
-    if (capaProyectos.value && !map.value.hasLayer(capaProyectos.value)) {
-      capaProyectos.value.addTo(map.value)
->>>>>>> santiago
     }
     proyectosVisibles.value = true
     searchPoints()
@@ -562,15 +542,12 @@ onUnmounted(() => {
     map.value.removeLayer(municipiosRecortadosLayer.value)
     municipiosRecortadosLayer.value = null
   }
-<<<<<<< HEAD
   // NUEVO: si el componente se desmonta con "Proyectos" visible, sin esto
   // el cluster se queda enganchado al mapa viejo.
   if (clusterProyectos.value && map.value) {
     map.value.removeLayer(clusterProyectos.value)
     clusterProyectos.value = null
   }
-=======
->>>>>>> santiago
 })
 </script>
 
