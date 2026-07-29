@@ -81,7 +81,7 @@ watch(
 </script>
 
 <template>
-  <MapView></MapView>
+  <!-- <MapView></MapView> -->
   <section>
     <h2>Consulta SQL</h2>
 
