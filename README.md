@@ -1,5 +1,333 @@
 # TopoJSON
 
+# InfomationClick.vue
+
+# Componente Controlador de Mapa
+
+## Objetivo
+
+Desarrollar un componente **Vue 3** utilizando **Composition API** y **`<script setup>`** cuya responsabilidad sea actuar como un **controlador de filtros y navegación para un mapa**.
+
+Este componente **no contiene lógica del mapa**. Su única responsabilidad es administrar los controles de entrada del usuario y sincronizar su estado con componentes externos.
+
+Debe funcionar en ambos sentidos:
+
+- Recibir valores desde un componente padre para mostrarlos en la interfaz.
+- Emitir los cambios realizados por el usuario para que un componente externo ejecute la lógica correspondiente.
+
+En otras palabras, el componente actúa únicamente como una capa de presentación y captura de datos.
+
+---
+
+# Requisitos
+
+## 1. Control CARTERA
+
+Debe existir un campo de texto.
+
+### Características
+
+- Tipo: `string`.
+- Puede recibir un valor inicial desde el exterior.
+- Cada cambio realizado por el usuario debe emitirse al componente padre.
+- Si el valor cambia desde el componente padre, el input debe actualizarse automáticamente.
+
+---
+
+## 2. Control UBICACIÓN
+
+Está compuesto por dos controles dependientes entre sí.
+
+### ENTIDAD
+
+- Tipo: Checkbox múltiple.
+- Muestra las 32 entidades federativas de México.
+- Las entidades **no están definidas dentro del componente**, sino que se reciben mediante una propiedad.
+- Permite seleccionar una o varias entidades.
+
+Cada cambio debe:
+
+- Actualizar el estado interno.
+- Emitir la selección.
+- Actualizar automáticamente el listado de municipios disponibles.
+
+---
+
+### MUNICIPIOS
+
+- Tipo: Checkbox múltiple.
+- Solo aparece cuando existe al menos una entidad seleccionada.
+- Los municipios se reciben desde el exterior.
+- Deben filtrarse automáticamente para mostrar únicamente los municipios pertenecientes a las entidades seleccionadas.
+
+El componente debe conservar únicamente municipios válidos.
+
+
+## Comportamiento de la selección geográfica
+
+La selección geográfica debe permitir trabajar tanto a nivel **Entidad** como a nivel **Municipio**, dependiendo de la información disponible y de la selección realizada por el usuario.
+
+### Selección de Entidades
+
+- El usuario puede seleccionar una o varias entidades federativas.
+- Cada vez que cambie la selección, el componente debe emitir el listado de entidades seleccionadas.
+- Al seleccionar una entidad, el componente solicitará (mediante el componente padre) los municipios correspondientes.
+- El componente **no conoce** los municipios de forma interna; únicamente los muestra cuando son recibidos mediante `props`.
+
+### Carga de Municipios
+
+El listado de municipios **no debe existir inicialmente**.
+
+Solo debe mostrarse cuando el componente reciba los municipios correspondientes a las entidades seleccionadas.
+
+Mientras no existan municipios disponibles:
+
+- No debe mostrarse el selector de municipios.
+- La selección se considera únicamente a nivel entidad.
+
+### Selección de Municipios
+
+Una vez recibidos los municipios:
+
+- El usuario puede seleccionar uno, varios o ninguno.
+- Cada modificación debe emitirse al componente padre.
+- Los municipios siempre pertenecen a las entidades actualmente seleccionadas.
+
+Si una entidad deja de estar seleccionada:
+
+- Deben eliminarse automáticamente todos los municipios pertenecientes a dicha entidad.
+- Debe emitirse nuevamente la selección actualizada.
+
+### Niveles de granularidad
+
+El componente debe permitir representar información con diferentes niveles de detalle.
+
+Puede existir información:
+
+- únicamente a nivel **Entidad**;
+- a nivel **Entidad incluyendo todos sus municipios**;
+- únicamente para **Municipios específicos**.
+
+Por ello, el componente no debe asumir que siempre existirán municipios seleccionados.
+
+Ejemplos:
+
+- **Jalisco** → representa toda la entidad.
+- **Jalisco + Guadalajara + Zapopan** → representa únicamente esos municipios dentro de Jalisco.
+- **Nuevo León + Sonora** → información únicamente a nivel estatal.
+- **Puebla + Tehuacán** → mezcla de selección estatal y municipal.
+
+El componente únicamente administra estas selecciones y las comunica al exterior; la interpretación de su significado corresponde a la lógica del mapa.
+
+### Valores emitidos
+
+El componente debe emitir siempre ambos conjuntos de datos:
+
+```ts
+{
+    entidades: string[],
+    municipios: string[]
+}
+```
+
+Esto permite que el componente padre determine cómo interpretar la selección y ejecute la lógica correspondiente.
+
+El componente **no debe asumir** que la existencia de municipios implica que la entidad deja de estar seleccionada. Ambos niveles de selección son independientes y pueden coexistir.
+
+### Ejemplo
+
+Si el usuario tiene seleccionados:
+
+- Guadalajara
+- Zapopan
+
+y posteriormente desmarca **Jalisco**, dichos municipios deben eliminarse automáticamente de la selección.
+
+Cada modificación debe emitirse al exterior.
+
+---
+
+### Resumen de ubicación
+
+Una vez realizada la selección, el componente debe mostrar un resumen con:
+
+- Entidades seleccionadas.
+- Municipios seleccionados.
+
+Este resumen es únicamente visual.
+
+---
+
+## 3. Control RADAR
+
+Debe existir un control tipo **Slider**.
+
+Este control solamente será visible cuando una propiedad externa (`showRadar`) sea verdadera.
+
+### Características
+
+- Valor mínimo configurable.
+- Valor máximo configurable.
+- Unidad en kilómetros.
+- Recibe un valor inicial.
+- Emite cambios al exterior.
+- Si el valor cambia desde fuera, el slider debe actualizarse automáticamente.
+
+---
+
+# Comunicación con el exterior
+
+Todos los controles deben trabajar mediante comunicación bidireccional.
+
+Cada uno debe poder:
+
+- Recibir un valor externo.
+- Reflejar dicho valor en la interfaz.
+- Emitir los cambios realizados por el usuario.
+
+La lógica del mapa **nunca** debe ejecutarse dentro de este componente.
+
+Su única responsabilidad es emitir eventos como:
+
+- Cambio de cartera.
+- Cambio de entidades.
+- Cambio de municipios.
+- Cambio del radar.
+
+Será responsabilidad del componente padre decidir qué hacer con dichos cambios.
+
+---
+
+# Datos recibidos
+
+El componente debe recibir mediante **props** toda la información necesaria.
+
+Por ejemplo:
+
+- Listado de entidades.
+- Listado de municipios.
+- Cartera seleccionada.
+- Entidades seleccionadas.
+- Municipios seleccionados.
+- Valor del radar.
+- Visibilidad del radar.
+- Valor mínimo y máximo del slider.
+
+No debe contener información hardcodeada.
+
+---
+
+# Sincronización
+
+El componente debe mantenerse sincronizado cuando los valores cambien desde el exterior.
+
+### Ejemplos
+
+- Un clic sobre el mapa selecciona un municipio → el componente debe marcar automáticamente dicho municipio.
+- Un botón externo limpia los filtros → el componente debe limpiar todos los controles.
+- Una búsqueda externa modifica la cartera → el input debe actualizarse.
+
+En ningún momento el componente debe asumir que el usuario es el único origen de los cambios.
+
+---
+
+# Responsabilidades
+
+## El componente **sí debe**
+
+- Mostrar controles.
+- Administrar el estado visual.
+- Validar dependencias entre controles.
+- Emitir eventos.
+- Mostrar el estado actual.
+- Mantener sincronizados los valores recibidos mediante `props`.
+
+## El componente **no debe**
+
+- Consultar APIs.
+- Acceder directamente a Pinia (salvo que se indique explícitamente).
+- Modificar el mapa.
+- Ejecutar búsquedas.
+- Contener lógica de negocio.
+
+Debe ser completamente reutilizable.
+
+---
+
+# Consideraciones técnicas
+
+- Utilizar `v-model` (o `defineModel`) para cada control cuando sea apropiado.
+- Mantener una única fuente de verdad para evitar desincronizaciones.
+- Nunca mutar directamente las `props`; utilizar estado local sincronizado cuando sea necesario.
+- Preservar la reactividad cuando cambien las listas de entidades o municipios.
+- El filtrado de municipios debe ser eficiente, ya que el número de registros puede ser grande.
+- Cuando desaparezca una entidad seleccionada (porque cambió la lista recibida), eliminar automáticamente los municipios asociados.
+- Permitir estados vacíos (sin cartera, sin entidades o sin municipios) sin producir errores.
+- El componente debe ser completamente desacoplado del mapa y reutilizable en cualquier aplicación.
+
+---
+
+# Arquitectura esperada
+
+El componente debe seguir una arquitectura basada en responsabilidades claras:
+
+- **Props**: Reciben toda la información necesaria para renderizar la interfaz.
+- **Estado interno**: Administra únicamente el estado visual necesario para el funcionamiento del componente.
+- **Computed**: Calculan información derivada, como el listado filtrado de municipios.
+- **Watchers**: Mantienen sincronizados los valores internos con los recibidos desde el exterior.
+- **Emits**: Notifican todos los cambios realizados por el usuario.
+
+La lógica del mapa deberá implementarse completamente fuera de este componente.
+
+---
+
+# Flujo esperado
+
+```text
+Usuario modifica un control
+            │
+            ▼
+    Estado interno cambia
+            │
+            ▼
+       Se emite un evento
+            │
+            ▼
+ Componente padre recibe el cambio
+            │
+            ▼
+ Ejecuta la lógica del mapa
+            │
+            ▼
+ (Opcional) Actualiza nuevamente las props
+            │
+            ▼
+ El componente sincroniza su interfaz
+```
+
+  
+
+## CARTERA
+
+- Columna que forma parte de la BBDD
+- Ingresar un valor te dirigue al proyecto:
+  - Enfoca en el mapa.
+  - Muestra información de la base sobre ese proyecto (SQL).
+  - Muestra la dirección del proyecto.
+  - Enfoca con el radar ese punto (con ícono distintivo).
+
+  Acciones:
+
+  - Al elegir el proyecto se cambia la pestaña donde se muestra la información
+  - Al mismo tiempo, genera graficas de este punto y cercanos si es que se modifica el radar.
+    - El radar crece sobre ese punto y no puede moverse de ahí
+    - Se puede cambiar a modo libre
+
+## Modo libre
+
+El mapa funciona por si solo, click y radar se mueven libremente. Movimiento actual.
+
+
 https://mapshaper.org/
 
 Verifica que esté en WGS84

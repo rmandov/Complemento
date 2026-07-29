@@ -1,5 +1,6 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
+
 import { ref } from 'vue'
 import gsap from 'gsap'
 

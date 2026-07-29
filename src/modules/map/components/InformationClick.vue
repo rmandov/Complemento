@@ -1,7 +1,24 @@
 <script setup>
 import { useMapStore } from '@/stores/map'
 import { storeToRefs } from 'pinia'
-import { onMounted } from 'vue'
+import { onMounted, reactive,ref } from 'vue'
+
+import FiltersData from './FiltersData.vue'
+
+const filtros = reactive({
+  cartera: '',
+  ubicacion: { entidades: [], municipios: [] },
+  radar: 20
+})
+
+const todasLasEntidades = ['Jalisco', 'Nuevo León', 'Puebla', /* ... */]
+const todosLosMunicipios = [
+  { entidad: 'Jalisco', nombre: 'Guadalajara' },
+  { entidad: 'Jalisco', nombre: 'Zapopan' },
+  { entidad: 'Puebla', nombre: 'Tehuacán' },
+  // ...
+]
+const mostrarRadar = ref(true)
 
 const mapStore = useMapStore()
 const { CVE_ENT: entidad_clave, municipio, entidad } = storeToRefs(mapStore)
@@ -13,8 +30,18 @@ onMounted(() => {
 
 <template>
   <section
-    class="barra-lateral shadow-sm bg-white/100 scrollbar-thin scrollbar-thumb-sky-700 scrollbar-track-sky-100"
+    class="barra-lateral shadow-sm bg-white/100"
   >
+
+  <FiltersData v-model:cartera="filtros.cartera"
+    v-model:ubicacion="filtros.ubicacion"
+    v-model:radar="filtros.radar"
+    :entidades="todasLasEntidades"
+    :municipios="todosLosMunicipios"
+    :show-radar="mostrarRadar"
+    :radar-min="5"
+    :radar-max="100"></FiltersData>
+
     <div class="card flex flex-col h-full">
       <div class="title h-20 text-center">
         <h2 class="font-bold" v-if="entidad_clave !== '00'">{{ entidad_clave }}. {{ entidad }}</h2>
@@ -30,7 +57,10 @@ onMounted(() => {
         </p>
       </div>
     </div>
+
+
   </section>
+
 </template>
 <style>
 .barra-lateral {

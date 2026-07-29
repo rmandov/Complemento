@@ -44,6 +44,12 @@ import { useMapStore } from '@/stores/map.js'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
+/**
+ * Variable para reconocer cuando el size del windows del buscador cambie.
+ */
+let resizeObserver = null
+const handleResize = () => map.value?.invalidateSize()
+
 //Constantes para Tabs
 const activeTab = ref('mapa')
 
@@ -474,9 +480,26 @@ onMounted(async () => {
 
     inicializarConEntidades(entidades)
   }
+
+
+    // NUEVO: Observa el contenedor del mapa y fuerza el recálculo de Leaflet
+  if (mapContainer.value && window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(() => {
+      map.value?.invalidateSize()
+    })
+    resizeObserver.observe(mapContainer.value)
+  }
+
+window.addEventListener('resize', handleResize)
+
 })
 
 onUnmounted(() => {
+
+   // NUEVO: Limpia el observer
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', handleResize);
+
   unregisterClick()
   resetRadar()
 
