@@ -52,7 +52,7 @@ onMounted(async () => {
 
 <style scoped>
 .home {
-  margin: 30px 50px;
+  margin: 50px 50px;
   font-family: NotoSans;
   max-width: 1400px;
   margin-left: auto;

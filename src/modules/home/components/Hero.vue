@@ -97,7 +97,7 @@ import SplitText from '@/modules/home/components/SplitText.vue'
   grid-area: stats;
   position: absolute;
   /* Se sale del flujo del grid */
-  top: -60px;
+  top: -80px;
   /* Sobresale hacia arriba */
   right: -80px;
   /* Sobresale hacia la derecha */
