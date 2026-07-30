@@ -7,7 +7,7 @@ import FiltersData from './FiltersData.vue'
 
 const filtros = reactive({
   cartera: '',
-  ubicacion: { entidades: [], municipios: [] },
+  ubicacion: { entidades: ['Jalisco'], municipios: [] },
   radar: 20
 })
 
@@ -29,6 +29,7 @@ onMounted(() => {
 </script>
 
 <template>
+
   <section
     class="barra-lateral shadow-sm bg-white/100"
   >
@@ -67,7 +68,7 @@ onMounted(() => {
   position: relative;
   /*  height: calc(100% - 30px); */
   /* width: 300px; */
-  width: 20%;
+  width: 30%;
   /* border: solid 1px purple; */
   /* background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px); */
@@ -80,7 +81,7 @@ onMounted(() => {
   border-radius: 10px;
   overflow: auto;
 
-  padding: 1rem;
+ /*  padding: 1rem; */
 
   background-color: rgb(231, 231, 231);
 }

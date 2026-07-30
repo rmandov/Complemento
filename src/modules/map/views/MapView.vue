@@ -633,12 +633,12 @@ onUnmounted(() => {
   .info {
     order: 2; /* Se va abajo */
     width: 100%;
-    height: auto; /* O 100% si prefieres que ocupe toda la altura disponible */
+    height: 300px; /* O 100% si prefieres que ocupe toda la altura disponible */
   }
 
   .tabs-wrapper {
     order: 1; /* Mapa y pestañas arriba */
-    height: 100%; /* O un valor fijo, según necesites */
+    height: 400px; /* O un valor fijo, según necesites */
   }
 }
 
