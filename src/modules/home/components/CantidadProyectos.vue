@@ -57,12 +57,14 @@ function fluidFontSize(value, fallbackRem) {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: clamp(0.75rem, 2vw, 1.25rem);
+  /*  gap: clamp(0.75rem, 2vw, 1.25rem); */
   padding: clamp(0.75rem, 2vw, 1.25rem);
   width: fit-content;
   max-width: 100%;
   margin-left: auto;
   /* asegura que todo el bloque quede pegado a la derecha */
+  position: relative;
+  z-index: 200;
 }
 
 .card {
@@ -106,7 +108,10 @@ function fluidFontSize(value, fallbackRem) {
   align-items: flex-start;
   gap: clamp(0.75rem, 1.5vw, 1rem);
   padding: 1rem 1.25rem;
+  margin: -16px 0 0 0;
   width: fit-content;
+  position: relative;
+  z-index: 200;
 }
 
 .card-group-item {
