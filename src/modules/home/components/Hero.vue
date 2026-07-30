@@ -8,8 +8,14 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   <section class="hero-section">
     <!-- Capa de animación: cubre toda la sección, todo lo demás va encima -->
     <div class="hero-animation" aria-hidden="true">
-      <!-- Bloque que "recorta" la esquina superior izquierda para el título -->
+      <!-- Bloque invisible (mismo color que el fondo de la página) -->
       <div class="hero-animation-notch"></div>
+
+      <!-- Transición curva: rectángulo_1 (fondo/invisible) + rectángulo_2 (animación) -->
+      <div class="hero-animation-curve">
+        <div class="rectangulo_1"></div>
+        <div class="rectangulo_2"></div>
+      </div>
     </div>
 
     <!-- Contenido: siempre por encima de la animación -->
@@ -56,7 +62,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
       </div>
 
       <!-- Descripción -->
-      <div class="hero-description">
+      <!-- <div class="hero-description">
         <p>
           <SplitText>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
@@ -64,7 +70,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
             soluta alias vitae culpa facere esse neque?
           </SplitText>
         </p>
-      </div>
+      </div> -->
     </div>
   </section>
 </template>
@@ -81,11 +87,22 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   overflow: visible;
 }
 
-/* ─── Capa reservada para la futura animación ─── */
+/* ─── Capa reservada para la futura animación ───
+   Variables compartidas: --notch-w es el "grosor" del bloque invisible,
+   y también el ancho de los rectángulos de la curva de transición */
 .hero-animation {
+  --notch-bg: #ffffff;
+  /* ajusta al color de fondo real de la página */
+  --notch-w: 112px;
+  /* grosor del bloque invisible y de los rectángulos */
+  --notch-h: 130px;
+  /* alto del bloque invisible */
+  --notch-radius: 32px;
+  /* debe coincidir con el border-radius de .hero-section */
+
   position: absolute;
   inset: 0;
-  border-radius: 32px;
+  border-radius: var(--notch-radius);
   overflow: hidden;
   background-color: rgb(224, 224, 224);
   /* aquí irá el <video>/animación en el futuro */
@@ -93,45 +110,44 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   pointer-events: none;
 }
 
-/*
-  Bloque "transparente" que recorta la esquina superior izquierda.
-  IMPORTANTE: --hero-notch-bg debe coincidir con el color que hay
-  DETRÁS de .hero-section (el fondo real de la página/layout),
-  para que el recorte se vea continuo con lo que hay afuera.
-*/
+/* Bloque invisible (mismo color que el fondo de la página) */
 .hero-animation-notch {
-  --hero-notch-bg: #ffffff;
-  /* ajusta a tu color de fondo real */
-  --notch-w: 60px;
-  /* ancho del recorte: debe cubrir el ancho de hero-title-block */
-  --notch-h: 230px;
-  /* alto del recorte: debe cubrir el alto de hero-title-block */
-  --notch-fillet: 32px;
-  /* radio de la curva de unión (usa el mismo que el border-radius de la sección) */
-
   position: absolute;
   top: 0;
   left: 0;
   width: var(--notch-w);
   height: var(--notch-h);
-  background-color: var(--hero-notch-bg);
-  border-top-left-radius: 32px;
-  /* coincide con la esquina exterior de .hero-section */
-  z-index: 1;
+  background-color: var(--notch-bg);
+  border-top-left-radius: var(--notch-radius);
+  z-index: 2;
 }
 
-/* Fillet cóncavo: redondea la esquina interior donde el notch
-   se une con el área visible de la animación */
-.hero-animation-notch::after {
-  content: '';
+/* Contenedor de los dos rectángulos superpuestos, justo debajo del bloque invisible */
+.hero-animation-curve {
   position: absolute;
-  top: 100%;
-  left: 100%;
-  width: var(--notch-fillet);
-  height: var(--notch-fillet);
-  background: radial-gradient(circle at top left,
-      var(--hero-notch-bg) var(--notch-fillet),
-      transparent calc(var(--notch-fillet) + 1px));
+  top: var(--notch-h);
+  left: 0;
+  width: var(--notch-w);
+  height: 30px;
+  z-index: 2;
+}
+
+/* Rectángulo 1: va detrás, mismo color que el bloque invisible (sin bordes) */
+.rectangulo_1 {
+  position: absolute;
+  inset: 0;
+  background-color: var(--notch-bg);
+}
+
+/* Rectángulo 2: va encima, mismo color que la animación,
+   con esquinas superiores redondeadas → crea la curva de unión */
+.rectangulo_2 {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(224, 224, 224);
+  /* mismo color que .hero-animation */
+  border-radius: var(--notch-radius) var(--notch-radius) 0 0;
+  z-index: 1;
 }
 
 /* Contenedor de todo el contenido real, siempre encima de la animación */
@@ -234,8 +250,9 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
     margin-top: 0;
   }
 
-  /* En móvil el título vuelve al flujo normal, así que el recorte ya no aplica */
-  .hero-animation-notch {
+  /* En móvil el título vuelve al flujo normal, ya no aplica el recorte */
+  .hero-animation-notch,
+  .hero-animation-curve {
     display: none;
   }
 }
