@@ -15,29 +15,29 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 
       <h1 class="hero-title text-4xl font-bold">
         <SplitText>
-          <TextBlock eyebrow="Conoce la cartera de inversión del país" :radius="28" :overlap="-8" :lines="[
+          <TextBlock :radius="10" :overlap="-8" :lines="[
             {
               text: 'Complementariedades y',
-              padding: '6px 50px 6px 24px',
+              padding: '15px 50px 10px 24px',
               // primera línea: solo redondeamos arriba, y en la superior-derecha
               // usamos un radio distinto al global
               corners: { topLeft: true, topRight: true, bottomRight: true, bottomLeft: false },
             },
             {
               text: 'sinergias en Programas',
-              padding: '6px 20px 6px 24px',
+              padding: '10px 20px 10px 24px',
               // línea intermedia: solo lado derecho redondeado
               corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: false },
             },
             {
               text: 'y Proyectos de',
-              padding: '6px 80px 6px 24px',
+              padding: '10px 60px 10px 24px',
               corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: false },
             },
             {
               text: 'Inversión (PPI)',
               indent: 0,
-              padding: '6px 24px',
+              padding: '10px 24px 15px',
               corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: true }, // atajo: las 4 esquinas usan el radio global
             },
           ]" />
@@ -88,7 +88,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 
 .hero-title-block {
   grid-area: title;
-  background-color: #fff;
+  /* background-color: #fff; */
   border-radius: 24px;
   padding: 24px 32px;
   align-self: start;
@@ -114,7 +114,6 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 
 .hero-title {
   font-family: NotoSansBold;
-  line-height: 1.2;
   margin: 0;
 }
 

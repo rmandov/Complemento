@@ -9,7 +9,7 @@ const props = defineProps({
   // Radio por defecto, usado cuando una esquina se marca como "true"
   radius: {
     type: [String, Number],
-    default: 28,
+    default: 10,
   },
   // Cuánto se solapan las líneas entre sí (negativo = se pisan)
   overlap: {
