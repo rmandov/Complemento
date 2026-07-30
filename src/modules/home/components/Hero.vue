@@ -1,6 +1,7 @@
 <script setup>
 import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
 import SplitText from '@/modules/home/components/SplitText.vue'
+import TextBlock from '@/modules/home/components/TextBlock.vue'
 </script>
 
 <template>
@@ -14,7 +15,32 @@ import SplitText from '@/modules/home/components/SplitText.vue'
 
       <h1 class="hero-title text-4xl font-bold">
         <SplitText>
-          Complementariedades y sinergias en Programas y Proyectos de Inversión (PPI)
+          <TextBlock eyebrow="Conoce la cartera de inversión del país" :radius="28" :overlap="-8" :lines="[
+            {
+              text: 'Complementariedades y',
+              padding: '6px 50px 6px 24px',
+              // primera línea: solo redondeamos arriba, y en la superior-derecha
+              // usamos un radio distinto al global
+              corners: { topLeft: true, topRight: true, bottomRight: true, bottomLeft: false },
+            },
+            {
+              text: 'sinergias en Programas',
+              padding: '6px 20px 6px 24px',
+              // línea intermedia: solo lado derecho redondeado
+              corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: false },
+            },
+            {
+              text: 'y Proyectos de',
+              padding: '6px 80px 6px 24px',
+              corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: false },
+            },
+            {
+              text: 'Inversión (PPI)',
+              indent: 0,
+              padding: '6px 24px',
+              corners: { topLeft: false, topRight: false, bottomRight: true, bottomLeft: true }, // atajo: las 4 esquinas usan el radio global
+            },
+          ]" />
         </SplitText>
       </h1>
     </div>

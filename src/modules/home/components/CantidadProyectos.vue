@@ -27,9 +27,9 @@ onMounted(async () => {
       </p>
     </div>
   </div>
-  <p class="cards-leyenda">
+  <!-- <p class="cards-leyenda">
     {{ leyenda }}
-  </p>
+  </p> -->
 </template>
 
 <style scoped>
@@ -44,10 +44,9 @@ onMounted(async () => {
 
 .card {
   padding: 16px;
-  border: 1px solid #2d2deb;
+  /* border: 1px solid #dadada; */
   background-color: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   /* Por defecto: columna (cards 2, 3, etc.) */
