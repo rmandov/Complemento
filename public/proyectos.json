@@ -3,17 +3,23 @@
     {
       "id": 1,
       "titulo": "Total de PPI",
-      "valor": 8
+      "valor": 100000,
+      "fontSizeValor": "2rem",
+      "fontSizeTitulo": "1rem"
     },
     {
       "id": 2,
       "titulo": "Operación",
-      "valor": 2
+      "valor": 2,
+      "fontSizeValor": "1.2rem",
+      "fontSizeTitulo": "0.8rem"
     },
     {
       "id": 3,
       "titulo": "Concluidos",
-      "valor": 132
+      "valor": 132,
+      "fontSizeValor": "1.2rem",
+      "fontSizeTitulo": "0.8rem"
     }
   ],
   "leyenda": "Información actualizada al primer trimestre de 2026"

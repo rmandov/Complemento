@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 
 const { getGeoJson } = useGeoJson()
@@ -14,108 +14,139 @@ onMounted(async () => {
     leyenda.value = data.leyenda
   }
 })
+
+const mainCard = computed(() => cards.value[0])
+const groupedCards = computed(() => cards.value.slice(1))
+
+// Convierte el tamaño recibido del JSON en un valor "clamp()" fluido,
+// evitando que el texto se desborde o se vea excesivo en pantallas chicas.
+function fluidFontSize(value, fallbackRem) {
+  const max = value || `${fallbackRem}rem`
+  return `clamp(${fallbackRem * 0.7}rem, 3vw, ${max})`
+}
 </script>
 
 <template>
   <div class="cards">
-    <div v-for="card in cards" :key="card.id" :class="['card', `card--${card.id}`]">
-      <span class="card-valor">
-        {{ card.valor }}
+    <!-- Card 1: valor total, en fila -->
+    <div v-if="mainCard" :class="['card', 'card--main', `card--${mainCard.id}`]">
+      <span class="card-valor" :style="{ fontSize: fluidFontSize(mainCard.fontSizeValor, 2) }">
+        {{ mainCard.valor }}
       </span>
-      <p class="card-titulo">
-        {{ card.titulo }}
+      <p class="card-titulo" :style="{ fontSize: fluidFontSize(mainCard.fontSizeTitulo, 1) }">
+        {{ mainCard.titulo }}
       </p>
     </div>
+
+    <!-- Cards 2, 3... agrupadas verticalmente en un solo bloque -->
+    <div v-if="groupedCards.length" class="card card--group">
+      <div v-for="card in groupedCards" :key="card.id" class="card-group-item">
+        <span class="card-valor" :style="{ fontSize: fluidFontSize(card.fontSizeValor, 1.6) }">
+          {{ card.valor }}
+        </span>
+        <p class="card-titulo" :style="{ fontSize: fluidFontSize(card.fontSizeTitulo, 0.95) }">
+          {{ card.titulo }}
+        </p>
+      </div>
+    </div>
   </div>
-  <!-- <p class="cards-leyenda">
-    {{ leyenda }}
-  </p> -->
 </template>
 
 <style scoped>
 .cards {
   display: flex;
   flex-direction: column;
-  align-items: self-end;
-  gap: 16px;
-  padding: 20px;
-  min-width: 180px;
+  align-items: flex-end;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  /* asegura que todo el bloque quede pegado a la derecha */
 }
 
 .card {
-  padding: 16px;
-  /* border: 1px solid #dadada; */
+  box-sizing: border-box;
   background-color: #ffffff;
   border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  /* Por defecto: columna (cards 2, 3, etc.) */
-  align-items: center;
-  text-align: center;
-}
-
-.card-titulo {
-  margin: 8px 0 0;
-  /* Margen arriba para separar del valor en columna */
+  min-width: 0;
+  /* permite que el contenido se ajuste sin desbordar */
+  max-width: 100%;
 }
 
 .card-valor {
-  font-size: 2rem;
   font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
-.cards-leyenda {
-  font-size: 0.875rem;
-  color: #000000;
-  margin-top: 12px;
-  text-align: center;
-}
-
-/* ─── Card 1 en fila (row) ─── */
-.card--1 {
-  flex-direction: row;
-  /* Valor y título en línea horizontal */
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  width: 200px;
-}
-
-.card--1 .card-titulo {
+.card-titulo {
   margin: 0;
-  /* Sin margen vertical en modo fila */
+  font-weight: 500;
+  color: #444;
+  overflow-wrap: break-word;
+  white-space: nowrap;
 }
 
-/* ─── Tamaños individuales ─── */
-.card--2 {
-  width: 120px;
+/* ─── Card principal (Total de PPI): número + etiqueta en fila ─── */
+.card--main {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  width: fit-content;
 }
 
-.card--3 {
-  width: 120px;
+/* ─── Card agrupada: cada item en columna, alineado a la izquierda ─── */
+.card--group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.75rem, 1.5vw, 1rem);
+  padding: 1rem 1.25rem;
+  width: fit-content;
 }
 
+.card-group-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 768px) {
   .cards {
-    flex-direction: column;
-    box-shadow: none;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+    margin-left: 0;
     padding: 0;
     background-color: transparent;
-    align-items: stretch;
   }
 
-  .card,
-  .card--1 {
-    width: 100% !important;
-    flex-direction: row;
-    /* En móvil todas en fila para aprovechar el ancho */
+  .card--main,
+  .card--group {
+    width: 100%;
+  }
+
+  .card--main {
     justify-content: space-between;
-    gap: 12px;
   }
 
-  .card .card-titulo,
-  .card--1 .card-titulo {
-    margin: 0;
+  .card-valor,
+  .card-titulo {
+    white-space: normal;
+  }
+
+  /* En móvil, cada item agrupado pasa a fila para aprovechar el ancho */
+  .card-group-item {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
   }
 }
 </style>
