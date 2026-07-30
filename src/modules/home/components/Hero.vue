@@ -7,7 +7,10 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 <template>
   <section class="hero-section">
     <!-- Capa de animación: cubre toda la sección, todo lo demás va encima -->
-    <div class="hero-animation" aria-hidden="true"></div>
+    <div class="hero-animation" aria-hidden="true">
+      <!-- Bloque que "recorta" la esquina superior izquierda para el título -->
+      <div class="hero-animation-notch"></div>
+    </div>
 
     <!-- Contenido: siempre por encima de la animación -->
     <div class="hero-content">
@@ -70,26 +73,65 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 .hero-section {
   position: relative;
   background-color: rgb(224, 224, 224);
-  /* Este color es el que en el futuro pintará la animación */
   border-radius: 32px;
   padding: 40px;
   min-height: 620px;
   margin-bottom: 32px;
   margin-top: 90px;
   overflow: visible;
-  /* Permite que título y contador se salgan de la sección */
 }
 
-/* ─── Capa reservada para la futura animación ───
-   Cubre TODA la sección (mismo color por ahora) y queda detrás de todo */
+/* ─── Capa reservada para la futura animación ─── */
 .hero-animation {
   position: absolute;
   inset: 0;
   border-radius: 32px;
   overflow: hidden;
   background-color: rgb(224, 224, 224);
+  /* aquí irá el <video>/animación en el futuro */
   z-index: 0;
   pointer-events: none;
+}
+
+/*
+  Bloque "transparente" que recorta la esquina superior izquierda.
+  IMPORTANTE: --hero-notch-bg debe coincidir con el color que hay
+  DETRÁS de .hero-section (el fondo real de la página/layout),
+  para que el recorte se vea continuo con lo que hay afuera.
+*/
+.hero-animation-notch {
+  --hero-notch-bg: #ffffff;
+  /* ajusta a tu color de fondo real */
+  --notch-w: 60px;
+  /* ancho del recorte: debe cubrir el ancho de hero-title-block */
+  --notch-h: 230px;
+  /* alto del recorte: debe cubrir el alto de hero-title-block */
+  --notch-fillet: 32px;
+  /* radio de la curva de unión (usa el mismo que el border-radius de la sección) */
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--notch-w);
+  height: var(--notch-h);
+  background-color: var(--hero-notch-bg);
+  border-top-left-radius: 32px;
+  /* coincide con la esquina exterior de .hero-section */
+  z-index: 1;
+}
+
+/* Fillet cóncavo: redondea la esquina interior donde el notch
+   se une con el área visible de la animación */
+.hero-animation-notch::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 100%;
+  width: var(--notch-fillet);
+  height: var(--notch-fillet);
+  background: radial-gradient(circle at top left,
+      var(--hero-notch-bg) var(--notch-fillet),
+      transparent calc(var(--notch-fillet) + 1px));
 }
 
 /* Contenedor de todo el contenido real, siempre encima de la animación */
@@ -108,7 +150,6 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 .hero-title-block {
   grid-area: title;
   position: absolute;
-  /* Se saca del flujo, igual que hero-stats */
   top: -120px;
   left: 40px;
   z-index: 2;
@@ -156,7 +197,6 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   grid-area: description;
   align-self: start;
   padding-top: 8px;
-  /* Espacio para no chocar con el título flotante */
   margin-top: clamp(40px, 8vw, 96px);
 }
 
@@ -192,6 +232,11 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 
   .hero-description {
     margin-top: 0;
+  }
+
+  /* En móvil el título vuelve al flujo normal, así que el recorte ya no aplica */
+  .hero-animation-notch {
+    display: none;
   }
 }
 </style>

@@ -45,6 +45,11 @@ onMounted(async () => {
 
       <Carousel></Carousel>
     </section>
+
+    <div class="contenedor">
+      <div class="rectangulo_1"></div>
+      <div class="rectangulo_2"></div>
+    </div>
   </div>
 
   <RouterView />
@@ -70,6 +75,30 @@ onMounted(async () => {
   padding: 60px 20px;
   color: #666;
   font-size: 1.1rem;
+}
+
+.contenedor {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  /* altura de ambos */
+}
+
+.rectangulo_1 {
+  position: absolute;
+  inset: 0;
+
+  background: #000;
+}
+
+.rectangulo_2 {
+  position: absolute;
+  inset: 0;
+
+  background: #f0f0f0;
+  border-radius: 20px 20px 0 0;
+
+  z-index: 1;
 }
 
 /* Responsive */
