@@ -314,62 +314,34 @@ Para esto, el valor seleccionado es disparado para que un componente exterio que
 
 Lo mismo ocurre para el filtro ENTIDAD. Lo mismo, se emitle valor seleccionado, se espera lista para el siguiente filtro posible.
 
-El RADAR es una opciones que se acutaliza recibiuendo parametros de entidad o entidades seleccionada y sus respectivos municipios que caen en el radar. Cuando el RADAR se aplica despues de 
+El RADAR es una opciones que se acutaliza recibiendo parametros de entidad o entidades seleccionada y sus respectivos municipios que caen en el radar. 
 
 ENTIDAD -> Resultado
 ENTIDAD -> MUNCIPIO -> Resultado.
-ENTIDAD -> RADAR
+ENTIDAD -> RADAR -> Resultado.
+ENTIDAD -> RADAR -> RAMO -> Resultado.
+ENTIDAD -> RADAR -> TEMATICA -> Resultado
+
+ENTIDAD -> MUNICIPIO -> RADAR -> Resultado.
+
+Para esto la ENTIDAD puede ser seleccionada desde el filtro o recibir un valor externo y desde ahi desencadenar las acciones, similar a lo que ocurre con el RADAR. El RADAR es una variabel que solo controlamos sus distancia en km con un valor max y min y el defaul que se recibemn desde afuera y se actualiza en el slider. Lo importante esque los valores de entidades y municipis que recibe se muestran en este compnenete como valores seleccoinado, solo como muestra. no como valores que se cambien, lo cual tiene sentido ya que no es posible añadir o quitar entidad o municpios de los que el radar ya esta registrando. Es decir cuando el radar se activa (que es cuando se recibe un flag). Ya no es posible modificar valroes de municipios o entidades ya que estos solo se estan riguiendo por lo seleccionado en el radar. 
+
+Una vez mas recalco el hecho de que se mandan valores, se ejcunta sql poir fuera y se recibne para seguirmostrando mas opcines de filtraje. Es importante que me hagas notar opciones posibles o combinaciones que no tome en cuenta y que son necesarias para evitar erroes de logica o problemas al hacer los filtrajes.
 
 
+1. Se limpian los filtros.
+2. No, no se pueden combinar filtros.
+3. Para casos donde se dividen las opciones como el caso de Ramo a tematica o UR, se reciben ambas opcinoes y dependiendo de la eleccoines del usuario, el filtraje toma ese camino. Tambien puede no pedir es opcines de filtrar mas alla de Ramo y no hacer la solicitud del siguiente filtraje.
+4. En estados de carga en lo que recibe informacion es importante la clasica animacion de carga en el div (el efecto de renderizado clasico) o alguna visual para indicar que el proceso aun no llega. ESto con la intension de indicar que el componente no recibe aun un valor pero si ya lo recibe temabvien indicar que ya lo tiene rednerizado. Para hacer lofgica tambien externa  (como bloquear el mapa, hacer que el usauroi no pueda interactuar con el sitio, etc).
+5. Sí, si el usuaroi cambia de filtro, como se contestó arriba el filtro cambia y se inicia otra peticion.
+6. Si, se limpia automaticamente.
+7. Si es un caso que puede existir, seria mejor que no muestre la opciones si no esta disponible. Pero igual se puede debtair el ux/ui.
+8. Si, se desaparece automaticvamente.
+9. Asies el radar se vuelve el unico origen.
+10. Si, me agrada esa logica final que agrega.
 
 
-
-# Flujo esperado
-
-```text
-Usuario modifica un control
-            │
-            ▼
-    Estado interno cambia
-            │
-            ▼
-       Se emite un evento
-            │
-            ▼
- Componente padre recibe el cambio
-            │
-            ▼
- Ejecuta la lógica del mapa
-            │
-            ▼
- (Opcional) Actualiza nuevamente las props
-            │
-            ▼
- El componente sincroniza su interfaz
-```
-
-  
-
-## CARTERA
-
-- Columna que forma parte de la BBDD
-- Ingresar un valor te dirigue al proyecto:
-  - Enfoca en el mapa.
-  - Muestra información de la base sobre ese proyecto (SQL).
-  - Muestra la dirección del proyecto.
-  - Enfoca con el radar ese punto (con ícono distintivo).
-
-  Acciones:
-
-  - Al elegir el proyecto se cambia la pestaña donde se muestra la información
-  - Al mismo tiempo, genera graficas de este punto y cercanos si es que se modifica el radar.
-    - El radar crece sobre ese punto y no puede moverse de ahí
-    - Se puede cambiar a modo libre
-
-## Modo libre
-
-El mapa funciona por si solo, click y radar se mueven libremente. Movimiento actual.
-
+Crea un .md con los cambios y toma en cuenta las respuestas dadas
 
 https://mapshaper.org/
 
