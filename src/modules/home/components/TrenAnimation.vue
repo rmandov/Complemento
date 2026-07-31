@@ -3,6 +3,16 @@ import Botones from './MagneticButton.vue'
 </script>
 
 <template>
+  <!-- Formas de utilizar el componente Botones:
+  <Botones />
+
+  <Botones :magnetic-button="true" />
+
+  <Botones :magnetic-text="true" />
+
+  <Botones :magnetic-button="true" :magnetic-text="true" :strength-image="0.4" :strength-button="0.1"
+    :strength-text="0.25" /> -->
+
   <div class="tren-container">
     <Botones class="tren-botones" />
 
