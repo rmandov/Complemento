@@ -2,8 +2,8 @@
 import { RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
 
-import Hero from '@/modules/home/components/Hero.vue'
-import Tren from '@/modules/home/components/Tren.vue'
+import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
+import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
 import Carousel from '@/modules/home/components/Carousel2.vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
 const { getGeoJson } = useGeoJson()
@@ -30,9 +30,9 @@ onMounted(async () => {
 <template>
   <div class="home">
     <!-- Hero -->
-    <Hero />
+    <HeroAnimation />
     <!-- Seccion botones -->
-    <Tren />
+    <TrenAnimation />
 
     <!-- Sección Proyectos -->
     <section class="proyectos-section">

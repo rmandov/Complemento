@@ -1,5 +1,5 @@
 <script setup>
-import Botones from './Botones.vue'
+import Botones from './MagneticButton.vue'
 </script>
 
 <template>
