@@ -294,7 +294,31 @@ Se tienen agrupado dos formas de realizar filtrado: por RAMO/TEMATICA y por FILT
 ### RAMO / TEMAITCA
 
 
-Al seleccionar un valor de RAMO se muestra información filtrada y despliega la información de UR despues de seleccionar un RAMO.
+Al seleccionar un valor de RAMO se muestra información filtrada y despliega la información de UR despues de seleccionar un RAMO. Que son las UR disponibles de ese RAMO.
+
+Esto tambien es una cadena para despues de eligir una UR se muestren las TEMATICAS disponibles. Importante que solo se puede elegir uno a la vez no importa el nivel del filtro. Es decir las opciones de filtro son las siguientes:
+
+RAMO -> UR -> Resultados
+RAMO -> UR -> TEMATICA -> Resultados
+RAMO -> TEMATICA -> Resultados
+
+La logica anterior se aplica para el filtraje empezando por tematica. Es decir se elije solo uno, se depliega informacion disponible... siguiendo la misma logica
+
+TEMATICA -> Resultados
+TEMATICA -> RAMO -> Resultados
+TEMATICA -> RAMO -> UR -> Resultados
+
+Para esto, el valor seleccionado es disparado para que un componente exterio que gestiones los queires haga el filtro, obtenga el siguiente nivel de filtro y este componente reciba las siguientes opciones. Por el momento usaremos algun tipo de filtro falso o test para simular esas peticiones una opciones que podemos deshabilitar para poder hacer el cabmoi con la gestoin real (Esto puede ser un console log o un input solo para fingir el recibir informacion o emitirla), pero comentando esta parte de codigo esté disponible la implementacoin real.
+
+### ENTIDAD
+
+Lo mismo ocurre para el filtro ENTIDAD. Lo mismo, se emitle valor seleccionado, se espera lista para el siguiente filtro posible.
+
+El RADAR es una opciones que se acutaliza recibiuendo parametros de entidad o entidades seleccionada y sus respectivos municipios que caen en el radar. Cuando el RADAR se aplica despues de 
+
+ENTIDAD -> Resultado
+ENTIDAD -> MUNCIPIO -> Resultado.
+ENTIDAD -> RADAR
 
 
 
