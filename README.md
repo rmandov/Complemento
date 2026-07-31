@@ -281,6 +281,25 @@ La lógica del mapa deberá implementarse completamente fuera de este componente
 
 ---
 
+# CAMBIOS A LA INFORMACIÓN ANTERIOR
+
+El fitro CARTERA se elimina y en su lugar se agrega una nueva sección de filtrado: RAMO, UR y TEMATICA.
+
+Se sigue manteniendo la misma logica, los valores ingresado por en este componente se emiten hacia afuera para hacer la logica de negocio (sql, filtros, animaciones, etc) y se recien valores por fuera que actualizan valores internos (eg. se da click a una entindad en un mapa y esa entidad se coloca en el filtro).
+
+## FILTRADO Y REACCIONES EN CADENA
+
+Se tienen agrupado dos formas de realizar filtrado: por RAMO/TEMATICA y por FILTRO GEOGRAFICO. Es decir, son dos pestañas que se pueden intercalar o switchear dependiendo del primer valor ingresado. Si es un ramo o tematica, esta accion muestra los filtros solo aplicables en esa seccion. Si se selecciona una ENTIDAD solo se muestran los filtrados disponibles de su apartado.
+
+### RAMO / TEMAITCA
+
+
+Al seleccionar un valor de RAMO se muestra información filtrada y despliega la información de UR despues de seleccionar un RAMO.
+
+
+
+
+
 # Flujo esperado
 
 ```text
