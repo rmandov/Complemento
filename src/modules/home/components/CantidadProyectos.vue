@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
+import NumberWheel from '@/modules/home/animations/NumberWheel.vue' // ajusta la ruta a tu estructura
 
 const { getGeoJson } = useGeoJson()
 const cards = ref([])
@@ -18,8 +19,6 @@ onMounted(async () => {
 const mainCard = computed(() => cards.value[0])
 const groupedCards = computed(() => cards.value.slice(1))
 
-// Convierte el tamaño recibido del JSON en un valor "clamp()" fluido,
-// evitando que el texto se desborde o se vea excesivo en pantallas chicas.
 function fluidFontSize(value, fallbackRem) {
   const max = value || `${fallbackRem}rem`
   return `clamp(${fallbackRem * 0.7}rem, 3vw, ${max})`
@@ -31,18 +30,18 @@ function fluidFontSize(value, fallbackRem) {
     <!-- Card 1: valor total, en fila -->
     <div v-if="mainCard" :class="['card', 'card--main', `card--${mainCard.id}`]">
       <span class="card-valor" :style="{ fontSize: fluidFontSize(mainCard.fontSizeValor, 2) }">
-        {{ mainCard.valor }}
+        <NumberWheel :value="mainCard.valor" :line-height-ratio="1.1" />
       </span>
       <p class="card-titulo" :style="{ fontSize: fluidFontSize(mainCard.fontSizeTitulo, 1) }">
         {{ mainCard.titulo }}
       </p>
     </div>
 
-    <!-- Cards 2, 3... agrupadas verticalmente en un solo bloque -->
+    <!-- Cards 2, 3... agrupadas verticalmente -->
     <div v-if="groupedCards.length" class="card card--group">
       <div v-for="card in groupedCards" :key="card.id" class="card-group-item">
         <span class="card-valor" :style="{ fontSize: fluidFontSize(card.fontSizeValor, 1.6) }">
-          {{ card.valor }}
+          <NumberWheel :value="card.valor" :line-height-ratio="1.1" />
         </span>
         <p class="card-titulo" :style="{ fontSize: fluidFontSize(card.fontSizeTitulo, 0.95) }">
           {{ card.titulo }}

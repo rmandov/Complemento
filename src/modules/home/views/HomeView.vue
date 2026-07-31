@@ -45,11 +45,11 @@ onMounted(async () => {
 
       <Carousel></Carousel>
     </section>
-
+    <!--
     <div class="contenedor">
       <div class="rectangulo_1"></div>
       <div class="rectangulo_2"></div>
-    </div>
+    </div> -->
   </div>
 
   <RouterView />
