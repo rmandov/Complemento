@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, nextTick } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, provide} from 'vue'
 import L from 'leaflet'
 
 // Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
@@ -42,6 +42,9 @@ import { usePointsStore } from '@/stores/pointsStore.js'
 // NUEVO: constante con las coordenadas (posición del radar)
 import { useMapStore } from '@/stores/map.js'
 import { useMapNavigation } from '@/modules/map/composables/useMapNavigation'
+import { usePoligonoStore } from '@/stores/poligonoStore'
+
+const poligonoStore = usePoligonoStore()
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
@@ -78,6 +81,8 @@ const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, too
   createMap(mapContainer)
 
 const { flyToEntidad, flyToMunicipio } = useMapNavigation(map)
+// Proveer goBack al resto de la aplicación
+provide('mapGoBack', goBack)
 
 const capaProyectos = shallowRef(null)
 const clusterProyectos = shallowRef(null)
@@ -460,19 +465,25 @@ async function toggleProyectos() {
 
 
 // ── Navegación desde filtros (o cualquier cambio en el store) ──
-
 watch(() => mapStore.entidad, async (newCve, oldCve) => {
-  // Solo navegar si cambió y viene de fuera del mapa (filtro)
-  // Si quieres que también funcione al hacer click, quita la condición de oldCve
-  if (newCve && newCve !== oldCve) {
-    flyToEntidad(newCve)
-  }
+  if (!newCve || newCve === oldCve) return
+
+  // Si el poligonoStore YA tiene esta entidad seleccionada, el cambio vino del click.
+  // No hacemos nada para no duplicar la lógica.
+  const currentCve = poligonoStore.entidad?.feature?.properties?.CVE_ENT
+  if (currentCve === newCve) return
+
+  await flyToEntidad(newCve)
 })
 
 watch(() => mapStore.municipio, async (newCve, oldCve) => {
-  if (newCve && newCve !== oldCve) {
-    await flyToMunicipio(newCve)
-  }
+  if (!newCve || newCve === oldCve) return
+
+  // Si el poligonoStore YA tiene este municipio seleccionado, el cambio vino del click.
+  const currentCve = poligonoStore.municipio?.feature?.properties?.CVEGEO
+  if (currentCve === newCve) return
+
+  await flyToMunicipio(newCve)
 })
 
 // --- MAIN ---

@@ -7,6 +7,12 @@
  * son fuente de verdad en Pinia, y se reflejan en filterState
  * mediante watchers.
  */
+import { inject } from 'vue'
+const goBack = inject<() => void>('mapGoBack', () => {
+  console.warn('goBack no disponible en el contexto')
+})
+
+
 import { storeToRefs } from 'pinia'
 import { reactive, onMounted, ref, computed, watch } from 'vue'
 import MapFilters, { type FilterState, type FilterAction } from './MapFilters.vue'
@@ -82,17 +88,13 @@ watch(
       label: e.nombre,
     }))
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 )
 
 // 2. Entidad seleccionada
-watch(
-  entidad,
-  (value) => {
-    filterState.filters.entidad.selected = value
-  },
-  { immediate: true },
-)
+watch(entidad, (value) => {
+  filterState.filters.entidad.selected = value
+}, { immediate: true })
 
 // 3. Opciones de municipio (dependen de la entidad seleccionada)
 watch(
@@ -105,17 +107,13 @@ watch(
     // Al cambiar la lista, se limpia la selección de municipio (el store ya lo hace, pero por si acaso)
     // filterState.filters.municipio.selected = null // ya lo hace el watch de municipio
   },
-  { deep: true, immediate: true },
+  { deep: true, immediate: true }
 )
 
 // 4. Municipio seleccionado
-watch(
-  municipio,
-  (value) => {
-    filterState.filters.municipio.selected = value
-  },
-  { immediate: true },
-)
+watch(municipio, (value) => {
+  filterState.filters.municipio.selected = value
+}, { immediate: true })
 
 // ─── Computado para obtener la fila completa (Ramo+UR) ──────
 
@@ -302,9 +300,10 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
     case 'CLEAR_ALL':
       // Limpiar también el store geográfico
-      /*  mapStore.clearEntidad?.()
+     /*  mapStore.clearEntidad?.()
       mapStore.clearMunicipio?.() */
       mapStore.resetGeoFilters?.()
+
       return {
         radar: {
           ...filterState.radar,
@@ -347,6 +346,31 @@ async function handleAction(action: FilterAction) {
     mapStore.clearMunicipio?.()
     return
   }
+
+    // 🆕 CLEAR_ALL: ejecutar goBack + limpiar stores + actualizar filterState
+  if (action.type === 'CLEAR_ALL') {
+    // 1. Ejecutar la misma lógica que el botón "Volver"
+    goBack() // elimina capas, restaura entidad, resetea vista
+
+    // 2. Limpiar stores geográficos (esto disparará los watchers que sincronizan filterState)
+    mapStore.resetGeoFilters?.()
+    // Si tienes seleccionStore, límpialo también
+    // seleccionStore?.setCVEGEO(null)
+
+    // 3. Actualizar filterState (lo que no se sincroniza automáticamente)
+    filterState.radar.active = false
+    filterState.radar.entidadesResultado = []
+    filterState.radar.municipiosResultado = []
+    filterState.filters.ramo.selected = null
+    filterState.filters.ur.selected = null
+    filterState.filters.tematica.selected = null
+
+    // Las opciones de ramo ya están en filterState, no las toques.
+    // entidad y municipio se actualizarán vía watchers después de resetGeoFilters.
+
+    return
+  }
+
 
   // Para el resto, usar mockBackend
   filterState.loading = true
