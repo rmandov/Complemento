@@ -2,23 +2,27 @@
 /**
  * MapFiltersDemo
  * ─────────────────────────────────────────────────────────────
- * Ahora solo los filtros de Ramo/UR/Temática/Radar se manejan
- * localmente (o vía mock). Los filtros geográficos (Entidad/Municipio)
- * son fuente de verdad en Pinia, y se reflejan en filterState
- * mediante watchers.
+ * Ejemplo de componente PADRE. Aquí es donde SÍ vive la lógica
+ * de negocio: SQL/API real, Pinia, Leaflet, etc.
+ *
+ * Todo lo marcado como "MOCK" es una simulación temporal y debe
+ * eliminarse (o sustituirse) al conectar el backend real. El
+ * componente `MapFilters.vue` permanece intacto en ese proceso.
  */
+
 import { storeToRefs } from 'pinia'
 import { reactive, onMounted, ref, computed, watch } from 'vue'
 import MapFilters, { type FilterState, type FilterAction } from './MapFilters.vue'
 
+// Opciones Entidad/Municipios
 import { useMapStore } from '@/stores/map'
 const mapStore = useMapStore()
 const {
   entidad,
   municipio,
   municipios,
-  entidades, // asumo que existe un ref con todas las entidades
 } = storeToRefs(mapStore)
+
 
 import Papa from 'papaparse'
 
@@ -32,14 +36,20 @@ interface RamoUrRow {
   RamoUr_NombreUnidadCompleto: string
 }
 
-// ─── Datos e índices ──────────────────────────────────────────
+// ─── Datos e índices (accesibles globalmente en el script) ───
 
 const ramoUrData = ref<RamoUrRow[]>([])
+
+// Índice: RamoUr_Ramo -> lista de filas (para obtener UR de un ramo)
 const indiceRamos = new Map<string, RamoUrRow[]>()
+
+// Índice: `${RamoUr_Ramo}-${RamoUr_Unidad}` -> fila completa
 const indiceLlaves = new Map<string, RamoUrRow>()
+
+// Opciones de ramo (se construyen al cargar el CSV)
 const opcionesRamo = ref<{ value: string; label: string }[]>([])
 
-// ─── Estado único (filterState) ──────────────────────────────
+// ─── Estado único, fuente de verdad ────────────────────────────
 
 const filterState = reactive<FilterState>({
   mode: 'tematico',
@@ -53,7 +63,7 @@ const filterState = reactive<FilterState>({
   filters: {
     ramo: {
       selected: null,
-      options: [],
+      options: [], // se llenará con los datos del CSV
     },
     ur: { selected: null, options: [] },
     tematica: {
@@ -65,32 +75,20 @@ const filterState = reactive<FilterState>({
     },
     entidad: {
       selected: null,
-      options: [], // se llenará desde Pinia en onMounted o watch
+      options: [
+        { value: 'CDMX', label: 'Ciudad de México' },
+        { value: 'JAL', label: 'Jalisco' },
+        { value: 'NL', label: 'Nuevo León' },
+      ],
     },
     municipio: { selected: null, options: [] },
   },
 })
 
-// ─── Sincronización con Pinia (watchers) ─────────────────────
-
-// 1. Opciones de entidad: se cargan al montar y cada vez que cambien en el store
-watch(
-  entidades,
-  (lista) => {
-    filterState.filters.entidad.options = lista.map((e) => ({
-      value: e.cvegeo,
-      label: e.nombre,
-    }))
-  },
-  { immediate: true, deep: true }
-)
-
-// 2. Entidad seleccionada
 watch(entidad, (value) => {
   filterState.filters.entidad.selected = value
-}, { immediate: true })
+})
 
-// 3. Opciones de municipio (dependen de la entidad seleccionada)
 watch(
   municipios,
   (lista) => {
@@ -98,48 +96,59 @@ watch(
       value: m.cvegeo,
       label: m.nombre,
     }))
-    // Al cambiar la lista, se limpia la selección de municipio (el store ya lo hace, pero por si acaso)
-    // filterState.filters.municipio.selected = null // ya lo hace el watch de municipio
+
+    // Limpiar selección al cambiar de entidad
+    filterState.filters.municipio.selected = null
   },
-  { deep: true, immediate: true }
+  { deep: true }
 )
 
-// 4. Municipio seleccionado
 watch(municipio, (value) => {
   filterState.filters.municipio.selected = value
-}, { immediate: true })
+})
 
-// ─── Computado para obtener la fila completa (Ramo+UR) ──────
+// ─── Computado para obtener la fila seleccionada (opcional) ──
 
 const selectedRamoUrRow = computed(() => {
   const ramo = filterState.filters.ramo.selected
   const ur = filterState.filters.ur.selected
   if (ramo && ur) {
-    return indiceLlaves.get(`${ramo}${ur}`) || null
+    return indiceLlaves.get(`${ramo}-${ur}`) || null
   }
   return null
 })
 
-// ─── Construcción de índices desde CSV ──────────────────────
+// ─── Construcción de índices y opciones desde CSV ─────────────
 
 function construirIndices() {
+  // Limpiar índices previos (por si se recarga)
   indiceRamos.clear()
   indiceLlaves.clear()
+
+  // Set para obtener ramos únicos
   const ramosSet = new Set<string>()
 
   for (const row of ramoUrData.value) {
     const ramo = row.RamoUr_Ramo
     const unidad = row.RamoUr_Unidad
     const llave = `${ramo}${unidad}`
+    /* console.log("ESta es la llave: ", llave); */
 
+    // Índice por ramo
     if (!indiceRamos.has(ramo)) {
       indiceRamos.set(ramo, [])
     }
     indiceRamos.get(ramo)!.push(row)
+
+    // Índice por llave compuesta
     indiceLlaves.set(llave, row)
+
+    // Guardar ramo único
     ramosSet.add(ramo)
   }
 
+  // Construir opciones de ramo: value = RamoUr_Ramo, label = RamoUr_NombreRamo
+  // Tomamos el primer registro de cada ramo para obtener el nombre
   opcionesRamo.value = Array.from(ramosSet).map((ramo) => {
     const primeraFila = indiceRamos.get(ramo)![0]
     return {
@@ -147,28 +156,37 @@ function construirIndices() {
       label: primeraFila.RamoUr_NombreRamoCompleto,
     }
   })
+
+  // Actualizar las opciones en el estado
   filterState.filters.ramo.options = opcionesRamo.value
 }
 
-// ─── Carga del CSV ────────────────────────────────────────────
+// ─── Carga del CSV ─────────────────────────────────────────────
 
 onMounted(async () => {
   try {
     const response = await fetch('ramos_ur/DIM_RAMOUR.csv')
+    /* datosProyectos = await getGeoJson('ramos_ur/ramo_ur.csv') */
     const text = await response.text()
+
     const result = Papa.parse<RamoUrRow>(text, {
       header: true,
       skipEmptyLines: true,
     })
+
     ramoUrData.value = result.data
+
+    console.log('Aqui está el resutl.data: ', result)
+
+    // Construir índices y opciones
     construirIndices()
   } catch (error) {
     console.error('Error al cargar el CSV:', error)
   }
 })
 
-// ─── MOCK backend (solo para Ramo/UR/Temática/Radar) ────────
-// Los filtros geográficos ya están en Pinia y se sincronizan vía watchers.
+// ─── MOCK: simulación de backend ────────────────────────────────
+// Reemplazar esta función por la llamada real (SQL / API / Pinia).
 
 async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> {
   await new Promise((resolve) => setTimeout(resolve, 400))
@@ -183,19 +201,23 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
           ramo: { selected: null, options: filterState.filters.ramo.options },
           ur: { selected: null, options: [] },
           tematica: filterState.filters.tematica,
-          // No tocamos entidad/municipio aquí (se mantienen como están)
-          entidad: filterState.filters.entidad,
-          municipio: filterState.filters.municipio,
+          entidad: { selected: null, options: filterState.filters.entidad.options },
+          municipio: { selected: null, options: [] },
         },
       }
 
     case 'SELECT_RAMO': {
       const ramoSeleccionado = action.value
+      // Obtener las filas de ese ramo
       const filas = indiceRamos.get(ramoSeleccionado) ?? []
+
+      // Generar opciones de UR: value = RamoUr_Unidad, label = RamoUr_NombreUnidad
       const opcionesUr = filas.map((row) => ({
         value: row.RamoUr_Unidad,
         label: row.RamoUr_NombreUnidadCompleto,
       }))
+
+      // Eliminar duplicados (por si hay varias filas con misma UR pero distinto nombre)
       const uniqueUr = new Map<string, string>()
       opcionesUr.forEach((opt) => {
         if (!uniqueUr.has(opt.value)) {
@@ -215,7 +237,7 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
             selected: ramoSeleccionado,
           },
           ur: {
-            selected: null,
+            selected: null, // limpiar UR al cambiar ramo
             options: opcionesUrUnicas,
           },
         },
@@ -247,6 +269,9 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
         },
       }
 
+    // ... resto de casos (TEMATICA, ENTIDAD, MUNICIPIO, RADAR, CLEAR_ALL) se mantienen igual
+    // (los omito por brevedad, pero deben estar completos)
+
     case 'SELECT_TEMATICA':
       return {
         filters: {
@@ -263,11 +288,53 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
         },
       }
 
+    case 'SELECT_ENTIDAD':
+      return {
+        filters: {
+          ...filterState.filters,
+          entidad: { ...filterState.filters.entidad, selected: action.value },
+          // MOCK: municipios dependientes de la entidad elegida
+           municipio: {
+            selected: null,
+            options: mapStore.municipios.map((m) => ({
+              value: m.cvegeo,
+              label: m.nombre,
+            })),
+          },
+        },
+      }
+
+    case 'CLEAR_ENTIDAD':
+      return {
+        filters: {
+          ...filterState.filters,
+          entidad: { ...filterState.filters.entidad, selected: null },
+          municipio: { selected: null, options: [] },
+        },
+      }
+
+    case 'SELECT_MUNICIPIO':
+      return {
+        filters: {
+          ...filterState.filters,
+          municipio: { ...filterState.filters.municipio, selected: action.value },
+        },
+      }
+
+    case 'CLEAR_MUNICIPIO':
+      return {
+        filters: {
+          ...filterState.filters,
+          municipio: { ...filterState.filters.municipio, selected: null },
+        },
+      }
+
     case 'ACTIVATE_RADAR':
       return {
         radar: {
           ...filterState.radar,
           active: true,
+          // MOCK: resultado del cálculo externo del radio
           entidadesResultado: [
             { value: 'CDMX', label: 'Ciudad de México' },
             { value: 'EDOMEX', label: 'Estado de México' },
@@ -293,9 +360,6 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
       return { radar: { ...filterState.radar, value: action.value } }
 
     case 'CLEAR_ALL':
-      // Limpiar también el store geográfico
-      mapStore.clearEntidad?.() // si existe
-      mapStore.clearMunicipio?.()
       return {
         radar: {
           ...filterState.radar,
@@ -307,9 +371,8 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
           ramo: { selected: null, options: filterState.filters.ramo.options },
           ur: { selected: null, options: [] },
           tematica: { selected: null, options: filterState.filters.tematica.options },
-          // entidad y municipio se actualizarán vía watchers tras limpiar el store
-          entidad: filterState.filters.entidad,
-          municipio: filterState.filters.municipio,
+          entidad: { selected: null, options: filterState.filters.entidad.options },
+          municipio: { selected: null, options: [] },
         },
       }
 
@@ -318,28 +381,9 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
   }
 }
 
-// ─── Manejador de acciones ─────────────────────────────────────
+// ─── Manejador único de acciones ───────────────────────────────
 
 async function handleAction(action: FilterAction) {
-  // Para acciones geográficas, redirigir al store
-  if (action.type === 'SELECT_ENTIDAD') {
-    mapStore.setEntidad?.(action.value)
-    return // no actualizamos filterState directamente, el watch lo hará
-  }
-  if (action.type === 'CLEAR_ENTIDAD') {
-    mapStore.clearEntidad?.()
-    return
-  }
-  if (action.type === 'SELECT_MUNICIPIO') {
-    mapStore.setMunicipio?.(action.value)
-    return
-  }
-  if (action.type === 'CLEAR_MUNICIPIO') {
-    mapStore.clearMunicipio?.()
-    return
-  }
-
-  // Para el resto, usar mockBackend
   filterState.loading = true
   try {
     const parcial = await mockBackend(action)
@@ -348,8 +392,14 @@ async function handleAction(action: FilterAction) {
     filterState.loading = false
   }
 }
+
+// (Opcional) Exponer el computed para depuración o uso en template
+// Si quieres mostrar la fila seleccionada en algún lado, puedes agregarla al estado
+// o simplemente dejarla como computed.
 </script>
 
 <template>
   <MapFilters :state="filterState" @action="handleAction" />
+  <!-- Puedes agregar un div para depurar la fila seleccionada -->
+  <!-- <pre>{{ selectedRamoUrRow }}</pre> -->
 </template>

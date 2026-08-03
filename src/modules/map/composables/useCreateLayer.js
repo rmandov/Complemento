@@ -34,11 +34,20 @@ export function createLayer(poligonos_json, options = {}) {
 
   if (!poligonos_json) return
 
+  const listaEntidades = []
+
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
       const nombreEntidad = feature.properties[name] || 'nombre del poligono'
+
+      // Guardar entidades en la lista
+      listaEntidades.push({
+        nombre: nombreEntidad,
+        cvegeo: feature.properties?.CVE_ENT,
+      })
+
       layer.bindTooltip(nombreEntidad)
 
       layer.on({
@@ -82,7 +91,8 @@ export function createLayer(poligonos_json, options = {}) {
           poligonoStore.municipiosLayer.addTo(map)
         }
 
-        datosEntidad.setEntidad(nombreEntidad)
+        /* datosEntidad.setEntidad(nombreEntidad) */
+        datosEntidad.setEntidad(feature.properties['CVE_ENT'])
 
         const claveEntidad = feature.properties['CVE_ENT'] || '69'
 
@@ -92,6 +102,12 @@ export function createLayer(poligonos_json, options = {}) {
       })
     },
   })
+
+  // Guardar la lista completa en Pinia
+  datosEntidad.setEntidades(
+    listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+  )
+
 
   return newLayer
 }
@@ -163,6 +179,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
           return
         }
         const bounds = layer.getBounds()
+
         layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
         if (poligonoStore.municipio) {
           poligonoStore.municipio.addTo(map)
@@ -171,7 +188,8 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         poligonoStore.setMunicipio(layer)
         map.removeLayer(layer)
 
-        datosMunicipio.setMunicipio(nombreLayer)
+        /* datosMunicipio.setMunicipio(nombreLayer) */
+        datosMunicipio.setMunicipio(feature.properties?.CVEGEO )
 
         // ── NUEVO: Task 3 ────────────────────────────────────────
         // El CVEGEO ya viene incluido en las properties del feature
