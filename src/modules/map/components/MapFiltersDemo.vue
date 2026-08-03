@@ -66,13 +66,16 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
   switch (action.type) {
     case 'SET_MODE':
+      // Temática es un filtro compartido entre ambos modos: NO se limpia
+      // al cambiar de modo. Solo se resetea el eje propio de cada modo
+      // (Ramo/UR para temático; Entidad/Municipio/Radar para geográfico).
       return {
         mode: action.value,
         radar: { ...filterState.radar, active: false },
         filters: {
           ramo: { selected: null, options: filterState.filters.ramo.options },
           ur: { selected: null, options: [] },
-          tematica: { selected: null, options: filterState.filters.tematica.options },
+          tematica: filterState.filters.tematica,
           entidad: { selected: null, options: filterState.filters.entidad.options },
           municipio: { selected: null, options: [] }
         }

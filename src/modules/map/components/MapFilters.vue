@@ -264,10 +264,12 @@ function limpiarTodo() {
       </button>
     </div>
 
+
+
     <!-- ═══════════════ MODO TEMÁTICO ═══════════════ -->
     <div v-if="state.mode === 'tematico'" class="flex flex-col gap-4">
-      <p v-if="!mostrarRamo && !mostrarUr && !mostrarTematica" class="text-xs text-slate-400 italic text-center py-4">
-        Aún no hay opciones disponibles para el filtrado temático.
+      <p v-if="!mostrarRamo && !mostrarUr" class="text-xs text-slate-400 italic text-center py-4">
+        Aún no hay opciones adicionales disponibles para el filtrado temático.
       </p>
 
       <SingleSelectCombobox
@@ -290,17 +292,6 @@ function limpiarTodo() {
         :model-value="state.filters.ur.selected"
         :disabled="state.loading"
         @update:model-value="onUrChange"
-      />
-
-      <SingleSelectCombobox
-        v-if="mostrarTematica"
-        label="Temática"
-        placeholder="Buscar temática..."
-        accent-color="indigo"
-        :options="optionsFor(state.filters.tematica)"
-        :model-value="state.filters.tematica.selected"
-        :disabled="state.loading"
-        @update:model-value="onTematicaChange"
       />
     </div>
 
@@ -444,5 +435,23 @@ function limpiarTodo() {
         </div>
       </div>
     </div>
+
+
+    <!-- ═══════════════ TEMÁTICA: filtro transversal ═══════════════ -->
+    <!-- Ya no pertenece exclusivamente al modo Temático: aplica igual como -->
+    <!-- filtro adicional dentro del modo Geográfico (p. ej. "hospitales en -->
+    <!-- Jalisco" -> Entidad=Jalisco + Temática=Salud). -->
+    <SingleSelectCombobox
+      v-if="mostrarTematica"
+      label="Temática"
+      placeholder="Buscar temática..."
+      accent-color="indigo"
+      :options="optionsFor(state.filters.tematica)"
+      :model-value="state.filters.tematica.selected"
+      :disabled="state.loading"
+      @update:model-value="onTematicaChange"
+    />
+
+
   </div>
 </template>
