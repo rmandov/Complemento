@@ -82,13 +82,17 @@ watch(
       label: e.nombre,
     }))
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 )
 
 // 2. Entidad seleccionada
-watch(entidad, (value) => {
-  filterState.filters.entidad.selected = value
-}, { immediate: true })
+watch(
+  entidad,
+  (value) => {
+    filterState.filters.entidad.selected = value
+  },
+  { immediate: true },
+)
 
 // 3. Opciones de municipio (dependen de la entidad seleccionada)
 watch(
@@ -101,13 +105,17 @@ watch(
     // Al cambiar la lista, se limpia la selección de municipio (el store ya lo hace, pero por si acaso)
     // filterState.filters.municipio.selected = null // ya lo hace el watch de municipio
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 // 4. Municipio seleccionado
-watch(municipio, (value) => {
-  filterState.filters.municipio.selected = value
-}, { immediate: true })
+watch(
+  municipio,
+  (value) => {
+    filterState.filters.municipio.selected = value
+  },
+  { immediate: true },
+)
 
 // ─── Computado para obtener la fila completa (Ramo+UR) ──────
 
@@ -294,7 +302,7 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
     case 'CLEAR_ALL':
       // Limpiar también el store geográfico
-     /*  mapStore.clearEntidad?.()
+      /*  mapStore.clearEntidad?.()
       mapStore.clearMunicipio?.() */
       mapStore.resetGeoFilters?.()
       return {

@@ -15,8 +15,8 @@ export const useMapStore = defineStore('map', () => {
   })
 
   // Filtros geográficos
-  const entidad = ref(null)        // valor seleccionado (ej. 'CDMX')
-  const municipio = ref(null)      // valor seleccionado (ej. '09001')
+  const entidad = ref(null) // valor seleccionado (ej. 'CDMX')
+  const municipio = ref(null) // valor seleccionado (ej. '09001')
 
   // Lista de municipios disponibles (se actualiza al cambiar entidad)
   const municipios = ref([])
@@ -25,7 +25,7 @@ export const useMapStore = defineStore('map', () => {
   const CVE_ENT = ref('00')
 
   // NUEVO: Lista de todas las entidades (para las opciones del filtro)
-  const entidades = ref([])        // array de { cvegeo, nombre }
+  const entidades = ref([]) // array de { cvegeo, nombre }
 
   // ============================================================
   // Actions
@@ -99,7 +99,7 @@ export const useMapStore = defineStore('map', () => {
   // --- CVE_ENT ---
   function setCVE_ENT(newCVE_ENT) {
     CVE_ENT.value = newCVE_ENT
-    municipio.value = null   // o 'municipio' según tu lógica
+    municipio.value = null // o 'municipio' según tu lógica
   }
 
   // ============================================================
@@ -113,21 +113,21 @@ export const useMapStore = defineStore('map', () => {
     municipio,
     municipios,
     CVE_ENT,
-    entidades,          // <-- NUEVO
+    entidades, // <-- NUEVO
 
     // actions
     setCenter,
     setZoom,
     setBounds,
     setView,
-    setEntidades,       // <-- NUEVO
+    setEntidades, // <-- NUEVO
     setEntidad,
-    clearEntidad,       // <-- NUEVO
+    clearEntidad, // <-- NUEVO
     setMunicipio,
-    clearMunicipio,     // <-- NUEVO
+    clearMunicipio, // <-- NUEVO
     setMunicipios,
     clearMunicipios,
-    resetGeoFilters,    // <-- NUEVO (opcional)
+    resetGeoFilters, // <-- NUEVO (opcional)
     setCVE_ENT,
   }
 })

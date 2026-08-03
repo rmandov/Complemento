@@ -41,6 +41,7 @@ console.log('Este es el radius:', radius.value)
 import { usePointsStore } from '@/stores/pointsStore.js'
 // NUEVO: constante con las coordenadas (posición del radar)
 import { useMapStore } from '@/stores/map.js'
+import { useMapNavigation } from '@/modules/map/composables/useMapNavigation'
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
@@ -75,6 +76,8 @@ const mapStore = useMapStore()
 const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
   createMap(mapContainer)
+
+const { flyToEntidad, flyToMunicipio } = useMapNavigation(map)
 
 const capaProyectos = shallowRef(null)
 const clusterProyectos = shallowRef(null)
@@ -454,6 +457,23 @@ async function toggleProyectos() {
     searchPoints()
   }
 }
+
+
+// ── Navegación desde filtros (o cualquier cambio en el store) ──
+
+watch(() => mapStore.entidad, async (newCve, oldCve) => {
+  // Solo navegar si cambió y viene de fuera del mapa (filtro)
+  // Si quieres que también funcione al hacer click, quita la condición de oldCve
+  if (newCve && newCve !== oldCve) {
+    flyToEntidad(newCve)
+  }
+})
+
+watch(() => mapStore.municipio, async (newCve, oldCve) => {
+  if (newCve && newCve !== oldCve) {
+    await flyToMunicipio(newCve)
+  }
+})
 
 // --- MAIN ---
 onMounted(async () => {

@@ -92,22 +92,20 @@ export function createLayer(poligonos_json, options = {}) {
         }
 
         /* datosEntidad.setEntidad(nombreEntidad) */
+
         datosEntidad.setEntidad(feature.properties['CVE_ENT'])
+        datosEntidad.setCVE_ENT(feature.properties['CVE_ENT'] || '69')
 
-        const claveEntidad = feature.properties['CVE_ENT'] || '69'
-
-        datosEntidad.setCVE_ENT(claveEntidad)
-
-        flyToBounds(map, bounds)
+        /* flyToBounds(map, bounds) */
       })
+
+      // ── NUEVO: Registrar layer ──
+      poligonoStore.registerEntidadLayer(feature.properties.CVE_ENT, layer)
     },
   })
 
   // Guardar la lista completa en Pinia
-  datosEntidad.setEntidades(
-    listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
-  )
-
+  datosEntidad.setEntidades(listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')))
 
   return newLayer
 }
@@ -124,7 +122,7 @@ function mouseout(e) {
 }
 
 // Carga municipios
-function createMunicipiosLayer(poligonos_json, options = {}) {
+export function createMunicipiosLayer(poligonos_json, options = {}) {
   const ClickLayer = useActivateClickLayer()
   const datosMunicipio = useMapStore()
   const poligonoStore = usePoligonoStore()
@@ -189,7 +187,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         map.removeLayer(layer)
 
         /* datosMunicipio.setMunicipio(nombreLayer) */
-        datosMunicipio.setMunicipio(feature.properties?.CVEGEO )
+        datosMunicipio.setMunicipio(feature.properties?.CVEGEO)
 
         // ── NUEVO: Task 3 ────────────────────────────────────────
         // El CVEGEO ya viene incluido en las properties del feature
@@ -204,10 +202,13 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
         seleccionStore.setCVEGEO(cveGeo)
         // ───────────────────────────────────────────────────────
 
-        if (map && bounds.isValid()) {
+       /*  if (map && bounds.isValid()) {
           flyToBounds(map, bounds)
-        }
+        } */
       })
+
+      // ── NUEVO: Registrar layer ──
+      poligonoStore.registerMunicipioLayer(feature.properties.CVEGEO, layer)
     },
   })
 
