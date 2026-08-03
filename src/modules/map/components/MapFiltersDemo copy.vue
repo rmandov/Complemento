@@ -33,7 +33,7 @@ const filterState = reactive<FilterState>({
         { value: 3, label: 'Infraestructura' }
       ]
     },
-    ur: { selected: null, options: [] },
+    ur: { selected: null, options: [ ]},
     tematica: {
       selected: null,
       options: [
@@ -100,38 +100,6 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
           ...filterState.filters,
           ramo: { ...filterState.filters.ramo, selected: null },
           ur: { selected: null, options: [] }
-        }
-      }
-
-    case 'SELECT_UR':
-      return {
-        filters: {
-          ...filterState.filters,
-          ur: { ...filterState.filters.ur, selected: action.value }
-        }
-      }
-
-    case 'CLEAR_UR':
-      return {
-        filters: {
-          ...filterState.filters,
-          ur: { ...filterState.filters.ur, selected: null }
-        }
-      }
-
-    case 'SELECT_TEMATICA':
-      return {
-        filters: {
-          ...filterState.filters,
-          tematica: { ...filterState.filters.tematica, selected: action.value }
-        }
-      }
-
-    case 'CLEAR_TEMATICA':
-      return {
-        filters: {
-          ...filterState.filters,
-          tematica: { ...filterState.filters.tematica, selected: null }
         }
       }
 
