@@ -124,6 +124,7 @@ export function useMap(containerRef) {
     }
     // Limpia cualquier poligono que fuera almacenado en clicks realizados
     poligonoStore.clear()
+    mapStore.resetGeoFilters?.()
     // Cambia el setView enfocando a Mexico
     resetView()
   }

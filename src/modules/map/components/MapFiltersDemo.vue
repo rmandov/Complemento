@@ -42,7 +42,7 @@ const opcionesRamo = ref<{ value: string; label: string }[]>([])
 // ─── Estado único (filterState) ──────────────────────────────
 
 const filterState = reactive<FilterState>({
-  mode: 'tematico',
+  mode: 'geografico',
   loading: false,
   radar: {
     active: false,
@@ -294,8 +294,9 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
     case 'CLEAR_ALL':
       // Limpiar también el store geográfico
-      mapStore.clearEntidad?.() // si existe
-      mapStore.clearMunicipio?.()
+     /*  mapStore.clearEntidad?.()
+      mapStore.clearMunicipio?.() */
+      mapStore.resetGeoFilters?.()
       return {
         radar: {
           ...filterState.radar,
