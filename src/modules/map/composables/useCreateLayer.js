@@ -131,10 +131,7 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
   if (!poligonos_json) return
 
   // Limpiar la lista anterior
-  datosMunicipio.clearMunicipios();
-
-
-
+  datosMunicipio.clearMunicipios()
 
   const listaMunicipios = []
 
@@ -197,10 +194,9 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
   })
 
   // Guardar la lista completa en Pinia
-  datosMunicipio.setMunicipios(listaMunicipios.sort((a, b) =>
-    a.nombre.localeCompare(b.nombre, 'es')
-  ))
-
+  datosMunicipio.setMunicipios(
+    listaMunicipios.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+  )
 
   return newLayer
 }

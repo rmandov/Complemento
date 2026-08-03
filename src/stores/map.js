@@ -45,7 +45,7 @@ export const useMapStore = defineStore('map', () => {
   }
 
   function clearMunicipios() {
-     /* console.trace('clearMunicipios!!!!!!') */
+    /* console.trace('clearMunicipios!!!!!!') */
     municipios.value = []
   }
 
@@ -58,7 +58,6 @@ export const useMapStore = defineStore('map', () => {
   function setCVE_ENT(newCVE_ENT) {
     CVE_ENT.value = newCVE_ENT
     municipio.value = 'municipio'
-
   }
 
   return {

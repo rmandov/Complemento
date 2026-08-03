@@ -481,8 +481,7 @@ onMounted(async () => {
     inicializarConEntidades(entidades)
   }
 
-
-    // NUEVO: Observa el contenedor del mapa y fuerza el recálculo de Leaflet
+  // NUEVO: Observa el contenedor del mapa y fuerza el recálculo de Leaflet
   if (mapContainer.value && window.ResizeObserver) {
     resizeObserver = new ResizeObserver(() => {
       map.value?.invalidateSize()
@@ -490,15 +489,13 @@ onMounted(async () => {
     resizeObserver.observe(mapContainer.value)
   }
 
-window.addEventListener('resize', handleResize)
-
+  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
-
-   // NUEVO: Limpia el observer
+  // NUEVO: Limpia el observer
   resizeObserver?.disconnect()
-  window.removeEventListener('resize', handleResize);
+  window.removeEventListener('resize', handleResize)
 
   unregisterClick()
   resetRadar()
@@ -708,10 +705,12 @@ onUnmounted(() => {
   margin-top: -10px;
   margin-left: -10px;
   border-radius: 50%;
-  background: radial-gradient(circle,
-      rgba(255, 65, 54, 0.8) 55%,
-      rgba(255, 65, 54, 0.35) 75%,
-      rgba(255, 65, 54, 0) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  );
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }

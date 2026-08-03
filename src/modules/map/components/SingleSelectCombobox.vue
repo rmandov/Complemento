@@ -32,8 +32,8 @@ const props = withDefaults(
   {
     placeholder: 'Buscar...',
     disabled: false,
-    accentColor: 'indigo'
-  }
+    accentColor: 'indigo',
+  },
 )
 
 const emit = defineEmits<{
@@ -52,8 +52,8 @@ function normalizar(texto: string): string {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
-const selectedOption = computed(() =>
-  props.options.find((o) => o.value === props.modelValue) ?? null
+const selectedOption = computed(
+  () => props.options.find((o) => o.value === props.modelValue) ?? null,
 )
 
 const filteredOptions = computed(() => {
@@ -94,20 +94,20 @@ const colorClasses = computed(() => {
       ring: 'focus:ring-indigo-500/20 focus:border-indigo-500',
       chip: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
       chipHover: 'hover:bg-indigo-200/50',
-      active: 'text-indigo-900'
+      active: 'text-indigo-900',
     },
     emerald: {
       ring: 'focus:ring-emerald-500/20 focus:border-emerald-500',
       chip: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
       chipHover: 'hover:bg-emerald-200/50',
-      active: 'text-emerald-900'
+      active: 'text-emerald-900',
     },
     amber: {
       ring: 'focus:ring-amber-500/20 focus:border-amber-500',
       chip: 'bg-amber-50 text-amber-700 border-amber-200/60',
       chipHover: 'hover:bg-amber-200/50',
-      active: 'text-amber-900'
-    }
+      active: 'text-amber-900',
+    },
   }
   return map[props.accentColor]
 })
@@ -141,7 +141,13 @@ const colorClasses = computed(() => {
 
     <!-- Input de búsqueda (solo cuando no hay selección, o para reemplazarla) -->
     <div v-else class="relative flex items-center">
-      <svg class="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        class="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <circle cx="11" cy="11" r="7" />
         <path d="m21 21-4.3-4.3" />
       </svg>
@@ -172,7 +178,10 @@ const colorClasses = computed(() => {
         {{ option.label }}
       </button>
 
-      <div v-if="filteredOptions.length === 0" class="px-3 py-3 text-xs text-slate-400 italic text-center">
+      <div
+        v-if="filteredOptions.length === 0"
+        class="px-3 py-3 text-xs text-slate-400 italic text-center"
+      >
         Sin coincidencias para "{{ query }}"
       </div>
     </div>

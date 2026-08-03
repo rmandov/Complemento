@@ -104,7 +104,7 @@ function emitAction(action: FilterAction) {
 // ─── Estado puramente visual (no de negocio) ──────────────────
 
 const uiState = reactive({
-  radarInputValue: props.state.radar.value
+  radarInputValue: props.state.radar.value,
 })
 
 // ─── Helpers de presentación ───────────────────────────────────
@@ -123,21 +123,19 @@ const hayAlgunaSeleccionTematica = computed(
   () =>
     props.state.filters.ramo.selected !== null ||
     props.state.filters.ur.selected !== null ||
-    props.state.filters.tematica.selected !== null
+    props.state.filters.tematica.selected !== null,
 )
 
 const hayAlgunaSeleccionGeografica = computed(
   () =>
     props.state.filters.entidad.selected !== null ||
     props.state.filters.municipio.selected !== null ||
-    props.state.radar.active
+    props.state.radar.active,
 )
 
 /** Presets recomendados para el radio del Radar, acotados al rango permitido */
 const presetsRadar = computed(() =>
-  [5, 10, 25, 50, 100].filter(
-    (p) => p >= props.state.radar.min && p <= props.state.radar.max
-  )
+  [5, 10, 25, 50, 100].filter((p) => p >= props.state.radar.min && p <= props.state.radar.max),
 )
 
 function optionsFor(nivel: FilterLevel): ComboboxOption[] {
@@ -213,14 +211,21 @@ function limpiarTodo() {
 </script>
 
 <template>
-  <div class="relative flex flex-col gap-5 p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-xl mx-auto shadow-sm text-slate-800 text-sm">
-
+  <div
+    class="relative flex flex-col gap-5 p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-xl mx-auto shadow-sm text-slate-800 text-sm"
+  >
     <!-- Overlay de carga: puramente visual, la decisión de qué bloquear es del padre -->
     <div
       v-if="state.loading"
       class="absolute inset-0 z-30 bg-white/60 backdrop-blur-[1px] rounded-2xl flex items-center justify-center gap-2 text-slate-500"
     >
-      <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        class="w-4 h-4 animate-spin"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
       <span class="text-xs font-medium">Cargando resultados...</span>
@@ -232,9 +237,11 @@ function limpiarTodo() {
         <button
           type="button"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-          :class="state.mode === 'tematico'
-            ? 'bg-white text-indigo-700 shadow-2xs'
-            : 'text-slate-500 hover:text-slate-700'"
+          :class="
+            state.mode === 'tematico'
+              ? 'bg-white text-indigo-700 shadow-2xs'
+              : 'text-slate-500 hover:text-slate-700'
+          "
           :disabled="state.loading"
           @click="cambiarModo('tematico')"
         >
@@ -243,9 +250,11 @@ function limpiarTodo() {
         <button
           type="button"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-          :class="state.mode === 'geografico'
-            ? 'bg-white text-emerald-700 shadow-2xs'
-            : 'text-slate-500 hover:text-slate-700'"
+          :class="
+            state.mode === 'geografico'
+              ? 'bg-white text-emerald-700 shadow-2xs'
+              : 'text-slate-500 hover:text-slate-700'
+          "
           :disabled="state.loading"
           @click="cambiarModo('geografico')"
         >
@@ -263,8 +272,6 @@ function limpiarTodo() {
         Limpiar filtros
       </button>
     </div>
-
-
 
     <!-- ═══════════════ MODO TEMÁTICO ═══════════════ -->
     <div v-if="state.mode === 'tematico'" class="flex flex-col gap-4">
@@ -297,11 +304,12 @@ function limpiarTodo() {
 
     <!-- ═══════════════ MODO GEOGRÁFICO ═══════════════ -->
     <div v-else class="flex flex-col gap-4">
-
       <!-- ─── Radar activo: entidad/municipio son solo lectura ─── -->
       <div v-if="state.radar.active" class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-full">
+          <span
+            class="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-full"
+          >
             Modo Radar activo
           </span>
           <button
@@ -331,7 +339,10 @@ function limpiarTodo() {
             </div>
           </div>
 
-          <div v-if="(state.radar.municipiosResultado ?? []).length > 0" class="flex flex-col gap-1">
+          <div
+            v-if="(state.radar.municipiosResultado ?? []).length > 0"
+            class="flex flex-col gap-1"
+          >
             <span class="text-[11px] text-slate-500 font-medium">
               Municipios encontrados ({{ state.radar.municipiosResultado!.length }}):
             </span>
@@ -347,7 +358,10 @@ function limpiarTodo() {
           </div>
 
           <p
-            v-if="(state.radar.entidadesResultado ?? []).length === 0 && (state.radar.municipiosResultado ?? []).length === 0"
+            v-if="
+              (state.radar.entidadesResultado ?? []).length === 0 &&
+              (state.radar.municipiosResultado ?? []).length === 0
+            "
             class="text-xs text-slate-400 italic"
           >
             El radar aún no ha devuelto resultados.
@@ -390,12 +404,20 @@ function limpiarTodo() {
       </template>
 
       <!-- ─── Radar: control de distancia (único control editable en modo Radar) ─── -->
-      <div v-if="state.radar.active" class="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col gap-3 shadow-sm">
+      <div
+        v-if="state.radar.active"
+        class="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col gap-3 shadow-sm"
+      >
         <div class="flex justify-between items-center">
-          <label for="radar-slider" class="font-semibold text-slate-700 text-xs uppercase tracking-wider">
+          <label
+            for="radar-slider"
+            class="font-semibold text-slate-700 text-xs uppercase tracking-wider"
+          >
             Radio de búsqueda
           </label>
-          <span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 font-semibold rounded-full text-xs font-mono">
+          <span
+            class="px-2.5 py-0.5 bg-amber-100 text-amber-700 font-semibold rounded-full text-xs font-mono"
+          >
             {{ state.radar.value }} km
           </span>
         </div>
@@ -407,9 +429,11 @@ function limpiarTodo() {
             :key="`preset-${preset}`"
             type="button"
             class="px-2.5 py-1 text-xs rounded-lg font-medium border transition"
-            :class="state.radar.value === preset
-              ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
-              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'"
+            :class="
+              state.radar.value === preset
+                ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            "
             :disabled="state.loading"
             @click="aplicarPresetRadar(preset)"
           >
@@ -436,7 +460,6 @@ function limpiarTodo() {
       </div>
     </div>
 
-
     <!-- ═══════════════ TEMÁTICA: filtro transversal ═══════════════ -->
     <!-- Ya no pertenece exclusivamente al modo Temático: aplica igual como -->
     <!-- filtro adicional dentro del modo Geográfico (p. ej. "hospitales en -->
@@ -451,7 +474,5 @@ function limpiarTodo() {
       :disabled="state.loading"
       @update:model-value="onTematicaChange"
     />
-
-
   </div>
 </template>

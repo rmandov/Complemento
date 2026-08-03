@@ -1,11 +1,9 @@
 <script setup>
 import { useMapStore } from '@/stores/map'
 import { storeToRefs } from 'pinia'
-import { onMounted} from 'vue'
-
+import { onMounted } from 'vue'
 
 import MapFiltersDemo from './MapFiltersDemo.vue'
-
 
 const mapStore = useMapStore()
 const { CVE_ENT: entidad_clave, municipio, entidad } = storeToRefs(mapStore)
@@ -16,11 +14,7 @@ onMounted(() => {
 </script>
 
 <template>
-
-  <section
-    class="barra-lateral shadow-sm bg-white/100"
-  >
-
+  <section class="barra-lateral shadow-sm bg-white/100">
     <MapFiltersDemo></MapFiltersDemo>
 
     <div class="card flex flex-col h-full">
@@ -38,10 +32,7 @@ onMounted(() => {
         </p>
       </div>
     </div>
-
-
   </section>
-
 </template>
 <style>
 .barra-lateral {
@@ -61,7 +52,7 @@ onMounted(() => {
   border-radius: 10px;
   overflow: auto;
 
- /*  padding: 1rem; */
+  /*  padding: 1rem; */
 
   background-color: rgb(231, 231, 231);
 }

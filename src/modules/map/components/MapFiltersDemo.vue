@@ -48,31 +48,31 @@ const filterState = reactive<FilterState>({
     active: false,
     min: 1,
     max: 200,
-    value: 25
+    value: 25,
   },
   filters: {
     ramo: {
       selected: null,
-      options: [] // se llenará con los datos del CSV
+      options: [], // se llenará con los datos del CSV
     },
     ur: { selected: null, options: [] },
     tematica: {
       selected: null,
       options: [
         { value: 101, label: 'Cobertura escolar' },
-        { value: 102, label: 'Infraestructura hospitalaria' }
-      ]
+        { value: 102, label: 'Infraestructura hospitalaria' },
+      ],
     },
     entidad: {
       selected: null,
       options: [
         { value: 'CDMX', label: 'Ciudad de México' },
         { value: 'JAL', label: 'Jalisco' },
-        { value: 'NL', label: 'Nuevo León' }
-      ]
+        { value: 'NL', label: 'Nuevo León' },
+      ],
     },
-    municipio: { selected: null, options: [] }
-  }
+    municipio: { selected: null, options: [] },
+  },
 })
 
 // ─── Computado para obtener la fila seleccionada (opcional) ──
@@ -102,7 +102,6 @@ function construirIndices() {
     const llave = `${ramo}${unidad}`
     /* console.log("ESta es la llave: ", llave); */
 
-
     // Índice por ramo
     if (!indiceRamos.has(ramo)) {
       indiceRamos.set(ramo, [])
@@ -122,7 +121,7 @@ function construirIndices() {
     const primeraFila = indiceRamos.get(ramo)![0]
     return {
       value: ramo,
-      label: primeraFila.RamoUr_NombreRamoCompleto
+      label: primeraFila.RamoUr_NombreRamoCompleto,
     }
   })
 
@@ -140,13 +139,12 @@ onMounted(async () => {
 
     const result = Papa.parse<RamoUrRow>(text, {
       header: true,
-      skipEmptyLines: true
+      skipEmptyLines: true,
     })
 
     ramoUrData.value = result.data
 
-    console.log("Aqui está el resutl.data: ", result );
-
+    console.log('Aqui está el resutl.data: ', result)
 
     // Construir índices y opciones
     construirIndices()
@@ -172,8 +170,8 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
           ur: { selected: null, options: [] },
           tematica: filterState.filters.tematica,
           entidad: { selected: null, options: filterState.filters.entidad.options },
-          municipio: { selected: null, options: [] }
-        }
+          municipio: { selected: null, options: [] },
+        },
       }
 
     case 'SELECT_RAMO': {
@@ -184,7 +182,7 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
       // Generar opciones de UR: value = RamoUr_Unidad, label = RamoUr_NombreUnidad
       const opcionesUr = filas.map((row) => ({
         value: row.RamoUr_Unidad,
-        label: row.RamoUr_NombreUnidadCompleto
+        label: row.RamoUr_NombreUnidadCompleto,
       }))
 
       // Eliminar duplicados (por si hay varias filas con misma UR pero distinto nombre)
@@ -196,7 +194,7 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
       })
       const opcionesUrUnicas = Array.from(uniqueUr.entries()).map(([value, label]) => ({
         value,
-        label
+        label,
       }))
 
       return {
@@ -204,13 +202,13 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
           ...filterState.filters,
           ramo: {
             ...filterState.filters.ramo,
-            selected: ramoSeleccionado
+            selected: ramoSeleccionado,
           },
           ur: {
             selected: null, // limpiar UR al cambiar ramo
-            options: opcionesUrUnicas
-          }
-        }
+            options: opcionesUrUnicas,
+          },
+        },
       }
     }
 
@@ -219,28 +217,132 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
         filters: {
           ...filterState.filters,
           ramo: { ...filterState.filters.ramo, selected: null },
-          ur: { selected: null, options: [] }
-        }
+          ur: { selected: null, options: [] },
+        },
       }
 
     case 'SELECT_UR':
       return {
         filters: {
           ...filterState.filters,
-          ur: { ...filterState.filters.ur, selected: action.value }
-        }
+          ur: { ...filterState.filters.ur, selected: action.value },
+        },
       }
 
     case 'CLEAR_UR':
       return {
         filters: {
           ...filterState.filters,
-          ur: { ...filterState.filters.ur, selected: null }
-        }
+          ur: { ...filterState.filters.ur, selected: null },
+        },
       }
 
     // ... resto de casos (TEMATICA, ENTIDAD, MUNICIPIO, RADAR, CLEAR_ALL) se mantienen igual
     // (los omito por brevedad, pero deben estar completos)
+
+    case 'SELECT_TEMATICA':
+      return {
+        filters: {
+          ...filterState.filters,
+          tematica: { ...filterState.filters.tematica, selected: action.value },
+        },
+      }
+
+    case 'CLEAR_TEMATICA':
+      return {
+        filters: {
+          ...filterState.filters,
+          tematica: { ...filterState.filters.tematica, selected: null },
+        },
+      }
+
+    case 'SELECT_ENTIDAD':
+      return {
+        filters: {
+          ...filterState.filters,
+          entidad: { ...filterState.filters.entidad, selected: action.value },
+          // MOCK: municipios dependientes de la entidad elegida
+          municipio: {
+            selected: null,
+            options: [
+              { value: 1001, label: 'Municipio A' },
+              { value: 1002, label: 'Municipio B' },
+            ],
+          },
+        },
+      }
+
+    case 'CLEAR_ENTIDAD':
+      return {
+        filters: {
+          ...filterState.filters,
+          entidad: { ...filterState.filters.entidad, selected: null },
+          municipio: { selected: null, options: [] },
+        },
+      }
+
+    case 'SELECT_MUNICIPIO':
+      return {
+        filters: {
+          ...filterState.filters,
+          municipio: { ...filterState.filters.municipio, selected: action.value },
+        },
+      }
+
+    case 'CLEAR_MUNICIPIO':
+      return {
+        filters: {
+          ...filterState.filters,
+          municipio: { ...filterState.filters.municipio, selected: null },
+        },
+      }
+
+    case 'ACTIVATE_RADAR':
+      return {
+        radar: {
+          ...filterState.radar,
+          active: true,
+          // MOCK: resultado del cálculo externo del radio
+          entidadesResultado: [
+            { value: 'CDMX', label: 'Ciudad de México' },
+            { value: 'EDOMEX', label: 'Estado de México' },
+          ],
+          municipiosResultado: [
+            { value: 2001, label: 'Naucalpan' },
+            { value: 2002, label: 'Tlalnepantla' },
+          ],
+        },
+      }
+
+    case 'DEACTIVATE_RADAR':
+      return {
+        radar: {
+          ...filterState.radar,
+          active: false,
+          entidadesResultado: [],
+          municipiosResultado: [],
+        },
+      }
+
+    case 'CHANGE_RADAR':
+      return { radar: { ...filterState.radar, value: action.value } }
+
+    case 'CLEAR_ALL':
+      return {
+        radar: {
+          ...filterState.radar,
+          active: false,
+          entidadesResultado: [],
+          municipiosResultado: [],
+        },
+        filters: {
+          ramo: { selected: null, options: filterState.filters.ramo.options },
+          ur: { selected: null, options: [] },
+          tematica: { selected: null, options: filterState.filters.tematica.options },
+          entidad: { selected: null, options: filterState.filters.entidad.options },
+          municipio: { selected: null, options: [] },
+        },
+      }
 
     default:
       return {}
