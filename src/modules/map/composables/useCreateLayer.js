@@ -130,11 +130,26 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
 
   if (!poligonos_json) return
 
+  // Limpiar la lista anterior
+  datosMunicipio.clearMunicipios();
+
+
+
+
+  const listaMunicipios = []
+
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
       const nombreLayer = feature.properties[name] || 'nombre del poligono'
+
+      // Guardar municipio en la lista
+      listaMunicipios.push({
+        nombre: nombreLayer,
+        cvegeo: feature.properties?.CVEGEO,
+      })
+
       layer.bindTooltip(nombreLayer)
 
       layer.on({
@@ -180,5 +195,12 @@ function createMunicipiosLayer(poligonos_json, options = {}) {
       })
     },
   })
+
+  // Guardar la lista completa en Pinia
+  datosMunicipio.setMunicipios(listaMunicipios.sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, 'es')
+  ))
+
+
   return newLayer
 }

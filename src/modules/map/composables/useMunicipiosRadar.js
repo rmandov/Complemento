@@ -45,7 +45,7 @@ export function useMunicipiosRadar() {
       })
     }
 
-    console.log(`✅ Índice de bbox de entidades listo (${entidadesBboxIndex.size})`)
+    /* console.log(`✅ Índice de bbox de entidades listo (${entidadesBboxIndex.size})`) */
   }
 
   /* ───────────────────────────────────────────────

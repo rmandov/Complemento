@@ -11,8 +11,10 @@ export const useMapStore = defineStore('map', () => {
   })
 
   const entidad = ref('entidad')
-
   const municipio = ref('municipio')
+
+  // Lista de municipios disponibles
+  const municipios = ref([])
 
   const CVE_ENT = ref('00')
 
@@ -37,6 +39,16 @@ export const useMapStore = defineStore('map', () => {
     municipio.value = newMunicipio
   }
 
+  function setMunicipios(listaMunicipios) {
+    /* console.log('Guardando municipios', listaMunicipios) */
+    municipios.value = listaMunicipios
+  }
+
+  function clearMunicipios() {
+     /* console.trace('clearMunicipios!!!!!!') */
+    municipios.value = []
+  }
+
   function setView({ center, zoom, bounds }) {
     if (center) view.value.center = center
     if (zoom !== undefined) view.value.zoom = zoom
@@ -46,6 +58,7 @@ export const useMapStore = defineStore('map', () => {
   function setCVE_ENT(newCVE_ENT) {
     CVE_ENT.value = newCVE_ENT
     municipio.value = 'municipio'
+
   }
 
   return {
@@ -54,11 +67,18 @@ export const useMapStore = defineStore('map', () => {
     setZoom,
     setBounds,
     setView,
+
     CVE_ENT,
     setCVE_ENT,
+
     entidad,
     setEntidad,
+
     municipio,
     setMunicipio,
+
+    municipios,
+    setMunicipios,
+    clearMunicipios,
   }
 })
