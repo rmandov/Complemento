@@ -199,7 +199,9 @@ watch(
 
 .tab-btn--active {
   color: #2563eb;
-  border-bottom-color: #2563eb;
+ /*  border-bottom-color: #2563eb; */
+  text-decoration: underline #2563eb 2px;
+    text-underline-offset: 16px;
 }
 
 .tabs-content {

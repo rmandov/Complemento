@@ -54,6 +54,7 @@ export async function selectEntidad(map, layer, options = {}) {
     if (poligonoStore.isMunicipiosLayer) {
       map.removeLayer(poligonoStore.municipiosLayer)
       poligonoStore.clearMunicipiosLayer()
+      poligonoStore.setMunicipio(null)
     }
   }
 
@@ -137,13 +138,20 @@ export function createLayer(poligonos_json, options = {}) {
     map,
     pane = '',
     name = 'NOMGEO',
-    style = {
+    /* style = {
       weight: 1.2,
-      /* fillColor: 'rgb(92, 142, 254)', */
       fillColor: 'rgb(58, 118, 248)',
-      /* fillOpacity: 0.5, */
       fillOpacity: 0.1,
       color: 'rgb(92, 142, 254)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round'
+    }, */
+    style = {
+      weight: 1.2,
+      fillColor: 'rgb(61, 1, 226)',
+      fillOpacity: 0.1,
+      color: 'rgb(116, 92, 254)',
       opacity: 1,
       dashArray: '10, 5',
       lineCap: 'round'
@@ -226,10 +234,10 @@ export function createMunicipiosLayer(poligonos_json, options = {}) {
     style = {
       weight: 1.2,
       /* fillColor: 'rgb(92, 142, 254)', */
-      fillColor: 'rgb(248, 188, 58)',
+      fillColor: 'rgb(248, 204, 58)',
       /* fillOpacity: 0.5, */
       fillOpacity: 0.1,
-      color: 'rgb(254, 203, 92)',
+      color: 'rgb(254, 178, 92)',
       opacity: 1,
       dashArray: '10, 5',
       lineCap: 'round'
