@@ -37,12 +37,14 @@ export async function selectEntidad(map, layer, options = {}) {
   const bounds = layer.getBounds()
 
   // Restaurar estilo original
-  layer.setStyle(layer._originalStyle || {
-    weight: 1.2,
-    fillColor: 'rgb(92, 142, 254)',
-    fillOpacity: 0.5,
-    color: 'white',
-  })
+  layer.setStyle(
+    layer._originalStyle || {
+      weight: 1.2,
+      fillColor: 'rgb(92, 142, 254)',
+      fillOpacity: 0.5,
+      color: 'white',
+    },
+  )
 
   // ── Restaurar entidad anterior ──
   if (poligonoStore.entidad) {
@@ -185,9 +187,7 @@ export function createLayer(poligonos_json, options = {}) {
   })
 
   // Guardar la lista completa en Pinia
-  datosEntidad.setEntidades(
-    listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
-  )
+  datosEntidad.setEntidades(listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')))
 
   return newLayer
 }

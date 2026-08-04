@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, provide} from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, provide } from 'vue'
 import L from 'leaflet'
 
 // Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
@@ -463,28 +463,33 @@ async function toggleProyectos() {
   }
 }
 
-
 // ── Navegación desde filtros (o cualquier cambio en el store) ──
-watch(() => mapStore.entidad, async (newCve, oldCve) => {
-  if (!newCve || newCve === oldCve) return
+watch(
+  () => mapStore.entidad,
+  async (newCve, oldCve) => {
+    if (!newCve || newCve === oldCve) return
 
-  // Si el poligonoStore YA tiene esta entidad seleccionada, el cambio vino del click.
-  // No hacemos nada para no duplicar la lógica.
-  const currentCve = poligonoStore.entidad?.feature?.properties?.CVE_ENT
-  if (currentCve === newCve) return
+    // Si el poligonoStore YA tiene esta entidad seleccionada, el cambio vino del click.
+    // No hacemos nada para no duplicar la lógica.
+    const currentCve = poligonoStore.entidad?.feature?.properties?.CVE_ENT
+    if (currentCve === newCve) return
 
-  await flyToEntidad(newCve)
-})
+    await flyToEntidad(newCve)
+  },
+)
 
-watch(() => mapStore.municipio, async (newCve, oldCve) => {
-  if (!newCve || newCve === oldCve) return
+watch(
+  () => mapStore.municipio,
+  async (newCve, oldCve) => {
+    if (!newCve || newCve === oldCve) return
 
-  // Si el poligonoStore YA tiene este municipio seleccionado, el cambio vino del click.
-  const currentCve = poligonoStore.municipio?.feature?.properties?.CVEGEO
-  if (currentCve === newCve) return
+    // Si el poligonoStore YA tiene este municipio seleccionado, el cambio vino del click.
+    const currentCve = poligonoStore.municipio?.feature?.properties?.CVEGEO
+    if (currentCve === newCve) return
 
-  await flyToMunicipio(newCve)
-})
+    await flyToMunicipio(newCve)
+  },
+)
 
 // --- MAIN ---
 onMounted(async () => {

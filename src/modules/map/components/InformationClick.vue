@@ -14,10 +14,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="barra-lateral shadow-sm bg-white/100">
+  <section class="barra-lateral">
     <MapFiltersDemo></MapFiltersDemo>
 
-    <div class="card flex flex-col h-full">
+    <!-- <div class="card flex flex-col h-full">
       <div class="title h-20 text-center">
         <h2 class="font-bold" v-if="entidad_clave !== '00'">{{ entidad_clave }}. {{ entidad }}</h2>
         <h2 class="font-bold" v-else>Selecciona una entidad</h2>
@@ -31,7 +31,7 @@ onMounted(() => {
           eos vero rem minus quae fugit?
         </p>
       </div>
-    </div>
+    </div> -->
   </section>
 </template>
 <style>
@@ -49,12 +49,11 @@ onMounted(() => {
 
   /*  z-index: 500;  */ /* Más alto que todo */
   /* pointer-events: none; */
-  border-radius: 10px;
+  border-radius: none;
   overflow: auto;
-
+  padding-top: 4rem;
+  /* margin: auto 0; */
   /*  padding: 1rem; */
-
-  background-color: rgb(231, 231, 231);
 }
 
 .title {

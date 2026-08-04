@@ -12,7 +12,6 @@ const goBack = inject<() => void>('mapGoBack', () => {
   console.warn('goBack no disponible en el contexto')
 })
 
-
 import { storeToRefs } from 'pinia'
 import { reactive, onMounted, ref, computed, watch } from 'vue'
 import MapFilters, { type FilterState, type FilterAction } from './MapFilters.vue'
@@ -88,13 +87,17 @@ watch(
       label: e.nombre,
     }))
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 )
 
 // 2. Entidad seleccionada
-watch(entidad, (value) => {
-  filterState.filters.entidad.selected = value
-}, { immediate: true })
+watch(
+  entidad,
+  (value) => {
+    filterState.filters.entidad.selected = value
+  },
+  { immediate: true },
+)
 
 // 3. Opciones de municipio (dependen de la entidad seleccionada)
 watch(
@@ -107,13 +110,17 @@ watch(
     // Al cambiar la lista, se limpia la selección de municipio (el store ya lo hace, pero por si acaso)
     // filterState.filters.municipio.selected = null // ya lo hace el watch de municipio
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 // 4. Municipio seleccionado
-watch(municipio, (value) => {
-  filterState.filters.municipio.selected = value
-}, { immediate: true })
+watch(
+  municipio,
+  (value) => {
+    filterState.filters.municipio.selected = value
+  },
+  { immediate: true },
+)
 
 // ─── Computado para obtener la fila completa (Ramo+UR) ──────
 
@@ -182,13 +189,15 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
   switch (action.type) {
     case 'SET_MODE':
+      goBack()
       return {
         mode: action.value,
         radar: { ...filterState.radar, active: false },
         filters: {
           ramo: { selected: null, options: filterState.filters.ramo.options },
           ur: { selected: null, options: [] },
-          tematica: filterState.filters.tematica,
+          /* tematica: filterState.filters.tematica, */
+          tematica: { selected: null, options: filterState.filters.tematica.options },
           // No tocamos entidad/municipio aquí (se mantienen como están)
           entidad: filterState.filters.entidad,
           municipio: filterState.filters.municipio,
@@ -300,7 +309,7 @@ async function mockBackend(action: FilterAction): Promise<Partial<FilterState>> 
 
     case 'CLEAR_ALL':
       // Limpiar también el store geográfico
-     /*  mapStore.clearEntidad?.()
+      /*  mapStore.clearEntidad?.()
       mapStore.clearMunicipio?.() */
       mapStore.resetGeoFilters?.()
 
@@ -347,7 +356,7 @@ async function handleAction(action: FilterAction) {
     return
   }
 
-    // 🆕 CLEAR_ALL: ejecutar goBack + limpiar stores + actualizar filterState
+  // 🆕 CLEAR_ALL: ejecutar goBack + limpiar stores + actualizar filterState
   if (action.type === 'CLEAR_ALL') {
     // 1. Ejecutar la misma lógica que el botón "Volver"
     goBack() // elimina capas, restaura entidad, resetea vista
@@ -370,7 +379,6 @@ async function handleAction(action: FilterAction) {
 
     return
   }
-
 
   // Para el resto, usar mockBackend
   filterState.loading = true

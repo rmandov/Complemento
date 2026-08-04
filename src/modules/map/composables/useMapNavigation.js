@@ -42,7 +42,7 @@ export function useMapNavigation(mapRef) {
     await selectEntidad(mapRef.value, entidadLayer, { force: true })
 
     // 4. Esperar a que Leaflet renderice y registre los nuevos layers
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
     // 5. Buscar de nuevo el municipio
     layer = poligonoStore.getMunicipioLayer(cvegeo)
