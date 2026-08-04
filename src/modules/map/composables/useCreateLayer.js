@@ -154,7 +154,7 @@ export function createLayer(poligonos_json, options = {}) {
       color: 'rgb(116, 92, 254)',
       opacity: 1,
       dashArray: '10, 5',
-      lineCap: 'round'
+      lineCap: 'round',
     },
   } = options
 
@@ -240,7 +240,7 @@ export function createMunicipiosLayer(poligonos_json, options = {}) {
       color: 'rgb(254, 178, 92)',
       opacity: 1,
       dashArray: '10, 5',
-      lineCap: 'round'
+      lineCap: 'round',
     },
   } = options
 

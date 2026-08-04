@@ -9,7 +9,7 @@ const mapStore = useMapStore()
 const { CVE_ENT: entidad_clave, municipio, entidad } = storeToRefs(mapStore)
 
 onMounted(() => {
-  console.log('Esta es la entidad clave:', entidad_clave.value)
+  /* console.log('Esta es la entidad clave:', entidad_clave.value) */
 })
 </script>
 

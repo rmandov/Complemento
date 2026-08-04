@@ -159,10 +159,20 @@ function searchPoints() {
   )
 
   filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean)
+  /* radioCantidad.value = filteredFeatures.value.length */
+  console.group('PROYECTOS - PUNTOS:')
+  console.table(
+    filteredFeatures.value.map((feature) => ({
+      ID_PPI_ESPACIAL: feature.properties?.ID_PPI_ESPACIAL,
+      NOMBRE_CORTO: feature.properties?.NOMBRE_CORTO,
+    })),
+  )
+  console.groupEnd()
+
   radioCantidad.value = filteredFeatures.value.length
 
-  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
-  console.log(filteredFeatures.value)
+  /*  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
+  console.log(filteredFeatures.value) */
 }
 
 // Reaccionar a cambios de centro o radio
@@ -395,13 +405,13 @@ const proyectosVisibles = ref(false)
 async function crearCapaProyectos() {
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
-    console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
+    /*  console.log('Base ligera cargada:', datosProyectos.features.length, 'features') */
 
-    console.log(
+    /*     console.log(
       '🆔 IDs PPI espacial cargados:',
       datosProyectos.features.map((f) => f.properties?.ID_PPI_ESPACIAL),
     )
-
+ */
     pointsProyectos.loadPoints(datosProyectos)
   }
   if (!map.value || !datosProyectos) return
@@ -585,7 +595,7 @@ onUnmounted(() => {
               <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
               <ul>
                 <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
-                  {{ m.properties.NOMGEO }}
+                  {{ m.properties }}
                 </li>
               </ul>
             </div>
