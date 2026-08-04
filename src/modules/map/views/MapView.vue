@@ -572,7 +572,7 @@ onUnmounted(() => {
 
     <!-- Nuevo contenedor flexible para las pestañas -->
     <div class="tabs-wrapper">
-      <Tabs v-model="activeTab" :tabs="tabList" @change="onTabChange">
+      <Tabs v-model="activeTab" :tabs="tabList" >
         <!-- MAPA -->
         <template #mapa>
           <div class="display-mapa">
