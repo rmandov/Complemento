@@ -41,7 +41,7 @@ export async function selectEntidad(map, layer, options = {}) {
     layer._originalStyle || {
       weight: 1.2,
       fillColor: 'rgb(92, 142, 254)',
-      fillOpacity: 0.5,
+      fillOpacity: 0.1,
       color: 'white',
     },
   )
@@ -103,7 +103,7 @@ export async function selectMunicipio(map, layer, options = {}) {
   if (!ClickLayer.clickEnLayerActivo && !options.force) return
 
   const bounds = layer.getBounds()
-  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+  layer.setStyle({ fillOpacity: 0.1, weight: 1.2 })
 
   // ── Restaurar municipio anterior ──
   if (poligonoStore.municipio) {
@@ -139,9 +139,14 @@ export function createLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(92, 142, 254)',
-      fillOpacity: 0.5,
-      color: 'white',
+      /* fillColor: 'rgb(92, 142, 254)', */
+      fillColor: 'rgb(58, 118, 248)',
+      /* fillOpacity: 0.5, */
+      fillOpacity: 0.1,
+      color: 'rgb(92, 142, 254)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round'
     },
   } = options
 
@@ -195,12 +200,12 @@ export function createLayer(poligonos_json, options = {}) {
 // Eventos hover
 function mouseover(e) {
   const layer = e.target
-  layer.setStyle({ fillOpacity: 0.8, weight: 2 })
+  layer.setStyle({ fillOpacity: 0.8, weight: 1.2 })
 }
 
 function mouseout(e) {
   const layer = e.target
-  layer.setStyle(layer._originalStyle || { fillOpacity: 0.5, weight: 1.2 })
+  layer.setStyle(layer._originalStyle || { fillOpacity: 0.1, weight: 1.2 })
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -220,10 +225,14 @@ export function createMunicipiosLayer(poligonos_json, options = {}) {
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(133, 122, 253)',
-      fillOpacity: 0.5,
-      color: 'white',
-      dashArray: '3',
+      /* fillColor: 'rgb(92, 142, 254)', */
+      fillColor: 'rgb(248, 188, 58)',
+      /* fillOpacity: 0.5, */
+      fillOpacity: 0.1,
+      color: 'rgb(254, 203, 92)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round'
     },
   } = options
 
