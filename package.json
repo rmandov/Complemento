@@ -22,6 +22,7 @@
     "kdbush": "^4.1.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
+    "papaparse": "^5.5.4",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.3.1",
     "vue": "^3.5.32",

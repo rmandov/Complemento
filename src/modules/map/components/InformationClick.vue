@@ -1,49 +1,23 @@
 <script setup>
 import { useMapStore } from '@/stores/map'
 import { storeToRefs } from 'pinia'
-import { onMounted, reactive,ref } from 'vue'
+import { onMounted } from 'vue'
 
-import FiltersData from './FiltersData.vue'
-
-const filtros = reactive({
-  cartera: '',
-  ubicacion: { entidades: ['Jalisco'], municipios: [] },
-  radar: 20
-})
-
-const todasLasEntidades = ['Jalisco', 'Nuevo León', 'Puebla', /* ... */]
-const todosLosMunicipios = [
-  { entidad: 'Jalisco', nombre: 'Guadalajara' },
-  { entidad: 'Jalisco', nombre: 'Zapopan' },
-  { entidad: 'Puebla', nombre: 'Tehuacán' },
-  // ...
-]
-const mostrarRadar = ref(true)
+import MapFiltersDemo from './MapFiltersDemo.vue'
 
 const mapStore = useMapStore()
 const { CVE_ENT: entidad_clave, municipio, entidad } = storeToRefs(mapStore)
 
 onMounted(() => {
-  console.log('Esta es la entidad clave:', entidad_clave.value)
+  /* console.log('Esta es la entidad clave:', entidad_clave.value) */
 })
 </script>
 
 <template>
+  <section class="barra-lateral">
+    <MapFiltersDemo></MapFiltersDemo>
 
-  <section
-    class="barra-lateral shadow-sm bg-white/100"
-  >
-
-  <FiltersData v-model:cartera="filtros.cartera"
-    v-model:ubicacion="filtros.ubicacion"
-    v-model:radar="filtros.radar"
-    :entidades="todasLasEntidades"
-    :municipios="todosLosMunicipios"
-    :show-radar="mostrarRadar"
-    :radar-min="5"
-    :radar-max="100"></FiltersData>
-
-    <div class="card flex flex-col h-full">
+    <!-- <div class="card flex flex-col h-full">
       <div class="title h-20 text-center">
         <h2 class="font-bold" v-if="entidad_clave !== '00'">{{ entidad_clave }}. {{ entidad }}</h2>
         <h2 class="font-bold" v-else>Selecciona una entidad</h2>
@@ -57,11 +31,8 @@ onMounted(() => {
           eos vero rem minus quae fugit?
         </p>
       </div>
-    </div>
-
-
+    </div> -->
   </section>
-
 </template>
 <style>
 .barra-lateral {
@@ -78,12 +49,11 @@ onMounted(() => {
 
   /*  z-index: 500;  */ /* Más alto que todo */
   /* pointer-events: none; */
-  border-radius: 10px;
+  border-radius: none;
   overflow: auto;
-
- /*  padding: 1rem; */
-
-  background-color: rgb(231, 231, 231);
+  padding-top: 4rem;
+  /* margin: auto 0; */
+  /*  padding: 1rem; */
 }
 
 .title {

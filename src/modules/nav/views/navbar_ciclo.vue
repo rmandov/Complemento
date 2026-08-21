@@ -21,7 +21,7 @@ const obtenerNav = async () => {
   try {
     const response = await fetch(urlBase + 'nav.json')
     menu.value = await response.json()
-    console.log(menu.value)
+    /* console.log(menu.value) */
   } catch (error) {
     console.log(error)
   }

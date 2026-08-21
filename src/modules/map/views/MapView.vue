@@ -1,6 +1,6 @@
 <script setup>
 // src/modules/map/views/MapView.vue
-import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, nextTick } from 'vue'
+import { ref, onMounted, shallowRef, watch, onUnmounted, toRaw, computed, provide } from 'vue'
 import L from 'leaflet'
 
 // Plugin de clusters: agrupa los circleMarker de "Proyectos" cuando hay
@@ -41,6 +41,10 @@ console.log('Este es el radius:', radius.value)
 import { usePointsStore } from '@/stores/pointsStore.js'
 // NUEVO: constante con las coordenadas (posición del radar)
 import { useMapStore } from '@/stores/map.js'
+import { useMapNavigation } from '@/modules/map/composables/useMapNavigation'
+import { usePoligonoStore } from '@/stores/poligonoStore'
+
+const poligonoStore = usePoligonoStore()
 // NUEVO: store centralizado de selección (ID_PPI_ESPACIAL, CVEGEO)
 import { useSeleccionStore } from '@/stores/seleccionStore'
 
@@ -75,6 +79,10 @@ const mapStore = useMapStore()
 const mapContainer = ref(null)
 const { initMap, map, goBack, handleWheel, updateMousePosition, showWarning, tooltipPos } =
   createMap(mapContainer)
+
+const { flyToEntidad, flyToMunicipio } = useMapNavigation(map)
+// Proveer goBack al resto de la aplicación
+provide('mapGoBack', goBack)
 
 const capaProyectos = shallowRef(null)
 const clusterProyectos = shallowRef(null)
@@ -151,10 +159,20 @@ function searchPoints() {
   )
 
   filteredFeatures.value = results.map((idx) => rawFeatures[idx]).filter(Boolean)
+  /* radioCantidad.value = filteredFeatures.value.length */
+  console.group('PROYECTOS - PUNTOS:')
+  console.table(
+    filteredFeatures.value.map((feature) => ({
+      ID_PPI_ESPACIAL: feature.properties?.ID_PPI_ESPACIAL,
+      NOMBRE_CORTO: feature.properties?.NOMBRE_CORTO,
+    })),
+  )
+  console.groupEnd()
+
   radioCantidad.value = filteredFeatures.value.length
 
-  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
-  console.log(filteredFeatures.value)
+  /*  console.log('🔍 Resultados en radio:', filteredFeatures.value.length)
+  console.log(filteredFeatures.value) */
 }
 
 // Reaccionar a cambios de centro o radio
@@ -387,13 +405,13 @@ const proyectosVisibles = ref(false)
 async function crearCapaProyectos() {
   if (!datosProyectos) {
     datosProyectos = await getGeoJson('PPIs/Base_ligera.json')
-    console.log('Base ligera cargada:', datosProyectos.features.length, 'features')
+    /*  console.log('Base ligera cargada:', datosProyectos.features.length, 'features') */
 
-    console.log(
+    /*     console.log(
       '🆔 IDs PPI espacial cargados:',
       datosProyectos.features.map((f) => f.properties?.ID_PPI_ESPACIAL),
     )
-
+ */
     pointsProyectos.loadPoints(datosProyectos)
   }
   if (!map.value || !datosProyectos) return
@@ -455,6 +473,34 @@ async function toggleProyectos() {
   }
 }
 
+// ── Navegación desde filtros (o cualquier cambio en el store) ──
+watch(
+  () => mapStore.entidad,
+  async (newCve, oldCve) => {
+    if (!newCve || newCve === oldCve) return
+
+    // Si el poligonoStore YA tiene esta entidad seleccionada, el cambio vino del click.
+    // No hacemos nada para no duplicar la lógica.
+    const currentCve = poligonoStore.entidad?.feature?.properties?.CVE_ENT
+    if (currentCve === newCve) return
+
+    await flyToEntidad(newCve)
+  },
+)
+
+watch(
+  () => mapStore.municipio,
+  async (newCve, oldCve) => {
+    if (!newCve || newCve === oldCve) return
+
+    // Si el poligonoStore YA tiene este municipio seleccionado, el cambio vino del click.
+    const currentCve = poligonoStore.municipio?.feature?.properties?.CVEGEO
+    if (currentCve === newCve) return
+
+    await flyToMunicipio(newCve)
+  },
+)
+
 // --- MAIN ---
 onMounted(async () => {
   initMap()
@@ -481,8 +527,7 @@ onMounted(async () => {
     inicializarConEntidades(entidades)
   }
 
-
-    // NUEVO: Observa el contenedor del mapa y fuerza el recálculo de Leaflet
+  // NUEVO: Observa el contenedor del mapa y fuerza el recálculo de Leaflet
   if (mapContainer.value && window.ResizeObserver) {
     resizeObserver = new ResizeObserver(() => {
       map.value?.invalidateSize()
@@ -490,15 +535,13 @@ onMounted(async () => {
     resizeObserver.observe(mapContainer.value)
   }
 
-window.addEventListener('resize', handleResize)
-
+  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
-
-   // NUEVO: Limpia el observer
+  // NUEVO: Limpia el observer
   resizeObserver?.disconnect()
-  window.removeEventListener('resize', handleResize);
+  window.removeEventListener('resize', handleResize)
 
   unregisterClick()
   resetRadar()
@@ -529,7 +572,7 @@ onUnmounted(() => {
 
     <!-- Nuevo contenedor flexible para las pestañas -->
     <div class="tabs-wrapper">
-      <Tabs v-model="activeTab" :tabs="tabList" @change="onTabChange">
+      <Tabs v-model="activeTab" :tabs="tabList" >
         <!-- MAPA -->
         <template #mapa>
           <div class="display-mapa">
@@ -552,7 +595,7 @@ onUnmounted(() => {
               <strong>Municipios en el radio ({{ municipiosEnRadar.length }}):</strong>
               <ul>
                 <li v-for="m in municipiosEnRadar" :key="m.properties.CVEGEO">
-                  {{ m.properties.NOMGEO }}
+                  {{ m.properties }}
                 </li>
               </ul>
             </div>
@@ -708,10 +751,12 @@ onUnmounted(() => {
   margin-top: -10px;
   margin-left: -10px;
   border-radius: 50%;
-  background: radial-gradient(circle,
-      rgba(255, 65, 54, 0.8) 55%,
-      rgba(255, 65, 54, 0.35) 75%,
-      rgba(255, 65, 54, 0) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 65, 54, 0.8) 55%,
+    rgba(255, 65, 54, 0.35) 75%,
+    rgba(255, 65, 54, 0) 100%
+  );
   animation: pulsoOndaRadarVue 0.8s cubic-bezier(0.25, 0, 0, 1) forwards;
   pointer-events: none;
 }
