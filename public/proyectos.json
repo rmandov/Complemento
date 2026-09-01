@@ -10,14 +10,7 @@
     {
       "id": 2,
       "titulo": "Operación",
-      "valor": 2,
-      "fontSizeValor": "1.2rem",
-      "fontSizeTitulo": "0.8rem"
-    },
-    {
-      "id": 3,
-      "titulo": "Concluidos",
-      "valor": 132,
+      "valor": "50 %",
       "fontSizeValor": "1.2rem",
       "fontSizeTitulo": "0.8rem"
     }

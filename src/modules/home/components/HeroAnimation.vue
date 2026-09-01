@@ -1,3 +1,4 @@
+<!-- HeroAnimation.vue -->
 <script setup>
 import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
 import SplitText from '@/modules/home/components/SplitText.vue'
@@ -33,7 +34,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
               {
                 text: 'Complementariedades y',
                 padding: '15px 50px 10px 24px',
-                corners: { topLeft: true, topRight: true, bottomRight: true, bottomLeft: false },
+                corners: { topLeft: false, topRight: true, bottomRight: true, bottomLeft: false },
               },
               {
                 text: 'sinergias en Programas',
@@ -181,7 +182,9 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   gap: 12px;
   font-weight: 700;
   font-size: clamp(0.8rem, 0.7rem + 0.5vw, 0.95rem);
-  margin-bottom: 16px;
+  padding: 1rem 0 1rem 28px;
+  margin-top: 3rem;
+  background-color: white;
 }
 
 .hero-eyebrow-icon {
@@ -191,6 +194,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  margin-right: 20px;
 }
 
 .hero-title {

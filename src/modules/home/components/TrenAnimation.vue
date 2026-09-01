@@ -1,3 +1,4 @@
+<!-- TrenAnimation.vue -->
 <script setup>
 import Botones from './MagneticButton.vue'
 </script>
@@ -9,7 +10,10 @@ import Botones from './MagneticButton.vue'
     <div class="tren-text">
       <p>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
-        fugiat, cupiditate voluptates aliquid quia alias!
+        fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta alias vitae culpa
+        facere esse neque? lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur accusamus dicta vitae
+        fugiat, cupiditate voluptates aliquid quia alias! Doloremque aliquam quidem ad veniam soluta alias vitae culpa
+        facere esse neque? lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur
       </p>
     </div>
   </div>
@@ -20,10 +24,11 @@ import Botones from './MagneticButton.vue'
   display: grid;
 
   /* 30% botón | 20% espacio | 50% texto */
-  grid-template-columns: 30% 20% 50%;
+  grid-template-columns: 31% 8% 61%;
 
   align-items: center;
   margin-bottom: 32px;
+  margin: 3rem 0;
 }
 
 .tren-botones {
@@ -38,7 +43,7 @@ import Botones from './MagneticButton.vue'
   align-items: center;
   justify-content: center;
 
-  text-align: center;
+  text-align: left;
   font-weight: 700;
   font-size: 1.1rem;
   padding: 0 16px;
