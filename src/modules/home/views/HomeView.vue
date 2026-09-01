@@ -35,7 +35,7 @@ onMounted(async () => {
     <TrenAnimation />
 
     <!-- Sección Proyectos -->
-    <section class="proyectos-section">
+    <!-- <section class="proyectos-section">
       <h2 class="text-2xl font-bold">Proyectos estratégicos</h2>
       <p>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
@@ -44,7 +44,7 @@ onMounted(async () => {
       </p>
 
       <Carousel></Carousel>
-    </section>
+    </section> -->
     <!--
     <div class="contenedor">
       <div class="rectangulo_1"></div>

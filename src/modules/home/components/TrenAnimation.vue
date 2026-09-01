@@ -3,16 +3,6 @@ import Botones from './MagneticButton.vue'
 </script>
 
 <template>
-  <!-- Formas de utilizar el componente Botones:
-  <Botones />
-
-  <Botones :magnetic-button="true" />
-
-  <Botones :magnetic-text="true" />
-
-  <Botones :magnetic-button="true" :magnetic-text="true" :strength-image="0.4" :strength-button="0.1"
-    :strength-text="0.25" /> -->
-
   <div class="tren-container">
     <Botones class="tren-botones" />
 
@@ -27,21 +17,27 @@ import Botones from './MagneticButton.vue'
 
 <style scoped>
 .tren-container {
-  display: flex;
-  align-items: stretch;
-  gap: 24px;
+  display: grid;
+
+  /* 30% botón | 20% espacio | 50% texto */
+  grid-template-columns: 30% 20% 50%;
+
+  align-items: center;
   margin-bottom: 32px;
 }
 
 .tren-botones {
-  flex: 2;
+  grid-column: 1;
+  width: 100%;
 }
 
 .tren-text {
-  flex: 1;
+  grid-column: 3;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   text-align: center;
   font-weight: 700;
   font-size: 1.1rem;
@@ -50,7 +46,14 @@ import Botones from './MagneticButton.vue'
 
 @media (max-width: 768px) {
   .tren-container {
+    display: flex;
     flex-direction: column;
+    gap: 24px;
+  }
+
+  .tren-botones,
+  .tren-text {
+    width: 100%;
   }
 }
 </style>

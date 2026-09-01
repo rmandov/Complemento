@@ -18,12 +18,12 @@ const props = defineProps({
 })
 
 const botones = [
-  {
+  /* {
     to: '/fichas',
     img: new URL('../../../assets/img/img_circle.png', import.meta.url).href,
     label: 'Categoría',
     description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.!',
-  },
+  }, */
   {
     to: '/mapa',
     img: new URL('../../../assets/img/Mexico.png', import.meta.url).href,
