@@ -81,10 +81,20 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   position: relative;
   background-color: rgb(224, 224, 224);
   border-radius: 32px;
+
   padding: 40px;
-  min-height: 620px;
-  margin-bottom: 32px;
-  margin-top: 90px;
+
+  /*
+    En lugar de 620px fijos:
+
+    laptop pequeña → ~420px
+    escritorio normal → ~500px
+    pantalla grande → máximo 560px
+  */
+  min-height: clamp(420px, 55dvh, 560px);
+
+  margin: 0;
+
   overflow: visible;
 }
 
