@@ -218,8 +218,11 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 .hero-stats {
   grid-area: stats;
   position: absolute;
-  top: -80px;
+
+  top: clamp(-80px, -9vh, -50px);
+
   right: -80px;
+
   z-index: 2;
 }
 
@@ -230,44 +233,68 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
   margin-top: clamp(40px, 8vw, 96px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .hero-content {
     grid-template-columns: 1fr;
     grid-template-areas:
       "title"
       "stats"
       "description";
+
     padding-top: 24px;
   }
 
   .hero-section {
-    padding: 24px;
+    min-height: auto;
+    padding: 32px;
+    margin: 0 0 32px;
   }
 
   .hero-title-block {
     position: relative;
+
     top: auto;
     left: auto;
+
     max-width: 100%;
     padding: 16px 0;
   }
 
   .hero-stats {
     position: relative;
+
     top: auto;
     right: auto;
+
     justify-self: start;
     text-align: left;
+
+    margin-top: 24px;
   }
 
   .hero-description {
     margin-top: 0;
   }
 
-  /* En móvil el título vuelve al flujo normal, ya no aplica el recorte */
   .hero-animation-notch,
   .hero-animation-curve {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .hero-title-block {
+    padding: 8px 0;
+  }
+
+  .hero-eyebrow {
+    padding-left: 16px;
+    margin-top: 1rem;
   }
 }
 </style>

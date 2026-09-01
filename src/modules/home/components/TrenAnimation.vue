@@ -23,16 +23,20 @@ import Botones from './MagneticButton.vue'
 .tren-container {
   display: grid;
 
-  /* 30% botón | 20% espacio | 50% texto */
+  /* botón | espacio | texto */
   grid-template-columns: 31% 8% 61%;
 
   align-items: center;
-  margin-bottom: 32px;
-  margin: 3rem 0;
+
+  width: 100%;
+  min-height: 130px;
+
+  margin: 2rem 0;
 }
 
 .tren-botones {
   grid-column: 1;
+
   width: 100%;
 }
 
@@ -44,20 +48,56 @@ import Botones from './MagneticButton.vue'
   justify-content: center;
 
   text-align: left;
-  font-size: 1.1rem;
+
+  font-weight: 700;
+  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.1rem);
+  line-height: 1.5;
+
   padding: 0 16px;
 }
 
-@media (max-width: 768px) {
+.tren-text p {
+  margin: 0;
+}
+
+/* ========================================
+   LAPTOP CON POCA ALTURA
+======================================== */
+
+@media (min-width: 1024px) and (max-height: 820px) {
+  .tren-container {
+    min-height: 110px;
+  }
+
+  .tren-text {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+}
+
+/* ========================================
+   TABLET / MÓVIL
+======================================== */
+
+@media (max-width: 1023px) {
   .tren-container {
     display: flex;
     flex-direction: column;
+
     gap: 24px;
+
+    min-height: auto;
+
+    margin: 32px 0;
   }
 
   .tren-botones,
   .tren-text {
     width: 100%;
+  }
+
+  .tren-text {
+    padding: 0;
   }
 }
 </style>
