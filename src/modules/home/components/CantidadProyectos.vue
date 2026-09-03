@@ -41,7 +41,7 @@ function fluidFontSize(value, fallbackRem) {
     <div v-if="groupedCards.length" class="card card--group">
       <div v-for="card in groupedCards" :key="card.id" class="card-group-item">
         <span class="card-valor" :style="{ fontSize: fluidFontSize(card.fontSizeValor, 1.6) }">
-          <NumberWheel :value="card.valor" :line-height-ratio="1.1" % />
+          <NumberWheel :value="card.valor" :line-height-ratio="1.1" />
         </span>
         <p class="card-titulo" :style="{ fontSize: fluidFontSize(card.fontSizeTitulo, 0.95) }">
           {{ card.titulo }}

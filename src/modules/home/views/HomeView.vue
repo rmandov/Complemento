@@ -29,18 +29,27 @@ onMounted(async () => {
 
 <template>
   <div class="home">
-    <!-- Primera pantalla -->
-    <div class="home-intro">
-      <HeroAnimation />
-      <TrenAnimation />
-    </div>
+    <!-- Hero -->
+    <HeroAnimation />
+    <!-- Seccion botones -->
+    <TrenAnimation />
 
     <!-- Sección Proyectos -->
+    <!-- <section class="proyectos-section">
+      <h2 class="text-2xl font-bold">Proyectos estratégicos</h2>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
+        perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
+        mollitia blanditiis atque quidem aut!
+      </p>
+
+      <Carousel></Carousel>
+    </section> -->
     <!--
-    <section class="proyectos-section">
-      ...
-    </section>
-    -->
+    <div class="contenedor">
+      <div class="rectangulo_1"></div>
+      <div class="rectangulo_2"></div>
+    </div> -->
   </div>
 
   <RouterView />
@@ -48,48 +57,14 @@ onMounted(async () => {
 
 <style scoped>
 .home {
-  width: min(calc(100% - 100px), 1400px);
-  margin: 0 auto;
+  margin: 50px 50px;
   font-family: NotoSans;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* ========================================
-   HERO + TREN
-======================================== */
-
-.home-intro {
-  display: grid;
-
-  /*
-    Hero ocupa el espacio disponible.
-    Tren ocupa solamente lo que necesita.
-  */
-  grid-template-rows: minmax(0, 1fr) auto;
-
-  gap: clamp(16px, 2vh, 28px);
-
-  /*
-    Dejamos espacio superior para el contenido
-    que sobresale del Hero.
-  */
-  padding-top: clamp(70px, 9vh, 90px);
-
-  /*
-    Altura aproximada de la primera pantalla.
-
-    Si tienes un navbar fijo de, por ejemplo, 80px,
-    puedes cambiarlo por:
-    min-height: calc(100dvh - 80px);
-  */
-  min-height: 100dvh;
-
-  box-sizing: border-box;
-}
-
-/* ========================================
-   PROYECTOS
-======================================== */
-
+/* Proyectos */
 .proyectos-section {
   margin-bottom: 32px;
 }
@@ -102,45 +77,41 @@ onMounted(async () => {
   font-size: 1.1rem;
 }
 
-/* ========================================
-   LAPTOPS DE POCA ALTURA
-   Ejemplo: 1366 × 768
-======================================== */
-
-@media (min-width: 1024px) and (max-height: 820px) {
-  .home-intro {
-    padding-top: 65px;
-    gap: 14px;
-  }
+.contenedor {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  /* altura de ambos */
 }
 
-/* ========================================
-   TABLET
-======================================== */
+.rectangulo_1 {
+  position: absolute;
+  inset: 0;
 
-@media (max-width: 1023px) {
-  .home {
-    width: min(calc(100% - 48px), 1400px);
-  }
-
-  .home-intro {
-    display: block;
-    min-height: auto;
-    padding-top: 32px;
-  }
+  background: #000;
 }
 
-/* ========================================
-   MÓVIL
-======================================== */
+.rectangulo_2 {
+  position: absolute;
+  inset: 0;
 
+  background: #f0f0f0;
+  border-radius: 20px 20px 0 0;
+
+  z-index: 1;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .home {
-    width: calc(100% - 32px);
+  .boton-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
   }
 
-  .home-intro {
-    padding-top: 16px;
+  .boton {
+    width: 100%;
+    flex: none;
   }
 }
 </style>
