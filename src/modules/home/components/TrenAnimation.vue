@@ -48,8 +48,6 @@ import Botones from './MagneticButton.vue'
   justify-content: center;
 
   text-align: left;
-
-  font-weight: 700;
   font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.1rem);
   line-height: 1.5;
 
