@@ -6,6 +6,7 @@ import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
 import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
 import Carousel from '@/modules/home/components/Carousel2.vue'
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
+import ParticleCircle from '@/modules/home/animations/ParticleCircle.vue'
 const { getGeoJson } = useGeoJson()
 
 const projects = ref([])
@@ -51,6 +52,10 @@ onMounted(async () => {
       <div class="rectangulo_2"></div>
     </div> -->
   </div>
+
+  <section class="demo">
+    <ParticleCircle :count="5000" :color="0x2563eb" :repulsion-radius="150" :repulsion-strength="130" />
+  </section>
 
   <RouterView />
 </template>
