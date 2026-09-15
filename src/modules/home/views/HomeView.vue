@@ -5,16 +5,57 @@ import { ref, onMounted } from 'vue'
 import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
 import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
 import Carousel from '@/modules/home/components/Carousel2.vue'
+
 import { useGeoJson } from '@/modules/map/composables/useGeoJson'
-import ParticleCircle from '@/modules/home/animations/ParticleCircle.vue'
+
+import ParticleMexico from '@/modules/home/animations/ParticleMexico.vue'
+
 const { getGeoJson } = useGeoJson()
 
 const projects = ref([])
 const loading = ref(true)
 
+const base = import.meta.env.BASE_URL
+
+const geojsonFiles = [
+  `${base}municipios/aguascalientes.json`,
+  `${base}municipios/baja_california_sur.json`,
+  `${base}municipios/baja_california.json`,
+  `${base}municipios/campeche.json`,
+  `${base}municipios/chiapas.json`,
+  `${base}municipios/chihuahua.json`,
+  `${base}municipios/ciudad_de_mexico.json`,
+  `${base}municipios/coahuila_de_zaragoza.json`,
+  `${base}municipios/colima.json`,
+  `${base}municipios/durango.json`,
+  `${base}municipios/guanajuato.json`,
+  `${base}municipios/guerrero.json`,
+  `${base}municipios/hidalgo.json`,
+  `${base}municipios/jalisco.json`,
+  `${base}municipios/mexico.json`,
+  `${base}municipios/michoacan_de_ocampo.json`,
+  `${base}municipios/morelos.json`,
+  `${base}municipios/nayarit.json`,
+  `${base}municipios/nuevo_leon.json`,
+  `${base}municipios/oaxaca.json`,
+  `${base}municipios/puebla.json`,
+  `${base}municipios/queretaro.json`,
+  `${base}municipios/quintana_roo.json`,
+  `${base}municipios/san_luis_potosi.json`,
+  `${base}municipios/sinaloa.json`,
+  `${base}municipios/sonora.json`,
+  `${base}municipios/tabasco.json`,
+  `${base}municipios/tamaulipas.json`,
+  `${base}municipios/tlaxcala.json`,
+  `${base}municipios/veracruz_de_ignacio_de_la_llave.json`,
+  `${base}municipios/yucatan.json`,
+  `${base}municipios/zacatecas.json`
+]
+
 onMounted(async () => {
   try {
     const res = await getGeoJson('proyectos_carrusel.json')
+
     if (res) {
       projects.value = res
     } else {
@@ -54,7 +95,8 @@ onMounted(async () => {
   </div>
 
   <section class="demo">
-    <ParticleCircle :count="5000" :color="0x2563eb" :repulsion-radius="150" :repulsion-strength="130" />
+    <ParticleMexico :count="5000" :color="0x2563eb" :geojson-files="geojsonFiles" :repulsion-radius="150"
+      :repulsion-strength="130" />
   </section>
 
   <RouterView />

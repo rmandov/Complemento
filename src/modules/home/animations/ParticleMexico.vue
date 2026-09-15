@@ -13,7 +13,7 @@ import {
 } from 'pixi.js'
 
 import {
-  geoMercator,
+  geoIdentity,
   geoPath
 } from 'd3-geo'
 
@@ -32,33 +32,19 @@ const props = defineProps({
     default: 0x2563eb
   },
 
-  /*
-   * Si tus archivos se llaman:
-   *
-   * public/municipios/01.json
-   * public/municipios/02.json
-   * ...
-   * public/municipios/32.json
-   *
-   * no necesitas mandar esta prop.
-   *
-   * Si tienen otros nombres puedes pasar:
-   *
-   * :geojson-files="[
-   *   'aguascalientes.json',
-   *   'baja_california.json',
-   *   ...
-   * ]"
-   */
   geojsonFiles: {
     type: Array,
+    required: true
+  },
 
-    default: () =>
-      Array.from(
-        { length: 32 },
-        (_, index) =>
-          `${String(index + 1).padStart(2, '0')}.json`
-      )
+  repulsionRadius: {
+    type: Number,
+    default: 140
+  },
+
+  repulsionStrength: {
+    type: Number,
+    default: 130
   }
 })
 
@@ -77,6 +63,12 @@ let resizeTimer = null
 let mexicoGeoJson = null
 
 const particles = []
+
+const pointer = {
+  active: false,
+  x: 0,
+  y: 0
+}
 
 // ======================================================
 // TEXTURA DE LOS PUNTOS
@@ -189,13 +181,23 @@ function createParticles() {
         radius
       )
 
-    /*
-     * Tamaño ligeramente diferente
-     * para cada punto.
-     */
     const baseScale =
       0.09 +
       Math.random() * 0.1
+
+    /*
+     * IMPORTANTE:
+     *
+     * Cada partícula necesita
+     * su propia dirección de escape.
+     *
+     * Tiene que declararse DENTRO
+     * del for y ANTES de particles.push().
+     */
+    const escapeAngle =
+      Math.random() *
+      Math.PI *
+      2
 
     const particle =
       new Particle({
@@ -227,18 +229,18 @@ function createParticles() {
     particles.push({
       particle,
 
-      // Posición a la que debe viajar.
       targetX:
         start.x,
 
       targetY:
         start.y,
 
-      // Física
-      vx: 0,
-      vy: 0,
+      vx:
+        0,
 
-      // Pulsación
+      vy:
+        0,
+
       baseScale,
 
       phase:
@@ -254,7 +256,22 @@ function createParticles() {
       amplitude:
         0.15 +
         Math.random() *
-        0.35
+        0.35,
+
+      /*
+       * Dirección aleatoria que usamos
+       * sólo si el mouse queda exactamente
+       * encima de la partícula.
+       */
+      escapeX:
+        Math.cos(
+          escapeAngle
+        ),
+
+      escapeY:
+        Math.sin(
+          escapeAngle
+        )
     })
 
     particleContainer.addParticle(
@@ -268,146 +285,106 @@ function createParticles() {
 // ======================================================
 
 async function loadMexicoGeoJson() {
-  const base =
-    import.meta.env.BASE_URL
+  const requests = props.geojsonFiles.map(async (url) => {
+    const response = await fetch(url)
 
-  const requests =
-    props.geojsonFiles.map(
-      async (file) => {
-        const url =
-          `${base}municipios/${file}`
+    if (!response.ok) {
+      throw new Error(`No se pudo cargar: ${url}`)
+    }
 
-        const response =
-          await fetch(url)
+    return response.json()
+  })
 
-        if (!response.ok) {
-          throw new Error(
-            `No se pudo cargar: ${url}`
-          )
-        }
+  const estados = await Promise.all(requests)
 
-        return response.json()
-      }
-    )
-
-  const estados =
-    await Promise.all(
-      requests
-    )
-
-  /*
-   * Todos los municipios de los
-   * 32 estados terminan dentro
-   * del mismo FeatureCollection.
-   */
-  const features =
-    estados.flatMap(
-      estado =>
-        estado.features || []
-    )
+  const features = estados.flatMap(
+    estado => estado.features || []
+  )
 
   mexicoGeoJson = {
-    type:
-      'FeatureCollection',
-
+    type: 'FeatureCollection',
     features
   }
 
-  console.log(
-    'Estados cargados:',
-    estados.length
-  )
-
-  console.log(
-    'Features cargadas:',
-    features.length
-  )
+  console.log('Estados cargados:', estados.length)
+  console.log('Municipios cargados:', features.length)
 }
 
 // ======================================================
 // CREAR MÁSCARA DE MÉXICO
 // ======================================================
 
-function createMexicoMask(
-  width,
-  height
-) {
+function createMexicoMask(width, height) {
   if (!mexicoGeoJson) {
     return null
   }
 
-  const canvas =
-    document.createElement('canvas')
+  const canvas = document.createElement('canvas')
 
-  canvas.width =
-    Math.floor(width)
+  canvas.width = Math.floor(width)
+  canvas.height = Math.floor(height)
 
-  canvas.height =
-    Math.floor(height)
+  const ctx = canvas.getContext('2d', {
+    willReadFrequently: true
+  })
 
-  const ctx =
-    canvas.getContext(
-      '2d',
-      {
-        willReadFrequently:
-          true
-      }
-    )
-
-  // ----------------------------------------------------
-  // PROYECCIÓN
-  // ----------------------------------------------------
-
-  /*
-   * Dejamos un pequeño margen
-   * alrededor del país.
-   */
   const padding =
-    Math.min(
-      width,
-      height
-    ) * 0.08
-
-  const projection =
-    geoMercator()
-
-      .fitExtent(
-        [
-          [
-            padding,
-            padding
-          ],
-
-          [
-            width -
-            padding,
-
-            height -
-            padding
-          ]
-        ],
-
-        mexicoGeoJson
-      )
+    Math.min(width, height) * 0.08
 
   /*
-   * geoPath sabe interpretar:
+   * IMPORTANTE:
    *
-   * Polygon
-   * MultiPolygon
-   * Feature
-   * FeatureCollection
+   * No usamos geoMercator.
+   *
+   * Los GeoJSON municipales ya tienen:
+   *
+   * [longitud, latitud]
+   *
+   * Por ejemplo:
+   *
+   * [-102.09, 22.02]
+   *
+   * geoIdentity los trata directamente
+   * como coordenadas XY.
    */
-  const path =
-    geoPath(
-      projection,
-      ctx
+  const projection = geoIdentity()
+    /*
+     * En coordenadas geográficas:
+     *
+     * norte = Y positivo
+     *
+     * En Canvas:
+     *
+     * abajo = Y positivo
+     *
+     * Por eso volteamos Y.
+     */
+    .reflectY(true)
+
+    /*
+     * Ajustamos automáticamente México
+     * al tamaño del canvas.
+     */
+    .fitExtent(
+      [
+        [
+          padding,
+          padding
+        ],
+        [
+          width - padding,
+          height - padding
+        ]
+      ],
+      mexicoGeoJson
     )
 
-  // ----------------------------------------------------
-  // DIBUJAMOS MÉXICO
-  // ----------------------------------------------------
+  const path = geoPath(
+    projection,
+    ctx
+  )
 
+  // Limpiar completamente
   ctx.clearRect(
     0,
     0,
@@ -415,22 +392,22 @@ function createMexicoMask(
     height
   )
 
-  ctx.fillStyle =
-    '#ffffff'
+  /*
+   * México será blanco.
+   *
+   * El resto permanece transparente.
+   */
+  ctx.fillStyle = '#ffffff'
 
   ctx.beginPath()
 
-  path(
-    mexicoGeoJson
-  )
+  path(mexicoGeoJson)
 
   /*
-   * evenodd también respeta huecos
-   * interiores de los polígonos.
+   * evenodd es conveniente porque tus
+   * datos contienen Polygon y MultiPolygon.
    */
-  ctx.fill(
-    'evenodd'
-  )
+  ctx.fill('evenodd')
 
   return {
     canvas,
@@ -645,6 +622,33 @@ function handleResize() {
     )
 }
 
+function handlePointerMove(event) {
+  if (!app || !containerRef.value) {
+    return
+  }
+
+  const rect =
+    containerRef.value.getBoundingClientRect()
+
+  /*
+   * Convertimos la posición del mouse
+   * a coordenadas internas de Pixi.
+   */
+  pointer.x =
+    (event.clientX - rect.left) *
+    (app.screen.width / rect.width)
+
+  pointer.y =
+    (event.clientY - rect.top) *
+    (app.screen.height / rect.height)
+
+  pointer.active = true
+}
+
+function handlePointerLeave() {
+  pointer.active = false
+}
+
 // ======================================================
 // INIT
 // ======================================================
@@ -739,114 +743,235 @@ onMounted(async () => {
 
   createParticles()
 
+  element.addEventListener(
+    'pointermove',
+    handlePointerMove
+  )
+
+  element.addEventListener(
+    'pointerleave',
+    handlePointerLeave
+  )
+
   // ----------------------------------------------------
   // ANIMACIÓN
   // ----------------------------------------------------
 
-  app.ticker.add(
-    ticker => {
-      const dt =
-        Math.min(
-          ticker.deltaMS /
-          16.6667,
+  app.ticker.add(ticker => {
+    const dt =
+      Math.min(
+        ticker.deltaMS / 16.6667,
+        2
+      )
 
-          2
-        )
+    const time =
+      performance.now() * 0.001
 
-      const time =
-        performance.now() *
-        0.001
+    // ==================================================
+    // FÍSICA
+    // ==================================================
+
+    const SPRING = 0.06
+    const DAMPING = 0.82
+
+    const damping =
+      Math.pow(
+        DAMPING,
+        dt
+      )
+
+    const radiusSquared =
+      props.repulsionRadius *
+      props.repulsionRadius
+
+    // ==================================================
+    // PARTÍCULAS
+    // ==================================================
+
+    for (
+      let i = 0;
+      i < particles.length;
+      i++
+    ) {
+      const data =
+        particles[i]
+
+      const particle =
+        data.particle
 
       /*
-       * Valores para el movimiento
-       * hacia la silueta.
+       * Normalmente el destino de la partícula
+       * es su posición dentro de México.
        */
-      const SPRING =
-        0.045
+      let targetX =
+        data.targetX
 
-      const DAMPING =
-        0.84
+      let targetY =
+        data.targetY
 
-      const damping =
-        Math.pow(
-          DAMPING,
-          dt
+      // ==================================================
+      // REPULSIÓN DEL MOUSE
+      // ==================================================
+
+      if (pointer.active) {
+        const dx =
+          particle.x -
+          pointer.x
+
+        const dy =
+          particle.y -
+          pointer.y
+
+        const distanceSquared =
+          dx * dx +
+          dy * dy
+
+        /*
+         * Primero comprobamos usando distancia al cuadrado
+         * para evitar hacer sqrt en las 5,000 partículas.
+         */
+        if (
+          distanceSquared <
+          radiusSquared
+        ) {
+          const distance =
+            Math.sqrt(
+              distanceSquared
+            )
+
+          /*
+           * 1 = justo debajo del mouse
+           * 0 = borde del radio
+           */
+          const normalized =
+            1 -
+            distance /
+            props.repulsionRadius
+
+          /*
+           * Fuerza cuadrática.
+           *
+           * Cerca del mouse:
+           * fuerte.
+           *
+           * Cerca del borde:
+           * suave.
+           */
+          const force =
+            normalized *
+            normalized
+
+          let directionX
+          let directionY
+
+          if (
+            distance >
+            0.001
+          ) {
+            directionX =
+              dx / distance
+
+            directionY =
+              dy / distance
+          } else {
+            directionX =
+              data.escapeX
+
+            directionY =
+              data.escapeY
+          }
+
+          /*
+           * Modificamos temporalmente
+           * el destino.
+           *
+           * data.targetX / data.targetY
+           * NO cambian.
+           *
+           * Por eso siempre puede regresar
+           * a formar México.
+           */
+          targetX +=
+            directionX *
+            props.repulsionStrength *
+            force
+
+          targetY +=
+            directionY *
+            props.repulsionStrength *
+            force
+        }
+      }
+
+      // ==================================================
+      // SPRING
+      // ==================================================
+
+      data.vx +=
+        (
+          targetX -
+          particle.x
+        ) *
+        SPRING *
+        dt
+
+      data.vy +=
+        (
+          targetY -
+          particle.y
+        ) *
+        SPRING *
+        dt
+
+      // ==================================================
+      // DAMPING
+      // ==================================================
+
+      data.vx *=
+        damping
+
+      data.vy *=
+        damping
+
+      // ==================================================
+      // POSICIÓN
+      // ==================================================
+
+      particle.x +=
+        data.vx *
+        dt
+
+      particle.y +=
+        data.vy *
+        dt
+
+      // ==================================================
+      // PULSACIÓN DE TAMAÑO
+      // ==================================================
+
+      const wave =
+        Math.sin(
+          time *
+          data.speed +
+          data.phase
         )
 
-      for (
-        let i = 0;
-        i <
-        particles.length;
-        i++
-      ) {
-        const data =
-          particles[i]
+      const pulse =
+        1 +
+        wave *
+        data.amplitude
 
-        const particle =
-          data.particle
+      const scale =
+        data.baseScale *
+        pulse
 
-        // ---------------------------------------------
-        // IR HACIA MÉXICO
-        // ---------------------------------------------
+      particle.scaleX =
+        scale
 
-        data.vx +=
-          (
-            data.targetX -
-            particle.x
-          ) *
-          SPRING *
-          dt
-
-        data.vy +=
-          (
-            data.targetY -
-            particle.y
-          ) *
-          SPRING *
-          dt
-
-        data.vx *=
-          damping
-
-        data.vy *=
-          damping
-
-        particle.x +=
-          data.vx *
-          dt
-
-        particle.y +=
-          data.vy *
-          dt
-
-        // ---------------------------------------------
-        // PULSACIÓN
-        // ---------------------------------------------
-
-        const wave =
-          Math.sin(
-            time *
-            data.speed +
-            data.phase
-          )
-
-        const pulse =
-          1 +
-          wave *
-          data.amplitude
-
-        const scale =
-          data.baseScale *
-          pulse
-
-        particle.scaleX =
-          scale
-
-        particle.scaleY =
-          scale
-      }
+      particle.scaleY =
+        scale
     }
-  )
+  })
 
   // ----------------------------------------------------
   // RESIZE
@@ -882,6 +1007,21 @@ onMounted(async () => {
 // ======================================================
 
 onUnmounted(() => {
+  const element =
+    containerRef.value
+
+  if (element) {
+    element.removeEventListener(
+      'pointermove',
+      handlePointerMove
+    )
+
+    element.removeEventListener(
+      'pointerleave',
+      handlePointerLeave
+    )
+  }
+
   clearTimeout(
     resizeTimer
   )
@@ -891,17 +1031,14 @@ onUnmounted(() => {
   particles.length = 0
 
   if (dotTexture) {
-    dotTexture.destroy(
-      true
-    )
+    dotTexture.destroy(true)
   }
 
   if (app) {
     app.destroy(
       true,
       {
-        children:
-          true
+        children: true
       }
     )
   }
@@ -924,6 +1061,8 @@ onUnmounted(() => {
 
   position: relative;
   overflow: hidden;
+
+  touch-action: none;
 }
 
 .particle-mexico :deep(canvas) {
