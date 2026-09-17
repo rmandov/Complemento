@@ -35,12 +35,65 @@ let resizeObserver = null
 let resizeTimer = null
 let mexicoGeoJson = null
 
+let particleSpawnRaf = null
+let spawnAccumulator = 0
+
+const PARTICLES_PER_SECOND = 1200
+
 const particles = []
 
 const pointer = {
   active: false,
   x: 0,
   y: 0
+}
+
+function addParticleAtPoint(point) {
+  const baseScale =
+    0.09 +
+    Math.random() * 0.1
+
+  const escapeAngle =
+    Math.random() *
+    Math.PI *
+    2
+
+  const particle =
+    new Particle({
+      texture: dotTexture,
+      x: point.x,
+      y: point.y,
+      anchorX: 0.5,
+      anchorY: 0.5,
+      scaleX: baseScale,
+      scaleY: baseScale,
+      tint: props.color
+    })
+
+  particles.push({
+    particle,
+    targetX: point.x,
+    targetY: point.y,
+    vx: 0,
+    vy: 0,
+    baseScale,
+    phase:
+      Math.random() *
+      Math.PI *
+      2,
+    speed:
+      0.8 +
+      Math.random() * 1.5,
+    amplitude:
+      0.15 +
+      Math.random() * 0.35,
+    escapeX: Math.cos(escapeAngle),
+    escapeY: Math.sin(escapeAngle)
+  })
+
+  particleContainer.addParticle(
+    particle
+  )
 }
 
 function createDotTexture() {
@@ -145,45 +198,80 @@ function createParticlesInMexico() {
   const width = Math.floor(app.screen.width)
   const height = Math.floor(app.screen.height)
 
-  const mexicoPoints = getMexicoPoints(width, height, props.count)
+  const mexicoPoints = getMexicoPoints(
+    width,
+    height,
+    props.count
+  )
 
   if (!mexicoPoints.length) {
-    console.warn('No se pudieron generar puntos dentro de México.')
+    console.warn(
+      'No se pudieron generar puntos dentro de México.'
+    )
     return
   }
 
-  for (let i = 0; i < mexicoPoints.length; i++) {
-    const point = mexicoPoints[i]
-    const baseScale = 0.09 + Math.random() * 0.1
-    const escapeAngle = Math.random() * Math.PI * 2
+  let currentIndex = 0
+  let lastTime = null
+  spawnAccumulator = 0
 
-    const particle = new Particle({
-      texture: dotTexture,
-      x: point.x,
-      y: point.y,
-      anchorX: 0.5,
-      anchorY: 0.5,
-      scaleX: baseScale,
-      scaleY: baseScale,
-      tint: props.color
-    })
+  function spawnStep(now) {
+    if (!app || !particleContainer) return
 
-    particles.push({
-      particle,
-      targetX: point.x,
-      targetY: point.y,
-      vx: 0,
-      vy: 0,
-      baseScale,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.8 + Math.random() * 1.5,
-      amplitude: 0.15 + Math.random() * 0.35,
-      escapeX: Math.cos(escapeAngle),
-      escapeY: Math.sin(escapeAngle)
-    })
+    if (lastTime === null) {
+      lastTime = now
+    }
 
-    particleContainer.addParticle(particle)
+    const deltaSeconds =
+      (now - lastTime) / 1000
+
+    lastTime = now
+
+    // Acumula cuántas partículas deben aparecer
+    // según el tiempo transcurrido.
+    spawnAccumulator +=
+      PARTICLES_PER_SECOND *
+      deltaSeconds
+
+    const amountToCreate =
+      Math.floor(spawnAccumulator)
+
+    spawnAccumulator -= amountToCreate
+
+    const endIndex = Math.min(
+      currentIndex + amountToCreate,
+      mexicoPoints.length
+    )
+
+    for (
+      let i = currentIndex;
+      i < endIndex;
+      i++
+    ) {
+      addParticleAtPoint(
+        mexicoPoints[i]
+      )
+    }
+
+    currentIndex = endIndex
+
+    if (
+      currentIndex <
+      mexicoPoints.length
+    ) {
+      particleSpawnRaf =
+        requestAnimationFrame(
+          spawnStep
+        )
+    } else {
+      particleSpawnRaf = null
+    }
   }
+
+  particleSpawnRaf =
+    requestAnimationFrame(
+      spawnStep
+    )
 }
 
 function updateMexicoTargets(immediate = false) {
@@ -348,14 +436,29 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  const element = containerRef.value
+  const element =
+    containerRef.value
 
   if (element) {
-    element.removeEventListener('pointermove', handlePointerMove)
-    element.removeEventListener('pointerleave', handlePointerLeave)
+    element.removeEventListener(
+      'pointermove',
+      handlePointerMove
+    )
+    element.removeEventListener(
+      'pointerleave',
+      handlePointerLeave
+    )
   }
 
   clearTimeout(resizeTimer)
+
+  cancelAnimationFrame(
+    particleSpawnRaf
+  )
+
+  particleSpawnRaf = null
+  spawnAccumulator = 0
+
   resizeObserver?.disconnect()
 
   particles.length = 0
