@@ -3,12 +3,55 @@
 import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
 import SplitText from '@/modules/home/components/SplitText.vue'
 import TextBlock from '@/modules/home/components/TextBlock.vue'
+import ParticleMexico from '@/modules/home/animations/ParticleMexico.vue'
+
+const base = import.meta.env.BASE_URL
+
+const geojsonFiles = [
+  `${base}municipios/aguascalientes.json`,
+  `${base}municipios/baja_california_sur.json`,
+  `${base}municipios/baja_california.json`,
+  `${base}municipios/campeche.json`,
+  `${base}municipios/chiapas.json`,
+  `${base}municipios/chihuahua.json`,
+  `${base}municipios/ciudad_de_mexico.json`,
+  `${base}municipios/coahuila_de_zaragoza.json`,
+  `${base}municipios/colima.json`,
+  `${base}municipios/durango.json`,
+  `${base}municipios/guanajuato.json`,
+  `${base}municipios/guerrero.json`,
+  `${base}municipios/hidalgo.json`,
+  `${base}municipios/jalisco.json`,
+  `${base}municipios/mexico.json`,
+  `${base}municipios/michoacan_de_ocampo.json`,
+  `${base}municipios/morelos.json`,
+  `${base}municipios/nayarit.json`,
+  `${base}municipios/nuevo_leon.json`,
+  `${base}municipios/oaxaca.json`,
+  `${base}municipios/puebla.json`,
+  `${base}municipios/queretaro.json`,
+  `${base}municipios/quintana_roo.json`,
+  `${base}municipios/san_luis_potosi.json`,
+  `${base}municipios/sinaloa.json`,
+  `${base}municipios/sonora.json`,
+  `${base}municipios/tabasco.json`,
+  `${base}municipios/tamaulipas.json`,
+  `${base}municipios/tlaxcala.json`,
+  `${base}municipios/veracruz_de_ignacio_de_la_llave.json`,
+  `${base}municipios/yucatan.json`,
+  `${base}municipios/zacatecas.json`
+]
+
 </script>
 
 <template>
   <section class="hero-section">
     <!-- Capa de animación: cubre toda la sección, todo lo demás va encima -->
     <div class="hero-animation" aria-hidden="true">
+
+      <ParticleMexico class="hero-particles" :count="5000" :color="0x2563eb" :geojson-files="geojsonFiles"
+        :repulsion-radius="150" :repulsion-strength="130" />
+
       <!-- Bloque invisible (mismo color que el fondo de la página) -->
       <div class="hero-animation-notch"></div>
 
@@ -103,22 +146,70 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
    y también el ancho de los rectángulos de la curva de transición */
 .hero-animation {
   --notch-bg: #ffffff;
-  /* ajusta al color de fondo real de la página */
   --notch-w: 112px;
-  /* grosor del bloque invisible y de los rectángulos */
   --notch-h: 130px;
-  /* alto del bloque invisible */
   --notch-radius: 32px;
-  /* debe coincidir con el border-radius de .hero-section */
 
   position: absolute;
   inset: 0;
+
   border-radius: var(--notch-radius);
   overflow: hidden;
+
   background-color: rgb(224, 224, 224);
-  /* aquí irá el <video>/animación en el futuro */
+
   z-index: 0;
-  pointer-events: none;
+
+  /*
+    IMPORTANTE:
+    quité pointer-events: none;
+    para permitir que ParticleMexico detecte el mouse.
+  */
+}
+
+/* ─────────────────────────────────────────────
+   MAPA DE MÉXICO
+───────────────────────────────────────────── */
+
+.hero-particles {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 0;
+
+  overflow: hidden;
+}
+
+/*
+  Por si ParticleMexico genera un canvas
+*/
+.hero-particles :deep(canvas) {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  display: block;
+}
+
+/*
+  Por si ParticleMexico utiliza SVG
+*/
+.hero-particles :deep(svg) {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
 }
 
 /* Bloque invisible (mismo color que el fondo de la página) */
@@ -164,7 +255,7 @@ import TextBlock from '@/modules/home/components/TextBlock.vue'
 /* Contenedor de todo el contenido real, siempre encima de la animación */
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   grid-template-columns: minmax(280px, 45%) 1fr;
   grid-template-areas:
