@@ -38,7 +38,7 @@ let mexicoGeoJson = null
 let particleSpawnRaf = null
 let spawnAccumulator = 0
 
-const PARTICLES_PER_SECOND = 1200
+const PARTICLES_PER_SECOND = 2000
 
 const particles = []
 
@@ -58,46 +58,113 @@ function addParticleAtPoint(point) {
     Math.PI *
     2
 
+  // =============================================
+  // POSICIÓN INICIAL
+  // =============================================
+
+  /*
+   * La partícula aparece arriba
+   * de la pantalla.
+   *
+   * Usamos aproximadamente la X de su destino,
+   * pero agregamos un pequeño desplazamiento
+   * para que no caigan completamente rectas.
+   */
+
+  const horizontalSpread = 250
+
+  const startX =
+    point.x +
+    (
+      Math.random() - 0.5
+    ) *
+    horizontalSpread
+
+  /*
+   * Algunas empiezan más arriba que otras
+   * para evitar una línea horizontal perfecta.
+   */
+  const startY =
+    -50 -
+    Math.random() * 300
+
+  // =============================================
+  // PARTÍCULA
+  // =============================================
+
   const particle =
     new Particle({
       texture: dotTexture,
-      x: point.x,
-      y: point.y,
+
+      // Empieza arriba
+      x: startX,
+      y: startY,
+
       anchorX: 0.5,
       anchorY: 0.5,
+
       scaleX: baseScale,
       scaleY: baseScale,
+
       tint: props.color
     })
 
   particles.push({
     particle,
+
+    // Su destino sigue siendo México
     targetX: point.x,
     targetY: point.y,
-    vx: 0,
-    vy: 0,
+
+    /*
+     * Pequeño impulso inicial hacia abajo.
+     *
+     * Esto ayuda a que parezca que
+     * las partículas están cayendo.
+     */
+    vx:
+      (
+        Math.random() -
+        0.5
+      ) *
+      2,
+
+    vy:
+      2 +
+      Math.random() * 3,
+
     baseScale,
+
     phase:
       Math.random() *
       Math.PI *
       2,
+
     speed:
       0.8 +
       Math.random() * 1.5,
+
     amplitude:
       0.15 +
       Math.random() * 0.35,
-    escapeX: Math.cos(escapeAngle),
-    escapeY: Math.sin(escapeAngle)
+
+    escapeX:
+      Math.cos(
+        escapeAngle
+      ),
+
+    escapeY:
+      Math.sin(
+        escapeAngle
+      )
   })
 
   particleContainer.addParticle(
     particle
   )
 }
-
 function createDotTexture() {
-  const size = 12
+  const size = 20
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
@@ -368,8 +435,8 @@ onMounted(async () => {
     const dt = Math.min(ticker.deltaMS / 16.6667, 2)
     const time = performance.now() * 0.001
 
-    const SPRING = 0.06
-    const DAMPING = 0.82
+    const SPRING = 0.055
+    const DAMPING = 0.5
     const damping = Math.pow(DAMPING, dt)
     const radiusSquared = props.repulsionRadius * props.repulsionRadius
 
