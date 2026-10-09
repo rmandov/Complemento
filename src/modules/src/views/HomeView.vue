@@ -1,0 +1,174 @@
+<script setup>
+import { RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue'
+
+import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
+import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
+import Carousel from '@/modules/home/components/Carousel2.vue'
+
+import { useGeoJson } from '@/modules/map/composables/useGeoJson'
+import ParticleMexico from '@/modules/home/animations/ParticleMexico.vue'
+
+// NUEVO: esfera y referencia al contenedor que controla el recorrido.
+import ScrollSphere from '@/modules/home/components/ScrollSphere.vue'
+const homeContainer = ref(null)
+
+const { getGeoJson } = useGeoJson()
+const projects = ref([])
+const loading = ref(true)
+const base = import.meta.env.BASE_URL
+
+const geojsonFiles = [
+  `${base}municipios/aguascalientes.json`,
+  `${base}municipios/baja_california_sur.json`,
+  `${base}municipios/baja_california.json`,
+  `${base}municipios/campeche.json`,
+  `${base}municipios/chiapas.json`,
+  `${base}municipios/chihuahua.json`,
+  `${base}municipios/ciudad_de_mexico.json`,
+  `${base}municipios/coahuila_de_zaragoza.json`,
+  `${base}municipios/colima.json`,
+  `${base}municipios/durango.json`,
+  `${base}municipios/guanajuato.json`,
+  `${base}municipios/guerrero.json`,
+  `${base}municipios/hidalgo.json`,
+  `${base}municipios/jalisco.json`,
+  `${base}municipios/mexico.json`,
+  `${base}municipios/michoacan_de_ocampo.json`,
+  `${base}municipios/morelos.json`,
+  `${base}municipios/nayarit.json`,
+  `${base}municipios/nuevo_leon.json`,
+  `${base}municipios/oaxaca.json`,
+  `${base}municipios/puebla.json`,
+  `${base}municipios/queretaro.json`,
+  `${base}municipios/quintana_roo.json`,
+  `${base}municipios/san_luis_potosi.json`,
+  `${base}municipios/sinaloa.json`,
+  `${base}municipios/sonora.json`,
+  `${base}municipios/tabasco.json`,
+  `${base}municipios/tamaulipas.json`,
+  `${base}municipios/tlaxcala.json`,
+  `${base}municipios/veracruz_de_ignacio_de_la_llave.json`,
+  `${base}municipios/yucatan.json`,
+  `${base}municipios/zacatecas.json`,
+]
+
+onMounted(async () => {
+  try {
+    const res = await getGeoJson('proyectos_carrusel.json')
+    if (res) {
+      projects.value = res
+    } else {
+      console.warn('El JSON no es un array:', res)
+    }
+  } catch (error) {
+    console.error('Error cargando proyectos:', error)
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
+<template>
+  <div ref="homeContainer" class="home">
+    <!-- Se monta cuando Vue ya tiene la referencia al elemento de Home. -->
+    <ScrollSphere
+      v-if="homeContainer"
+      :trigger="homeContainer"
+      color="#3075ed"
+      :size="0.7"
+      :scrub="0.65"
+      :show-path="true"
+    />
+
+    <div class="home-content">
+      <!-- Hero -->
+      <HeroAnimation />
+      <!-- Sección botones -->
+      <TrenAnimation />
+
+      <!-- Sección Proyectos -->
+      <!-- <section class="proyectos-section">
+        <h2 class="text-2xl font-bold">Proyectos estratégicos</h2>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem quam ipsa, amet omnis
+          perspiciatis distinctio culpa sequi ratione ad! Recusandae ipsam ut rerum beatae inventore
+          mollitia blanditiis atque quidem aut!
+        </p>
+        <Carousel></Carousel>
+      </section> -->
+
+      <!-- <div class="contenedor">
+        <div class="rectangulo_1"></div>
+        <div class="rectangulo_2"></div>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- <section class="demo">
+    <ParticleMexico :count="5000" :color="0x2563eb" :geojson-files="geojsonFiles"
+      :repulsion-radius="150" :repulsion-strength="130" />
+  </section> -->
+
+  <RouterView />
+</template>
+
+<style scoped>
+.home {
+  margin: 50px 50px;
+  font-family: NotoSans;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+
+  /* NUEVO: organizar las capas de contenido y esfera dentro de Home. */
+  position: relative;
+  isolation: isolate;
+
+  /* Temporal para probar el recorrido completo del prototipo.
+     Quita esta línea cuando tus secciones ya proporcionen suficiente scroll. */
+  min-height: 500vh;
+}
+.home-content {
+  position: relative;
+  z-index: 1;
+}
+.proyectos-section {
+  margin-bottom: 32px;
+}
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 1.1rem;
+}
+.contenedor {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+.rectangulo_1 {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.rectangulo_2 {
+  position: absolute;
+  inset: 0;
+  background: #f0f0f0;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+@media (max-width: 768px) {
+  .boton-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .boton {
+    width: 100%;
+    flex: none;
+  }
+}
+</style>
