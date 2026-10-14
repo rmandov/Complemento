@@ -98,6 +98,7 @@ onMounted(async () => {
     <ParticleMexico :count="5000" :color="0x2563eb" :geojson-files="geojsonFiles" :repulsion-radius="150"
       :repulsion-strength="130" />
   </section> -->
+  <Carousel />
 
   <RouterView />
 </template>
