@@ -13,5 +13,35 @@
     "image": "/src/assets/img/img_circle.png",
     "title": "Proyecto 3",
     "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 4",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 5",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 6",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 7",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 8",
+    "description": "La tercera imagen tiene esta descripción."
+  },
+  {
+    "image": "/src/assets/img/img_circle.png",
+    "title": "Proyecto 9",
+    "description": "La tercera imagen tiene esta descripción."
   }
 ]
