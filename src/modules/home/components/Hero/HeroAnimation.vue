@@ -1,8 +1,8 @@
 <!-- HeroAnimation.vue -->
 <script setup>
-import CantidadProyectos from '@/modules/home/components/CantidadProyectos.vue'
-import SplitText from '@/modules/home/components/SplitText.vue'
-import TextBlock from '@/modules/home/components/TextBlock.vue'
+import CantidadProyectos from '@/modules/home/components/Hero/CantidadProyectos.vue'
+import SplitText from '@/modules/home/components/Hero/SplitText.vue'
+import TextBlock from '@/modules/home/components/Hero/TextBlock.vue'
 import ParticleMexico from '@/modules/home/animations/ParticleMexico.vue'
 
 const base = import.meta.env.BASE_URL

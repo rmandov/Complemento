@@ -2,7 +2,10 @@
 import { RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
 
-import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
+import HeroAnimation from '@/modules/home/components/Hero/HeroAnimation.vue'
+import ModelView from '@/modules/home/components/Hero3DModel/ModelView.vue'
+import Cubo3D from '@/modules/home/components/Hero3DModel/Cubo3D.vue'
+
 import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
 import Carousel from '@/modules/home/components/Carousel2.vue'
 
@@ -71,8 +74,16 @@ onMounted(async () => {
 
 <template>
   <div class="home">
-    <!-- Hero -->
-    <HeroAnimation />
+
+    <!-- Hero con el mapa de mexico con particulas -->
+
+    <!-- <HeroAnimation /> -->
+
+    <!-- Nuevo Hero con modelo en 3D -->
+
+    <ModelView />
+    <Cubo3D />
+
     <!-- Seccion botones -->
     <TrenAnimation />
 
@@ -98,7 +109,7 @@ onMounted(async () => {
     <ParticleMexico :count="5000" :color="0x2563eb" :geojson-files="geojsonFiles" :repulsion-radius="150"
       :repulsion-strength="130" />
   </section> -->
-  <Carousel />
+  <!-- <Carousel /> -->
 
   <RouterView />
 </template>
