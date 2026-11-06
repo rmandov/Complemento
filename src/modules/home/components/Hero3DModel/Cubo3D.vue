@@ -93,7 +93,7 @@ onMounted(() => {
   // ==========================================
   const loader = new GLTFLoader()
 
-  const rutaModelo = `${import.meta.env.BASE_URL}models/cubo.glb`
+  const rutaModelo = `${import.meta.env.BASE_URL}models/paisaje_montanas_y_rio.glb`
 
   console.log('Cargando modelo desde:', rutaModelo)
 
