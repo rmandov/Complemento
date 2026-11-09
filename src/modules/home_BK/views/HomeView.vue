@@ -2,7 +2,7 @@
 import { RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
 
-import HeroAnimation from '@/modules/home/components/HeroAnimation.vue'
+/* import HeroAnimation from '@/modules/home/components/HeroAnimation.vue' */
 import TrenAnimation from '@/modules/home/components/TrenAnimation.vue'
 import Carousel from '@/modules/home/components/Carousel2.vue'
 
@@ -72,18 +72,12 @@ onMounted(async () => {
 <template>
   <div ref="homeContainer" class="home">
     <!-- Se monta cuando Vue ya tiene la referencia al elemento de Home. -->
-    <ScrollSphere
-      v-if="homeContainer"
-      :trigger="homeContainer"
-      color="#3075ed"
-      :size="0.7"
-      :scrub="0.65"
-      :show-path="true"
-    />
+    <ScrollSphere v-if="homeContainer" :trigger="homeContainer" color="#3075ed" :size="0.7" :scrub="0.65"
+      :show-path="true" />
 
     <div class="home-content">
       <!-- Hero -->
-      <HeroAnimation />
+      <!-- <HeroAnimation /> -->
       <!-- Sección botones -->
       <TrenAnimation />
 
@@ -129,13 +123,16 @@ onMounted(async () => {
      Quita esta línea cuando tus secciones ya proporcionen suficiente scroll. */
   min-height: 500vh;
 }
+
 .home-content {
   position: relative;
   z-index: 1;
 }
+
 .proyectos-section {
   margin-bottom: 32px;
 }
+
 .loading-state,
 .empty-state {
   text-align: center;
@@ -143,16 +140,19 @@ onMounted(async () => {
   color: #666;
   font-size: 1.1rem;
 }
+
 .contenedor {
   position: relative;
   width: 100%;
   height: 200px;
 }
+
 .rectangulo_1 {
   position: absolute;
   inset: 0;
   background: #000;
 }
+
 .rectangulo_2 {
   position: absolute;
   inset: 0;
@@ -160,12 +160,14 @@ onMounted(async () => {
   border-radius: 20px 20px 0 0;
   z-index: 1;
 }
+
 @media (max-width: 768px) {
   .boton-section {
     flex-direction: column;
     align-items: center;
     gap: 32px;
   }
+
   .boton {
     width: 100%;
     flex: none;
