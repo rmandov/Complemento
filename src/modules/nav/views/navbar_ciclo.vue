@@ -2,6 +2,7 @@
 //@ts-ignore
 import logoImg from '@/assets/img/logo.png'
 import { onMounted, onUnmounted, ref } from 'vue'
+import breadcrumb from '../components/breadcrumb.vue'
 export interface MenuItem {
   id: number
   label: string
@@ -20,7 +21,7 @@ const obtenerNav = async () => {
   try {
     const response = await fetch(urlBase + 'nav.json')
     menu.value = await response.json()
-    console.log(menu.value)
+    /* console.log(menu.value) */
   } catch (error) {
     console.log(error)
   }
@@ -46,27 +47,25 @@ const handleAbrirMenu = () => {
   menuAbierto.value = !menuAbierto.value
   itemActivo.value = null
 }
-const handleResize=()=>{
-  menuAbierto.value=false;
+const handleResize = () => {
+  menuAbierto.value = false
 }
 onMounted(() => {
   obtenerNav()
-  window.addEventListener('resize', handleResize);
-});
-onUnmounted(()=>{
-  window.removeEventListener('resize', handleResize);
+  window.addEventListener('resize', handleResize)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 <template>
   <header class="navbar shadow-sm">
-   <div class=" flex items-center justify-center lg:justify-start flex-1">
-     <a
-      href="https://www.transparenciapresupuestaria.gob.mx/"
-      class="navbar-logo"
-    >
-      <img :src="logoImg" alt="Logo Gobierno" class="logo-img" />
-    </a>
-   </div>
+    <div class="flex items-center justify-center lg:justify-start flex-1">
+      <a href="https://www.transparenciapresupuestaria.gob.mx/" class="navbar-logo">
+        <img :src="logoImg" alt="Logo Gobierno" class="logo-img" />
+      </a>
+      <breadcrumb></breadcrumb>
+    </div>
     <!-- Botón hamburguesa (solo móvil) -->
     <button
       class="flex lg:hidden hamburger-btn"
@@ -101,7 +100,6 @@ onUnmounted(()=>{
                     class="subnav-boton"
                     :class="{ 'subnav-boton-activo': itemActivo === subitem.id }"
                     @click="handleClickItem(subitem.id)"
-                    
                     :style="{ '--color-borde-btn': subitem.texto }"
                   >
                     <span style="flex: 1">{{ idx + 1 }}</span>
@@ -205,7 +203,7 @@ onUnmounted(()=>{
   width: auto;
 }
 .subnav-boton.subnav-boton-activo::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 100%;
   left: 0;

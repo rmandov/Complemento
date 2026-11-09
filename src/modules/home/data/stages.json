@@ -1,0 +1,20 @@
+[
+  {
+    "id": "etapa-1",
+    "titulo": "Etapa 1",
+    "texto1": "Este es el primer momento del recorrido interactivo.",
+    "texto2": "Desplázate hacia abajo para explorar las siguientes etapas."
+  },
+  {
+    "id": "etapa-2",
+    "titulo": "Etapa 2",
+    "texto1": "El modelo avanza de manera continua por una trayectoria cerrada.",
+    "texto2": "La información y la navegación cambian junto con el scroll."
+  },
+  {
+    "id": "etapa-3",
+    "titulo": "Etapa 3",
+    "texto1": "Este contenido proviene de stages.json y puede ampliarse.",
+    "texto2": "Agrega nuevas etapas sin modificar el recorrido de Three.js."
+  }
+]

@@ -1,14 +1,10 @@
 <template>
-  <div class="gallery" ref="galleryRef">
+  <div v-if="cards.length" class="gallery" ref="galleryRef">
     <ul class="cards" ref="cardsRef">
-      <li
-        v-for="(card, index) in loopCards"
-        :key="index"
-        :ref="(el) => setCardRef(el, index)"
-        @click="goToCard(index)"
-        class="card-item"
-      >
+      <li v-for="(card, index) in cards" :key="index" :ref="(el) => setCardRef(el, index)" @click="goToCard(index)"
+        class="card-item">
         <img :src="card.image" :alt="card.title" loading="lazy" />
+
         <div class="card-content">
           <h3>{{ card.title }}</h3>
           <p>{{ card.description }}</p>
@@ -16,203 +12,253 @@
       </li>
     </ul>
 
-    <button class="arrow arrow-prev" @click="prev" aria-label="Anterior">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-    </button>
-    <button class="arrow arrow-next" @click="next" aria-label="Siguiente">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M9 18l6-6-6-6" />
-      </svg>
-    </button>
+    <template v-if="cards.length > 1">
+      <button class="arrow arrow-prev" @click="prev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
 
-    <div class="actions">
-      <button class="prev" @click="prev">Prev</button>
-      <button class="next" @click="next">Next</button>
-    </div>
+      <button class="arrow arrow-next" @click="next" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+
+      <div class="actions">
+        <button class="prev" @click="prev">Prev</button>
+        <button class="next" @click="next">Next</button>
+      </div>
+    </template>
   </div>
-  <div class="drag-proxy" ref="dragProxyRef"></div>
+
+  <div v-if="cards.length > 1" class="drag-proxy" ref="dragProxyRef"></div>
 </template>
 
+
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import gsap from "gsap";
-import { Draggable } from "gsap/Draggable";
-import cardsData from "./cards.json";
+import { ref, onMounted, onUnmounted } from 'vue'
+import gsap from 'gsap'
+import { Draggable } from 'gsap/Draggable'
+import cardsData from './cards.json'
 
-gsap.registerPlugin(Draggable);
+gsap.registerPlugin(Draggable)
 
-const galleryRef = ref(null);
-const cardsRef = ref(null);
-const dragProxyRef = ref(null);
-const cardElements = ref([]);
+// Datos originales, sin duplicaciones
+const cards = Array.isArray(cardsData) ? cardsData : []
+const totalCards = cards.length
+
+const galleryRef = ref(null)
+const cardsRef = ref(null)
+const dragProxyRef = ref(null)
+
+const cardElements = []
 
 const setCardRef = (el, index) => {
-  if (el) cardElements.value[index] = el;
-};
+  if (el) cardElements[index] = el
+}
 
-const spacing = 0.1;
+// Posición virtual del carrusel
+const playhead = { position: 0 }
 
-const loopCards = computed(() => {
-  const minItems = Math.ceil(1.5 / spacing) + 1;
-  const items = [];
-  while (items.length < minItems) {
-    items.push(...cardsData);
-  }
-  return items.slice(0, Math.max(minItems, cardsData.length * 3));
-});
+let draggableInstance = null
+let resizeObserver = null
+let pixelsPerCard = 150
 
-const playhead = { offset: 0 };
-let iteration = 0;
-let seamlessLoop, wrapTime, snapTime;
+// Distancia circular más corta entre tarjetas
+const circularDistance = (index, position, total) => {
+  let distance = (index - position) % total
 
-const animateFunc = (element) => {
-  const tl = gsap.timeline();
-  tl.fromTo(
-    element,
-    { scale: 0, opacity: 0 },
-    {
+  if (distance > total / 2) distance -= total
+  if (distance < -total / 2) distance += total
+
+  return distance
+}
+
+// Calcula la presentación de las tarjetas
+const renderCarousel = () => {
+  if (!galleryRef.value || !cardElements.length) return
+
+  const galleryWidth = galleryRef.value.clientWidth
+  const cardWidth = cardElements[0].offsetWidth || 224
+
+  // Caso 1: una única tarjeta
+  if (totalCards === 1) {
+    gsap.set(cardElements[0], {
+      x: 0,
       scale: 1,
       opacity: 1,
+      visibility: 'visible',
       zIndex: 100,
-      duration: 0.5,
-      yoyo: true,
-      repeat: 1,
-      ease: "power1.in",
-      immediateRender: false,
-    },
-  ).fromTo(
-    element,
-    { xPercent: 400 },
-    { xPercent: -400, duration: 1, ease: "none", immediateRender: false },
-    0,
-  );
-  return tl;
-};
-
-const buildSeamlessLoop = (items, spacing, animateFunc) => {
-  let overlap = Math.ceil(1 / spacing),
-    startTime = items.length * spacing + 0.5,
-    loopTime = (items.length + overlap) * spacing + 1,
-    rawSequence = gsap.timeline({ paused: true }),
-    seamlessLoop = gsap.timeline({
-      paused: true,
-      repeat: -1,
-      onRepeat() {
-        const tl = this;
-        if (tl._time === tl._dur) {
-          tl._tTime += tl._dur - 0.01;
-        }
-      },
-    }),
-    l = items.length + overlap * 2,
-    time,
-    i,
-    index;
-
-  for (i = 0; i < l; i++) {
-    index = i % items.length;
-    time = i * spacing;
-    rawSequence.add(animateFunc(items[index]), time);
-
-    if (i <= items.length) {
-      seamlessLoop.add("label" + i, time);
-    }
-  }
-
-  rawSequence.time(startTime);
-  seamlessLoop
-    .to(rawSequence, {
-      time: loopTime,
-      duration: loopTime - startTime,
-      ease: "none",
     })
-    .fromTo(
-      rawSequence,
-      { time: overlap * spacing + 1 },
-      {
-        time: startTime,
-        duration: startTime - (overlap * spacing + 1),
-        immediateRender: false,
-        ease: "none",
-      },
-    );
-  return seamlessLoop;
-};
-
-const updateCarousel = (offset) => {
-  seamlessLoop.time(wrapTime(offset));
-};
-
-const animateToOffset = (offset) => {
-  let snappedTime = snapTime(offset);
-  let progress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
-
-  if (progress >= 1 || progress < 0) {
-    iteration += Math.floor(progress);
+    return
   }
 
-  let newProgress = (snappedTime - seamlessLoop.duration() * iteration) / seamlessLoop.duration();
-  let wrappedProgress = gsap.utils.wrap(0, 1, newProgress);
-  let targetOffset =
-    seamlessLoop.duration() * iteration + wrappedProgress * seamlessLoop.duration();
+  // Caso 2: dos tarjetas, visibles sin duplicar
+  if (totalCards === 2) {
+    const baseScale =
+      galleryWidth <= 768
+        ? Math.min(0.66, (galleryWidth - 32) / (2 * cardWidth))
+        : 0.96
 
-  targetOffset = snapTime(targetOffset);
+    const gap =
+      cardWidth * baseScale + (galleryWidth <= 768 ? 8 : 24)
+
+    cardElements.forEach((element, index) => {
+      const distance = Math.abs(
+        circularDistance(index, playhead.position, totalCards)
+      )
+
+      const focus = Math.max(0, 1 - distance)
+
+      gsap.set(element, {
+        x: (index === 0 ? -1 : 1) * gap / 2,
+        scale: baseScale * (0.9 + focus * 0.1),
+        opacity: 0.72 + focus * 0.28,
+        visibility: 'visible',
+        zIndex: Math.round(10 + focus * 90),
+      })
+    })
+
+    pixelsPerCard = gap
+    return
+  }
+
+  // Caso 3: tres o más tarjetas
+  pixelsPerCard = Math.min(
+    cardWidth * 0.83,
+    Math.max(76, (galleryWidth - cardWidth) / 4)
+  )
+
+  const visibleSides =
+    galleryWidth <= 768
+      ? 0
+      : Math.max(
+        1,
+        Math.floor(
+          (galleryWidth - cardWidth) / (2 * pixelsPerCard)
+        )
+      )
+
+  cardElements.forEach((element, index) => {
+    const distance = circularDistance(
+      index,
+      playhead.position,
+      totalCards
+    )
+
+    const absDistance = Math.abs(distance)
+
+    const opacity = gsap.utils.clamp(
+      0,
+      1,
+      visibleSides + 1 - absDistance
+    )
+
+    const scale = Math.max(0.64, 1 - absDistance * 0.11)
+
+    gsap.set(element, {
+      x: distance * pixelsPerCard,
+      scale,
+      opacity,
+      visibility: opacity > 0 ? 'visible' : 'hidden',
+      zIndex: Math.round(100 - absDistance * 10),
+      pointerEvents: opacity > 0.2 ? 'auto' : 'none',
+    })
+  })
+}
+
+// Animar hacia una posición del carrusel
+const animateToPosition = (position) => {
+  if (totalCards <= 1) return
+
+  gsap.killTweensOf(playhead)
 
   gsap.to(playhead, {
-    offset: targetOffset,
+    position,
     duration: 0.6,
-    ease: "power3.out",
-    onUpdate: () => updateCarousel(playhead.offset),
-  });
-};
+    ease: 'power3.out',
+    onUpdate: renderCarousel,
+    onComplete: renderCarousel,
+  })
+}
 
-const goToCard = (clickedIndex) => {
-  const total = loopCards.value.length;
-  const currentVirtualIndex = Math.round(playhead.offset / spacing);
-  const currentRelative = ((currentVirtualIndex % total) + total) % total;
-  let diff = clickedIndex - currentRelative;
+// Seleccionar una tarjeta
+const goToCard = (index) => {
+  if (totalCards <= 1) return
 
-  if (diff > total / 2) diff -= total;
-  if (diff < -total / 2) diff += total;
-  if (diff === 0) return;
+  // Buscar el camino circular más corto
+  const cycle = Math.round(
+    (playhead.position - index) / totalCards
+  )
 
-  animateToOffset(playhead.offset + diff * spacing);
-};
+  const target = index + cycle * totalCards
 
-const next = () => animateToOffset(playhead.offset + spacing);
-const prev = () => animateToOffset(playhead.offset - spacing);
+  animateToPosition(target)
+}
 
+// Navegación circular
+const next = () => {
+  if (totalCards <= 1) return
+  animateToPosition(Math.round(playhead.position) + 1)
+}
+
+const prev = () => {
+  if (totalCards <= 1) return
+  animateToPosition(Math.round(playhead.position) - 1)
+}
+
+// Inicialización
 const initCarousel = () => {
-  gsap.set(cardElements.value, { xPercent: 400, opacity: 0, scale: 0 });
+  if (!totalCards) return
 
-  seamlessLoop = buildSeamlessLoop(cardElements.value, spacing, animateFunc);
-  wrapTime = gsap.utils.wrap(0, seamlessLoop.duration());
-  snapTime = gsap.utils.snap(spacing);
+  renderCarousel()
 
-  updateCarousel(0);
+  // Una tarjeta no necesita desplazamiento
+  if (totalCards === 1) return
 
-  Draggable.create(dragProxyRef.value, {
-    type: "x",
-    trigger: cardsRef.value,
-    onPress() {
-      this.startOffset = playhead.offset;
-    },
-    onDrag() {
-      playhead.offset = this.startOffset + (this.startX - this.x) * 0.001;
-      updateCarousel(playhead.offset);
-    },
-    onDragEnd() {
-      animateToOffset(playhead.offset);
-    },
-  });
-};
+  if (dragProxyRef.value && cardsRef.value) {
+    draggableInstance = Draggable.create(dragProxyRef.value, {
+      type: 'x',
+      trigger: cardsRef.value,
+
+      onPress() {
+        gsap.killTweensOf(playhead)
+        this.startPosition = playhead.position
+      },
+
+      onDrag() {
+        const movement = this.x - this.startX
+
+        playhead.position =
+          this.startPosition - movement / pixelsPerCard
+
+        renderCarousel()
+      },
+
+      onDragEnd() {
+        animateToPosition(Math.round(playhead.position))
+      },
+    })[0]
+  }
+}
 
 onMounted(() => {
-  initCarousel();
-});
+  initCarousel()
+
+  if (galleryRef.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(renderCarousel)
+    resizeObserver.observe(galleryRef.value)
+  }
+})
+
+onUnmounted(() => {
+  gsap.killTweensOf(playhead)
+  draggableInstance?.kill()
+  resizeObserver?.disconnect()
+})
 </script>
+
 
 <style scoped>
 * {
@@ -251,7 +297,7 @@ onMounted(() => {
   left: 0;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: #1a1a1a;
+  background: #696969;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -260,7 +306,7 @@ onMounted(() => {
 }
 
 .cards li:hover {
-  box-shadow: 0 15px 40px rgba(136, 206, 2, 0.4);
+  box-shadow: 0 15px 40px rgb(63, 63, 63);
 }
 
 .cards li img {
@@ -279,6 +325,7 @@ onMounted(() => {
   justify-content: center;
   text-align: center;
   pointer-events: none;
+  background-color: #5e5e5e;
 }
 
 .card-content h3 {
@@ -291,14 +338,14 @@ onMounted(() => {
 .card-content p {
   margin: 0;
   font-size: 0.8rem;
-  color: #aaa;
+  color: #e4e4e4;
   line-height: 1.4;
 }
 
 /* ─── Desktop ─── */
 .actions {
   position: absolute;
-  bottom: 25px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -309,19 +356,21 @@ onMounted(() => {
 }
 
 .actions button {
-  background: #88ce02;
+  background: #dddddd;
   border: none;
   padding: 0.6rem 1.4rem;
   border-radius: 2rem;
-  color: #111;
+  color: #000000;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .actions button:hover {
   transform: scale(1.05);
-  background: #9be02a;
+  background: #aaaaaa;
 }
 
 .arrow {
@@ -341,7 +390,9 @@ onMounted(() => {
   justify-content: center;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  transition: opacity 0.3s, background 0.3s;
+  transition:
+    opacity 0.3s,
+    background 0.3s;
 }
 
 .arrow svg {
@@ -364,7 +415,7 @@ onMounted(() => {
     touch-action: pan-y;
   }
 
-  /* 
+  /*
     CLAVE DEL FIX:
     - En lugar de width:75vw (que hace tarjetas gigantes en tablets),
     - Usamos height:min(60vh,520px) como dimensión principal.
@@ -376,7 +427,8 @@ onMounted(() => {
     height: min(60vh, 520px);
     max-width: 85vw;
     aspect-ratio: 9/16;
-    top: 50%; /* centrado vertical perfecto */
+    top: 50%;
+    /* centrado vertical perfecto */
   }
 
   .cards li {
@@ -410,7 +462,7 @@ onMounted(() => {
   }
 
   .cards::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: -30px;
     left: 50%;

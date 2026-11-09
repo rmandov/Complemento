@@ -2,190 +2,293 @@
 import L from 'leaflet'
 import { usePoligonoStore } from '@/stores/poligonoStore'
 import { useMapStore } from '@/stores/map'
-
-// Cache compartido de municipios (nuevo): unifica la carga que antes
-// hacía este archivo directamente con la que ahora también dispara el
-// radar (useMunicipiosRadar.js), evitando descargas duplicadas.
+import { useSeleccionStore } from '@/stores/seleccionStore'
 import { useMunicipiosCache } from '../composables/useMunicipiosCache'
 import { useMap } from './mapControler'
+import { useActivateClickLayer } from '@/stores/layerActivoStore'
 
 const { getMunicipiosByEntidad } = useMunicipiosCache()
 
-// ¿Que valores cambian?, esos valores son los que se usan de input
-/*
-1. poligonos.json => const [entidad, municipio, localida, etc] = await getGeoJson('[entidad, municipio, localida, etc].json')
-2. pane_layer => Pane donde se situan los poligonos
-3. styles => {} con los estilos, si no hay se tiene colores por defecto
-4. name => Clave para obtener el nombre de ese layer
+// ═══════════════════════════════════════════════════════════════
+// LÓGICA DE SELECCIÓN REUTILIZABLE (click del mapa o filtro)
+// ═══════════════════════════════════════════════════════════════
 
-*/
-// ¿Que valores creo?, esos valores son los outputs
-/*
-1. Regreso la capa que se va a aplicar en el mapa. Con no debo mandar referencia del mapa.
-2. Indicar que hay una capa mas de profundida e iniciar otro procesos de carga de poligonos
-*/
+/**
+ * Selecciona una entidad: oculta la anterior, carga municipios, actualiza stores.
+ * @param {L.Map} map - Instancia de Leaflet
+ * @param {L.Layer} layer - Layer de la entidad
+ * @param {object} options - { force: true } para saltar validación de click activo
+ */
+export async function selectEntidad(map, layer, options = {}) {
+  const poligonoStore = usePoligonoStore()
+  const datosEntidad = useMapStore()
+  const { flyToBounds } = useMap()
+  const ClickLayer = useActivateClickLayer()
 
-// Carga Entidades
+  const feature = layer.feature
+  const cveEnt = feature.properties['CVE_ENT']
+
+  // Evitar doble selección
+  if (poligonoStore.entidad === layer) return
+
+  // Solo ejecutar si el click en layer está activo, o si viene forzado del filtro
+  if (!ClickLayer.clickEnLayerActivo && !options.force) return
+
+  const bounds = layer.getBounds()
+
+  // Restaurar estilo original
+  layer.setStyle(
+    layer._originalStyle || {
+      weight: 1.2,
+      fillColor: 'rgb(92, 142, 254)',
+      fillOpacity: 0.1,
+      color: 'white',
+    },
+  )
+
+  // ── Restaurar entidad anterior ──
+  if (poligonoStore.entidad) {
+    poligonoStore.entidad.addTo(map)
+    poligonoStore.setEntidad(null)
+
+    if (poligonoStore.isMunicipiosLayer) {
+      map.removeLayer(poligonoStore.municipiosLayer)
+      poligonoStore.clearMunicipiosLayer()
+      poligonoStore.setMunicipio(null)
+    }
+  }
+
+  // ── Seleccionar nueva entidad ──
+  poligonoStore.setEntidad(layer)
+  map.removeLayer(layer)
+
+  // ── Cargar y pintar municipios ──
+  const municipios = await getMunicipiosByEntidad(feature)
+
+  if (municipios) {
+    const municipiosLayer = createMunicipiosLayer(municipios, {
+      map,
+      pane: 'poligonosPane',
+      name: 'NOMGEO',
+    })
+    poligonoStore.setMunicipiosLayer(municipiosLayer)
+    municipiosLayer.addTo(map)
+  }
+
+  // ── Actualizar stores (esto dispara el watcher, pero ya tenemos el layer) ──
+  datosEntidad.setEntidad(cveEnt)
+  datosEntidad.setCVE_ENT(cveEnt)
+
+  if (bounds.isValid()) {
+    flyToBounds(map, bounds)
+  }
+}
+
+/**
+ * Selecciona un municipio: oculta el anterior, actualiza stores.
+ * @param {L.Map} map - Instancia de Leaflet
+ * @param {L.Layer} layer - Layer del municipio
+ * @param {object} options - { force: true } para saltar validación de click activo
+ */
+export async function selectMunicipio(map, layer, options = {}) {
+  const poligonoStore = usePoligonoStore()
+  const datosMunicipio = useMapStore()
+  const seleccionStore = useSeleccionStore()
+  const { flyToBounds } = useMap()
+  const ClickLayer = useActivateClickLayer()
+
+  const feature = layer.feature
+  const cvegeo = feature.properties?.CVEGEO
+
+  if (poligonoStore.municipio === layer) return
+  if (!ClickLayer.clickEnLayerActivo && !options.force) return
+
+  const bounds = layer.getBounds()
+  layer.setStyle({ fillOpacity: 0.1, weight: 1.2 })
+
+  // ── Restaurar municipio anterior ──
+  if (poligonoStore.municipio) {
+    poligonoStore.municipio.addTo(map)
+    poligonoStore.setMunicipio(null)
+  }
+
+  // ── Seleccionar nuevo municipio ──
+  poligonoStore.setMunicipio(layer)
+  map.removeLayer(layer)
+
+  datosMunicipio.setMunicipio(cvegeo)
+  seleccionStore.setCVEGEO(cvegeo)
+
+  if (map && bounds.isValid()) {
+    flyToBounds(map, bounds)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CARGA DE ENTIDADES
+// ═══════════════════════════════════════════════════════════════
+
 export function createLayer(poligonos_json, options = {}) {
   const poligonoStore = usePoligonoStore()
   const datosEntidad = useMapStore()
+  const ClickLayer = useActivateClickLayer()
   const { flyToBounds } = useMap()
 
   const {
     map,
     pane = '',
     name = 'NOMGEO',
+    /* style = {
+      weight: 1.2,
+      fillColor: 'rgb(58, 118, 248)',
+      fillOpacity: 0.1,
+      color: 'rgb(92, 142, 254)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round'
+    }, */
     style = {
       weight: 1.2,
-      fillColor: 'rgb(106, 106, 106)',
-      fillOpacity: 0.5,
-      color: 'white',
-
-      /* dashArray: '3', */
+      fillColor: 'rgb(61, 1, 226)',
+      fillOpacity: 0.1,
+      color: 'rgb(116, 92, 254)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round',
     },
   } = options
 
   if (!poligonos_json) return
+
+  const listaEntidades = []
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
       const nombreEntidad = feature.properties[name] || 'nombre del poligono'
+
+      // Guardar estilo original para restaurarlo después
+      layer._originalStyle = style
+
+      // Guardar entidades en la lista
+      listaEntidades.push({
+        nombre: nombreEntidad,
+        cvegeo: feature.properties?.CVE_ENT,
+      })
+
       layer.bindTooltip(nombreEntidad)
 
-      // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
       layer.on({
         mouseover,
         mouseout,
       })
 
+      // ── CLICK: delegar a selectEntidad ──
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
-        const bounds = layer.getBounds()
-        layer.setStyle(style)
-
-        // ** INICIO - Gestion de poligono clickeado **
-        // Se verifica si ya existe un poligono almacenado, esto significa que ya hubo un elemnto que fue clickeado.
-        if (poligonoStore.entidad) {
-          // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          poligonoStore.entidad.addTo(map)
-          poligonoStore.setEntidad(null)
-
-          // ** INICIO - Gestion municipios
-          if (poligonoStore.isMunicipiosLayer) {
-            map.removeLayer(poligonoStore.municipiosLayer)
-            poligonoStore.clearMunicipiosLayer()
-          }
-          // ** FIN - Gestion municipios
+        if (ClickLayer.clickEnLayerActivo) {
+          L.DomEvent.stopPropagation(e)
         }
-        // Se almacena poligono clickeado y se elimina del mapa
-        poligonoStore.setEntidad(layer)
-        map.removeLayer(layer)
-        // ** FIN - Gestion de poligono clickeado **
+        if (!ClickLayer.clickEnLayerActivo) return
 
-        // ** INICIO - Carga de muncipios de la entidad clickeada **
-        // Se usa el cache compartido (useMunicipiosCache) en vez de pedir
-        // el archivo directamente: si el radar ya había cargado esta
-        // entidad previamente (porque su radio la tocaba), aquí se
-        // reutiliza esa respuesta sin volver a pedirla por red. La
-        // resolución del nombre de archivo (NOMGEO -> slug) ahora vive
-        // DENTRO del composable de cache (nombreEntidadASlug en
-        // geoUtils.js), como única fuente de verdad.
-        const muncipios = await getMunicipiosByEntidad(feature)
-
-        if (muncipios) {
-          const municipiosLayer = createMunicipiosLayer(muncipios, {
-            map,
-            pane: 'poligonosPane',
-            name: 'NOMGEO',
-          })
-
-          poligonoStore.setMunicipiosLayer(municipiosLayer)
-          poligonoStore.municipiosLayer.addTo(map)
-        }
-        // ** FIN - Carga de muncipios de la entidad clickeada **
-
-        /* map.flyToBounds(bounds); */
-
-        // Cambio de título de Entidad
-        datosEntidad.setEntidad(nombreEntidad)
-
-        const claveEntidad = feature.properties['CVE_ENT'] || '69'
-
-        datosEntidad.setCVE_ENT(claveEntidad)
-
-        flyToBounds(map, bounds)
+        await selectEntidad(map, layer)
       })
+
+      // ── Registrar en el store para navegación desde filtros ──
+      poligonoStore.registerEntidadLayer(feature.properties.CVE_ENT, layer)
     },
   })
+
+  // Guardar la lista completa en Pinia
+  datosEntidad.setEntidades(listaEntidades.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')))
 
   return newLayer
 }
 
-// Eventos
+// Eventos hover
 function mouseover(e) {
   const layer = e.target
-  layer.setStyle({ fillOpacity: 0.8, weight: 2 })
+  layer.setStyle({ fillOpacity: 0.8, weight: 1.2 })
 }
 
 function mouseout(e) {
   const layer = e.target
-  layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
+  layer.setStyle(layer._originalStyle || { fillOpacity: 0.1, weight: 1.2 })
 }
 
-// Carga municipios
-function createMunicipiosLayer(poligonos_json, options = {}) {
+// ═══════════════════════════════════════════════════════════════
+// CARGA DE MUNICIPIOS (ahora exportada)
+// ═══════════════════════════════════════════════════════════════
+
+export function createMunicipiosLayer(poligonos_json, options = {}) {
+  const ClickLayer = useActivateClickLayer()
   const datosMunicipio = useMapStore()
   const poligonoStore = usePoligonoStore()
+  const seleccionStore = useSeleccionStore()
   const { flyToBounds } = useMap()
+
   const {
     map,
     pane = '',
     name = 'NOMGEO',
     style = {
       weight: 1.2,
-      fillColor: 'rgb(151, 151, 151)',
-      fillOpacity: 0.5,
-      color: 'white',
+      /* fillColor: 'rgb(92, 142, 254)', */
+      fillColor: 'rgb(248, 204, 58)',
+      /* fillOpacity: 0.5, */
+      fillOpacity: 0.1,
+      color: 'rgb(254, 178, 92)',
+      opacity: 1,
+      dashArray: '10, 5',
+      lineCap: 'round',
     },
   } = options
 
   if (!poligonos_json) return
+
+  // Limpiar la lista anterior y el registry
+  datosMunicipio.clearMunicipios()
+  poligonoStore.clearMunicipioLayers()
+
+  const listaMunicipios = []
 
   const newLayer = L.geoJSON(poligonos_json, {
     pane,
     style,
     onEachFeature: (feature, layer) => {
       const nombreLayer = feature.properties[name] || 'nombre del poligono'
+
+      listaMunicipios.push({
+        nombre: nombreLayer,
+        cvegeo: feature.properties?.CVEGEO,
+      })
+
       layer.bindTooltip(nombreLayer)
 
-      // El evento click puede ser gestionado aqui mismo, por ahora esta en una sentencia separada.
       layer.on({
         mouseover,
         mouseout,
       })
 
+      // ── CLICK: delegar a selectMunicipio ──
       layer.on('click', async (e) => {
-        L.DomEvent.stopPropagation(e)
-        const bounds = layer.getBounds()
-        layer.setStyle({ fillOpacity: 0.5, weight: 1.2 })
-        if (poligonoStore.municipio) {
-          // Si ya existe, se agrega al mapa y se libera espacio para el nuevo elemento que va a se eliminado del mapa.
-          poligonoStore.municipio.addTo(map)
-          poligonoStore.setMunicipio(null)
+        if (ClickLayer.clickEnLayerActivo) {
+          L.DomEvent.stopPropagation(e)
         }
-        // Se almacena poligono clickeado y se elimina del mapa
-        poligonoStore.setMunicipio(layer)
-        map.removeLayer(layer)
+        if (!ClickLayer.clickEnLayerActivo) return
 
-        datosMunicipio.setMunicipio(nombreLayer)
-
-        if (map && bounds.isValid()) {
-          flyToBounds(map, bounds)
-        }
+        await selectMunicipio(map, layer)
       })
+
+      // ── Registrar en el store ──
+      poligonoStore.registerMunicipioLayer(feature.properties.CVEGEO, layer)
     },
   })
+
+  // Guardar la lista completa en Pinia
+  datosMunicipio.setMunicipios(
+    listaMunicipios.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+  )
+
   return newLayer
 }
