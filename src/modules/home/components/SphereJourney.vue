@@ -26,17 +26,51 @@ const journeyStyle = {
 <template>
   <section ref="sectionRef" class="sphere-journey" :style="journeyStyle" aria-label="Recorrido interactivo 3D">
     <div class="sphere-journey__sticky">
+
+      <!-- Título fijo durante el recorrido -->
+      <h1 class="title">
+        Complementariedades y sinergias de los
+        Programas y Proyectos de Inversión (PPI)
+      </h1>
+
       <div ref="canvasRef" class="sphere-journey__canvas" aria-hidden="true"></div>
+
       <StageNavigation v-if="stages.length" :stages="stages" :active-index="activeIndex" @navigate="goToStage"
         @map="goToMap" />
+
       <StageContent :stage="stage" :number="activeIndex + 1" :total="stages.length" />
-      <p v-if="error" class="sphere-journey__error" role="alert">{{ error }}</p>
-      <p v-if="!stages.length" class="sphere-journey__error">Agrega etapas en data/stages.json.</p>
+
+      <p v-if="error" class="sphere-journey__error" role="alert">
+        {{ error }}
+      </p>
+
+      <p v-if="!stages.length" class="sphere-journey__error">
+        Agrega etapas en data/stages.json.
+      </p>
+
     </div>
   </section>
 </template>
 
 <style scoped>
+.title {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  margin: 0;
+  padding: 18px 24px;
+
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  font-family: NotoSans-ExtraBold, sans-serif;
+  text-align: center;
+  color: #000;
+
+  z-index: 10;
+  pointer-events: none;
+}
+
 .sphere-journey {
   --journey-navbar-offset: var(--journey-navbar-desktop);
   position: relative;

@@ -6,7 +6,7 @@
 export const JOURNEY_CONFIG = {
   model: {
     // MODIFICAR AQUÍ PARA CAMBIAR EL MODELO: sphere.glb -> train.glb
-    path: `${import.meta.env.BASE_URL}models/sphere.glb`,
+    path: `${import.meta.env.BASE_URL}models/esfera_ornamental_calada.glb`,
     // MODIFICAR AQUÍ PARA CAMBIAR EL TAMAÑO (escala tras normalizar el GLB)
     scale: 0.5,
     mobileScale: 0.77,
@@ -35,7 +35,7 @@ export const JOURNEY_CONFIG = {
   journey: {
     closed: true,
     scrollVhPerStage: 115, // altura de scroll entre etapas, en svh
-    smoothingSeconds: 0.22, // suavizado del modelo; no retrasa el texto
+    smoothingSeconds: 0.3, // suavizado del modelo; no retrasa el texto
     jumpDurationSeconds: 1.1, // salto desde la navegación lateral
     showPath: true, // útil para pruebas; false oculta la curva
   },
