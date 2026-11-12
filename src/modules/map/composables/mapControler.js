@@ -43,12 +43,15 @@ export function useMap(containerRef) {
     map.value.fitBounds(mexicoBounds);
 
     // 1. Capa de fondo (SIN ETIQUETAS)
-    const callesFondo = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      subdomains: "abcd",
-      maxZoom: 20,
-    });
+    const callesFondo = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 20,
+      },
+    );
 
     // 2. Capa de etiquetas (SOLO TEXTO TRANSPARENTE) forzada en un pane superior
     const callesLabels = L.tileLayer(

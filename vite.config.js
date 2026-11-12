@@ -11,7 +11,7 @@ export default defineConfig(({ command }) => ({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  base: command === "build" ? "/work/models/PTP/NPTP/PTP_Complementario/" : "",
+  base: command === "build" ? "/work/models/PTP/NPTP/PTP_Complementario2/" : "",
   server: {
     host: true,
     port: 5173,
