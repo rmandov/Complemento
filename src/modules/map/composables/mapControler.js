@@ -43,12 +43,13 @@ export function useMap(containerRef) {
     map.value.fitBounds(mexicoBounds);
 
     // 1. Capa de fondo (SIN ETIQUETAS)
-    const callesFondo = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      subdomains: "abcd",
-      maxZoom: 20,
-    });
+    const callesFondo = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution: "Tiles &copy; Esri",
+    maxZoom: 16,
+  }
+);
 
     // 2. Capa de etiquetas (SOLO TEXTO TRANSPARENTE) forzada en un pane superior
     const callesLabels = L.tileLayer(
@@ -62,7 +63,7 @@ export function useMap(containerRef) {
     );
 
     // 3. Agrupamos ambas en una sola capa lógica para que el usuario las active juntas
-    const calles = L.layerGroup([callesFondo, callesLabels]);
+    const calles = L.layerGroup([callesFondo]);
 
     calles.addTo(map.value);
   };

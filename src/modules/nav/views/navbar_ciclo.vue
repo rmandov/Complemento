@@ -153,7 +153,7 @@ onUnmounted(() => {
   padding: 0;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 99999999;
   background-color: #fff;
   border-bottom: 1px solid #f1f5f9;
   --color-borde-activo: #1a365d;

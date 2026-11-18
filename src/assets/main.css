@@ -53,3 +53,10 @@
   font-family: Patria-Bold;
   src: url(./../assets/fonts/Patria/Patria_Bold.otf);
 }
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
