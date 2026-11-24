@@ -31,3 +31,10 @@ export const estiloMunSeleccionado: L.PathOptions = {
 export const estiloMunHover: L.PathOptions = {
   fillOpacity: 0.8,
 };
+
+export const estilosTooltip:L.TooltipOptions = {
+  direction: "auto",
+  opacity: 0.9,
+  sticky: false,
+  interactive: false,
+};

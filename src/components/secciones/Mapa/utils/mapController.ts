@@ -18,7 +18,9 @@ export function initMap(mapaContainer: Ref<HTMLElement | null>): L.Map | null {
 
   // Crear pane para etiquetas
   mapaC.createPane("labels");
-  mapaC.getPane("labels")!.style.zIndex = "640";
+  mapaC.createPane("proyectos");
+  mapaC.getPane("proyectos")!.style.zIndex = "250";
+  mapaC.getPane("labels")!.style.zIndex = "100";
 
   const callesFondo = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
@@ -123,6 +125,7 @@ export function addGeoJsonToMap(
   zIndex = 400,
   events: GeoJsonEvents = {},
 ): L.GeoJSON {
+
   if (!map.getPane(paneName)) {
     map.createPane(paneName);
     map.getPane(paneName)!.style.zIndex = zIndex.toString();
@@ -133,8 +136,13 @@ export function addGeoJsonToMap(
     pane: paneName,
 
     onEachFeature: (feature, layer) => {
+
+
+
       layer.on({
         click: (event) => {
+          layer.closeTooltip();
+
           events.onFeatureClick?.({ feature, layer, event });
         },
 
@@ -158,7 +166,7 @@ export function addGeoJsonToMap(
 export const capaEstados = ref<L.GeoJSON | null>(null);
 export const capaMunicipios = ref<L.GeoJSON | null>(null);
 export const geoJsonEstados = ref();
-
+export const capaProyectos = ref<L.FeatureGroup>();
 export function removeGeoJsonFromMap(map: L.Map, layer: L.GeoJSON | null | undefined): void {
   if (!layer) return;
 
@@ -200,26 +208,23 @@ export interface GeoJsonFeatureEvent {
   event: L.LeafletMouseEvent;
 }
 
-export function formatearID(id:string):string{
-  return parseInt(id).toString()
+export function formatearID(id: string): string {
+  return id;//parseInt(id).toString();
 }
-export function volarABounds(
-  bounds: L.LatLngBounds,
-  options?: L.FitBoundsOptions
-) {
+export function volarABounds(bounds: L.LatLngBounds, options?: L.FitBoundsOptions) {
   mapa?.flyToBounds(bounds, {
     duration: 1.5,
     ...options,
-  })
+  });
 }
 /**
  * Convierte el nombre de una entidad (NOMGEO) al slug usado para nombrar
  * los archivos JSON de municipios en /municipios/<slug>.json
  */
-export function nombreEntidadASlug(nombre:string) {
+export function nombreEntidadASlug(nombre: string) {
   return nombre
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replaceAll(' ', '_')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replaceAll(" ", "_");
 }

@@ -28,7 +28,7 @@ export interface Tab {
 }
 </script>
 <template>
-  <section class="flex flex-col gap-2  w-full h-[75dvh] border rounded-xl shadow-xl border-gray-100 px-3 py-3 bg-white">
+  <section class="flex flex-col gap-2  w-full min-h-[80dvh] lg:min-h-[70%] border rounded-xl shadow-xl border-gray-100 px-3 py-3 bg-white">
     <div>
       <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
         class="boton-tab" :class="{
@@ -38,7 +38,7 @@ export interface Tab {
         {{ tab.label }}
       </button>
     </div>
-    <div class="flex-1 ">
+    <div class="flex-1  max-h-full overflow-hidden">
       <KeepAlive>
         <component :is="tabs.find(tab => tab.id === activeTab)?.component" />
       </KeepAlive>

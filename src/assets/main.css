@@ -60,3 +60,9 @@
     "GRAD" 0,
     "opsz" 24;
 }
+body{
+  height: 100%;
+}
+#app{
+  height: 100%;
+}

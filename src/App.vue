@@ -8,12 +8,6 @@ import Footer from './modules/footer/views/footer.vue'
 <template>
   <main class="flex flex-col min-h-dvh">
     <Navbar :logoSrc="logoImg"></Navbar>
-    <!-- <Navbar
-    :logoSrc="logoImg"
-    logoAlt="Logo Gobierno"
-    logoHref="https://www.transparenciapresupuestaria.gob.mx/"
-    :breakpoint="768"
-  ></Navbar> -->
     <div class="flex-1">
       <RouterView />
 

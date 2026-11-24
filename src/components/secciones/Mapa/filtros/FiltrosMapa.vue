@@ -1,37 +1,51 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { Filtros } from '../ViewMapa.vue';
 import { Ref } from 'vue';
 import { Tab } from '../pestanasMapa/pestanasMapa.vue';
-import Proyectos from './Proyectos.vue';
-import Programas from './Programas.vue';
+
 import Categorias from './Categorias.vue';
 import Ramo from './Ramo.vue';
 import Predeterminado from './Predeterminado.vue';
 import { handleMouseLeave, handleMouseMove } from '@/modules/map/composables/gsap/magenticButton';
 
 const filtros = inject<Ref<Filtros>>("filtros")!;
+const limpiarFiltros = inject<() => void>("limpiarFiltros")!;
 const activeTab = ref<number | null>(null);
 function handleClickTab(id: number) {
+  limpiarFiltros()
+
   if (id === activeTab.value) {
     activeTab.value = null
-    filtros.value.tipo_filtro = null;
     return
   }
   activeTab.value = id;
   filtros.value.tipo_filtro = id;
 }
+watch(() => filtros.value.tipo_filtro, (nvo) => {
+  const tipo3=["Proyecto","Programa"]
+  if(nvo!== undefined && nvo !== null){
+    const ind=tipo3[nvo];
+    console.log("ind",ind);
+
+    filtros.value.tipo3_PPI =  ind?? undefined
+  }
+  else{
+    filtros.value.tipo3_PPI = undefined
+  }
+
+})
 const tabs: Tab[] = [
   {
     id: 0,
     label: "Proyectos",
-    component: Proyectos,
+    component: Predeterminado,
     icono: "location_on"
   },
   {
     id: 1,
     label: "Programas",
-    component: Programas,
+    component: Predeterminado,
     icono: "map"
   },
   {
@@ -47,12 +61,14 @@ const tabs: Tab[] = [
     icono: "dashboard_customize"
   }
 ]
+
 </script>
 <template>
-  <aside class="w-full lg:w-[40%]  flex flex-col gap-4 p-4 rounded-xl shadow-xl border border-gray-100 bg-white">
+  <aside
+    class="w-full lg:w-[45%]  h-full overflow-hidden max-h-full  flex flex-col gap-4 p-4 rounded-xl shadow-xl border border-gray-100 bg-white">
     <div class="rounded-lg border border-gray-100 shadow p-2 bg-white">
       <h5 class="font-bold">Complementariedades y sinergias de los Programas y Proyectos de Inversión (PPI)</h5>
-      <table>
+      <table class="hidden">
         <thead>
           <tr>
             <td>filtro</td>
@@ -67,7 +83,7 @@ const tabs: Tab[] = [
         </tbody>
       </table>
     </div>
-    <div class="flex-1 flex flex-col xl:flex-row gap-4">
+    <div class="flex-1 max-h-full h-full overflow-hidden py-1 flex flex-col xl:flex-row gap-4">
       <div class="grid grid-cols-4 xl:flex flex-col
        gap-2 rounded-lg border border-gray-100 shadow p-2 bg-sky-50/50">
         <button type="button" v-for="tab in tabs" :key="tab.id" :title="tab.label"
@@ -75,19 +91,16 @@ const tabs: Tab[] = [
           :class="{
             'activo': activeTab === tab.id
           }" @click="handleClickTab(tab.id)" @mousemove="handleMouseMove" @mouseleave="handleMouseLeave">
-          <span class="material-symbols-outlined" v-if="tab.icono">
+          <span class="magnetic material-symbols-outlined" v-if="tab.icono">
             {{ tab.icono }}
           </span>
           <span class="text-sm">{{ tab.label }}</span>
         </button>
       </div>
-      <div class=" flex-1 flex flex-col gap-2 items-end">
-        <div class="flex-1 w-full border">
-          <component :is="tabs.find(tab => tab.id === activeTab)?.component ?? Predeterminado" />
-        </div>
-        <button type="button"
-          class=" rounded py-0 px-2 bg-sky-600 hover:bg-sky-800 text-white
-           cursor-pointer transition-all ease duration-300">
+      <div class=" flex-1 flex flex-col gap-2 items-end h-full overflow-hidden relative max-h-full">
+        <component :is="tabs.find(tab => tab.id === activeTab)?.component ?? Predeterminado" />
+        <button type="button" class=" rounded py-0 px-2 bg-sky-600 hover:bg-sky-800 text-white
+           cursor-pointer transition-all ease duration-300" @click="limpiarFiltros">
           Limpiar
         </button>
       </div>

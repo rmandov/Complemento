@@ -35,9 +35,7 @@ function getFilePath(file: string): string {
 /**
  * Inicializa DuckDB y crea las tablas configuradas.
  */
-export async function initDB(
-  tables: DuckTableConfig[] = []
-) {
+export async function initDB(tables: DuckTableConfig[] = []) {
   if (db && conn) {
     return { db, conn };
   }
@@ -56,52 +54,36 @@ export async function initDB(
     const bundle = await duckdb.selectBundle(bundles);
 
     if (!bundle.mainWorker || !bundle.mainModule) {
-      throw new Error(
-        "No se encontró un bundle válido de DuckDB-Wasm"
-      );
+      throw new Error("No se encontró un bundle válido de DuckDB-Wasm");
     }
 
     // ---------------------------------------------------------
     // 2. Crear Worker
     // ---------------------------------------------------------
 
-    const workerScriptResponse = await fetch(
-      bundle.mainWorker
-    );
+    const workerScriptResponse = await fetch(bundle.mainWorker);
 
     if (!workerScriptResponse.ok) {
       throw new Error(
-        `No se pudo descargar el Worker de DuckDB: ` +
-        `${workerScriptResponse.status}`
+        `No se pudo descargar el Worker de DuckDB: ` + `${workerScriptResponse.status}`,
       );
     }
 
-    const workerScriptText =
-      await workerScriptResponse.text();
+    const workerScriptText = await workerScriptResponse.text();
 
-    const workerBlob = new Blob(
-      [workerScriptText],
-      {
-        type: "application/javascript",
-      }
-    );
+    const workerBlob = new Blob([workerScriptText], {
+      type: "application/javascript",
+    });
 
-    const workerUrl =
-      URL.createObjectURL(workerBlob);
+    const workerUrl = URL.createObjectURL(workerBlob);
 
     const worker = new Worker(workerUrl);
 
     const logger = new duckdb.ConsoleLogger();
 
-    db = new duckdb.AsyncDuckDB(
-      logger,
-      worker
-    );
+    db = new duckdb.AsyncDuckDB(logger, worker);
 
-    await db.instantiate(
-      bundle.mainModule,
-      bundle.pthreadWorker
-    );
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
     URL.revokeObjectURL(workerUrl);
 
@@ -123,16 +105,12 @@ export async function initDB(
 
       const fileUrl = `${baseURL}${file}`;
 
-      console.log(
-        `[DuckDB] Cargando ${fileUrl}...`
-      );
+      console.log(`[DuckDB] Cargando ${fileUrl}...`);
 
       const response = await fetch(fileUrl);
 
       if (!response.ok) {
-        throw new Error(
-          `No existe ${file} (${response.status})`
-        );
+        throw new Error(`No existe ${file} (${response.status})`);
       }
 
       // -------------------------------------------------------
@@ -142,13 +120,9 @@ export async function initDB(
       if (import.meta.env.DEV) {
         const text = await response.text();
 
-        const virtualFile =
-          file.split("/").pop()!;
+        const virtualFile = file.split("/").pop()!;
 
-        await db.registerFileText(
-          virtualFile,
-          text
-        );
+        await db.registerFileText(virtualFile, text);
 
         try {
           await conn.query(`
@@ -157,9 +131,7 @@ export async function initDB(
             FROM read_csv_auto('${virtualFile}');
           `);
 
-          console.log(
-            `[DuckDB] Tabla "${table.name}" creada`
-          );
+          console.log(`[DuckDB] Tabla "${table.name}" creada`);
         } finally {
           await db.dropFile(virtualFile);
         }
@@ -168,28 +140,14 @@ export async function initDB(
       // -------------------------------------------------------
       // Producción: CSV.GZ
       // -------------------------------------------------------
-
       else {
-        const buffer = new Uint8Array(
-          await response.arrayBuffer()
-        );
+        const buffer = new Uint8Array(await response.arrayBuffer());
 
-        console.log(
-          `[DuckDB] ${file}: ` +
-          `${(
-            buffer.byteLength /
-            1024 /
-            1024
-          ).toFixed(2)} MB`
-        );
+        console.log(`[DuckDB] ${file}: ` + `${(buffer.byteLength / 1024 / 1024).toFixed(2)} MB`);
 
-        const virtualFile =
-          file.split("/").pop()!;
+        const virtualFile = file.split("/").pop()!;
 
-        await db.registerFileBuffer(
-          virtualFile,
-          buffer
-        );
+        await db.registerFileBuffer(virtualFile, buffer);
 
         try {
           await conn.query(`
@@ -198,18 +156,14 @@ export async function initDB(
             FROM read_csv_auto('${virtualFile}');
           `);
 
-          console.log(
-            `[DuckDB] Tabla "${table.name}" creada`
-          );
+          console.log(`[DuckDB] Tabla "${table.name}" creada`);
         } finally {
           await db.dropFile(virtualFile);
         }
       }
     }
 
-    console.log(
-      "[DuckDB] Inicialización completada"
-    );
+    console.log("[DuckDB] Inicialización completada");
 
     return {
       db,
@@ -224,10 +178,7 @@ export async function initDB(
     db = null;
     conn = null;
 
-    console.error(
-      "[DuckDB] Error inicializando DuckDB:",
-      error
-    );
+    console.error("[DuckDB] Error inicializando DuckDB:", error);
 
     throw error;
   }
@@ -236,10 +187,7 @@ export async function initDB(
 /**
  * Ejecuta una consulta SQL.
  */
-export async function query<T>(
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+export async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
   const { conn } = await initDB(tablas);
 
   let result;
@@ -256,9 +204,7 @@ export async function query<T>(
     result = await conn.query(sql);
   }
 
-  return result
-    .toArray()
-    .map((row) => ({ ...row })) as T[];
+  return result.toArray().map((row) => ({ ...row })) as T[];
 }
 
 /**
@@ -279,7 +225,11 @@ const tablas: DuckTableConfig[] = [
   {
     name: "entidades_federativas",
     file: "datos/entidades_federativas.csv",
-  }
+  },
+  {
+    name: "ppi",
+    file: "datos/proyectos/BD_PPI_OPA.csv",
+  },
 ];
 export interface Entidad_federativaInterface {
   id_entidad_federativa: number;
@@ -289,4 +239,54 @@ export interface MunicipioInterface {
   id_entidad_federativa: number;
   id_municipio: number;
   municipio: string;
+}
+
+export interface PPI {
+  ID_PPI_CAML: string;
+  ID_PPI: string;
+  CC: string;
+  CICLO_PND: string | null;
+
+  ID_RAMO: number;
+  RAMO: string;
+
+  ID_UR: string;
+  UR: string;
+
+  SUBCLASIFICACION: string | null;
+
+  PPI: string;
+  DESC_PPI: string | null;
+  PP: string | null;
+
+  FASE: string;
+
+  ID_EJE_PND: string | null;
+  EJE_PND: string | null;
+
+  ID_OBJ_PND: string | null;
+  OBJ_PND: string | null;
+
+  BENEFICIOS: string | null;
+
+  ID_EF: number;
+  EF: string;
+
+  ID_MUN: number | null;
+  MUN: string | null;
+
+  ID_LOC: number | null;
+  LOC: string | null;
+
+  LATITUD: number | null;
+  LONGITUD: number | null;
+
+  NIVEL_SEGREGACION: string;
+  CLASIFICACION: string;
+
+
+  TIPO3_PPI: string;
+  REGION: string;
+  METROPOLI: string;
+  ESTATUS_OPERACION: string;
 }

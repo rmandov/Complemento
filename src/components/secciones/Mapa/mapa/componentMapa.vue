@@ -10,7 +10,8 @@ import {
   formatearID,
   volarABounds,
   capaMunicipios,
-  removeGeoJsonFromMap
+  removeGeoJsonFromMap,
+  capaProyectos
 } from '../utils/mapController';
 
 import L from 'leaflet';
@@ -26,14 +27,17 @@ import {
   estiloEFSeleccionado,
   estiloMun,
   estiloMunHover,
-  estiloMunSeleccionado
+  estiloMunSeleccionado,
+  estilosTooltip
 } from '../utils/estilosCapas';
 import { useMunicipiosCache } from '../utils/useMunicipiosCache';
 import { ExtendedFeatureCollection } from 'd3-geo';
+import { PPI } from '../utils/duckdb';
+import { obtenerPPIFIltro } from '../utils/querys/predeterminadoQuerys';
 
 const mapa = ref<L.Map | null>(null);
 const mapaContainer = ref<HTMLElement | null>(null);
-
+const proyectosPPI = inject<Ref<PPI[]>>("datos")!;
 const filtros = inject<Ref<Filtros>>('filtros')!;
 
 const { getMunicipiosByEntidad } = useMunicipiosCache();
@@ -41,6 +45,10 @@ const { getMunicipiosByEntidad } = useMunicipiosCache();
 // Inicializar mapa
 onMounted(() => {
   mapa.value = initMap(mapaContainer);
+
+  if (!mapa.value) return;
+
+
   crearCapaEstados();
 });
 
@@ -93,7 +101,7 @@ async function crearCapaMunicipio(entidad: Feature) {
         onFeatureClick: handleClickMun,
         onFeatureMouseOver: handleMouseOverMun,
         onFeatureMouseOut: handleMouseOutMun
-      },
+      }
     );
   }
 }
@@ -133,7 +141,7 @@ function actualizarEstiloMun(idSeleccionado: string | null | undefined) {
       feature?: GeoJSON.Feature;
     }).feature;
 
-    const idEstado = formatearID(feature?.properties?.CVE_MUN);
+    const idEstado = formatearID(feature?.properties?.CVEGEO);
 
 
     if (idEstado === idSeleccionado?.toString()) {
@@ -158,7 +166,7 @@ watch(
       const fSeleccionado = featEstado.features[parseInt(nuevoId) - 1];
       crearCapaMunicipio(fSeleccionado)
     }
-    else{
+    else {
       filtros.value.id_municipio = undefined;
     }
   }
@@ -172,10 +180,12 @@ watch(
 );
 
 
+
 // Evento de clic sobre un estado
 function handleClickEF({ feature, layer }: GeoJsonFeatureEvent) {
   const id = formatearID(feature.properties?.CVE_ENT);
   filtros.value.id_ef = id;
+  filtros.value.id_municipio = undefined;
 }
 
 // Hover sobre un estado
@@ -202,13 +212,13 @@ function handleMouseOutEF({ feature, layer }: GeoJsonFeatureEvent) {
 
 // Evento de clic sobre un municipio
 function handleClickMun({ feature, layer }: GeoJsonFeatureEvent) {
-  const id = formatearID(feature.properties?.CVE_MUN);
+  const id = formatearID(feature.properties?.CVEGEO);
   filtros.value.id_municipio = id;
 }
 // Hover sobre un municipio
 function handleMouseOverMun({ feature, layer }: GeoJsonFeatureEvent) {
 
-  const id = formatearID(feature.properties?.CVE_MUN);
+  const id = formatearID(feature.properties?.CVEGEO);
 
   if (
     layer instanceof L.Path &&
@@ -220,8 +230,7 @@ function handleMouseOverMun({ feature, layer }: GeoJsonFeatureEvent) {
 
 // Retirar hover de un municipio
 function handleMouseOutMun({ feature, layer }: GeoJsonFeatureEvent) {
-  const id = formatearID(feature.properties?.CVE_MUN)
-    console.log(typeof id , typeof  filtros.value.id_municipio, id === filtros.value.id_municipio );
+  const id = formatearID(feature.properties?.CVEGEO)
 
   if (
     layer instanceof L.Path &&
@@ -236,12 +245,78 @@ function eliminarLimitesMunicipios() {
     removeGeoJsonFromMap(mapa.value, capaMunicipios.value);
   }
 }
+
+watch(filtros , async (nvo) => {
+  console.log("llega aqui", nvo);
+
+  proyectosPPI.value = await obtenerPPIFIltro(nvo);
+}, {
+  deep:true
+})
+watch(
+  proyectosPPI,
+  () => {
+    capaProyectos.value = dibujarProyectos();
+    mapa.value?.addLayer(capaProyectos.value);
+  },
+  { deep: true }
+);
+const renderer = L.canvas({
+  pane: "proyectos",
+  padding: 0.5
+});
+const estiloBase = {
+  radius: 6,
+  weight: 1,
+  fillOpacity: 0.7,
+  color: "rgb(255, 255, 255)",
+  fillColor: "#cecece"
+};
+function dibujarProyectos(): L.FeatureGroup {
+  const capa = L.featureGroup();
+
+
+  // Quitar todos los marcadores anteriores
+  capaProyectos.value?.clearLayers();
+
+  proyectosPPI.value.forEach((proyecto) => {
+
+    // Obtener coordenadas
+    const lat = Number(proyecto.LATITUD);
+    const lon = Number(proyecto.LONGITUD);
+
+    // Validar coordenadas
+    if (
+      proyecto.LATITUD == null ||
+      proyecto.LONGITUD == null ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon)
+    ) {
+      return;
+    }
+
+    // Crear marcador
+    const marcador = L.circleMarker([lat, lon], {
+      ...estiloBase
+    });
+
+    // Popup
+    marcador.bindTooltip(proyecto.CC,{});
+
+    // Agregar marcador al grupo
+    capa.addLayer(marcador)
+  });
+  capa.setZIndex(400);
+  console.log("capa", capa);
+
+  return capa
+}
 </script>
 
 <template>
   <div class="w-full h-full rounded-lg overflow-hidden relative">
     <div ref="mapaContainer" class="w-full h-full"></div>
-    <BotonRegresar @on-click="filtros.id_ef = undefined"/>
+    <BotonRegresar @on-click="filtros.id_ef = undefined" />
   </div>
 </template>
 <style scoped></style>
