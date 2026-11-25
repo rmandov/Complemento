@@ -8,7 +8,7 @@ import ViewMapa from "@/components/secciones/Mapa/ViewMapa.vue";
 
 const routes = [
   { path: "/", component: HomeView },
-  { path: "/mapa", component: MapView },
+  { path: "/mapa", component: ViewMapa },
   { path: "/fichas", component: FichaView, children: [{ path: "test", component: Test }] },
   { path: "/mapav2", component: ViewMapa },
 ];
