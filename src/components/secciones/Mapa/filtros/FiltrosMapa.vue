@@ -65,7 +65,7 @@ const tabs: Tab[] = [
 </script>
 <template>
   <aside
-    class="w-full lg:w-[45%]  h-full overflow-hidden max-h-full  flex flex-col gap-4 p-4 rounded-xl shadow-xl border border-gray-100 bg-white">
+    class="w-full lg:w-[45%] lg:min-w-[45%]  h-full overflow-hidden max-h-full  flex flex-col gap-4 p-4 rounded-xl shadow-xl border border-gray-100 bg-white">
     <div class="rounded-lg border border-gray-100 shadow p-2 bg-white">
       <h5 class="font-bold">Complementariedades y sinergias de los Programas y Proyectos de Inversión (PPI)</h5>
       <table class="hidden">
