@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, VNode } from 'vue';
 
 export interface Columna {
   key: string;
   label: string;
   sortable?: boolean;
   width?: string;
+  render?: (fila: Record<string, any>) => VNode | string | number;
+
 }
 
 interface Props {
@@ -145,7 +147,7 @@ const restaurarPagina = (event: Event) => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 h-full max-h-full overflow-hidden">
+  <div class="flex flex-col gap-4 h-full max-h-[80dvh] lg:max-h-full overflow-hidden">
 
     <div class="contenedor-tabla flex-1 overflow-auto border border-gray-300 rounded-lg shadow">
       <table class="tabla">
@@ -156,8 +158,8 @@ const restaurarPagina = (event: Event) => {
               minWidth: columna.width || 'auto'
             }">
               <button v-if="columna.sortable" type="button" @click="ordenar(columna)"
-                class="w-full flex items-center justify-start cursor-pointer">
-                {{ columna.label }}
+                class="w-full flex items-center justify-start cursor-pointer " :title="columna.label">
+                <span class="truncate max-w-full">{{ columna.label }}</span>
 
                 <span>
                   {{
@@ -170,7 +172,7 @@ const restaurarPagina = (event: Event) => {
                 </span>
               </button>
 
-              <span v-else>
+              <span class="truncate max-w-full" v-else>
                 {{ columna.label }}
               </span>
             </th>
@@ -183,7 +185,8 @@ const restaurarPagina = (event: Event) => {
               :title="dato[columna.key] == null ? '' : String(dato[columna.key])" :style="{
                 width: columna.width || 'auto'
               }">
-              <div class="truncate whitespace-nowrap">
+              <component v-if="columna.render" :is="columna.render(dato)" />
+              <div v-else class="max-w-full overflow-auto max-h-[5rem]">
                 {{ dato[columna.key] }}
               </div>
             </td>
@@ -198,7 +201,7 @@ const restaurarPagina = (event: Event) => {
       </table>
     </div>
 
-    <div class="flex items-center justify-end gap-4">
+    <div class="flex flex-wrap items-center justify-center md:justify-end gap-4">
       <div class="flex gap-2 items-center">
         <label for="rpp">Registros por página:</label>
 
@@ -224,7 +227,7 @@ const restaurarPagina = (event: Event) => {
       </div>
 
       <div class="flex gap-1">
-        <button :disabled="pagActiva === 0" @click="cambiarPagina(0)"  class="boton-paginacion">
+        <button :disabled="pagActiva === 0" @click="cambiarPagina(0)" class="boton-paginacion">
           <span class="material-symbols-outlined">
             keyboard_double_arrow_left
           </span>
@@ -264,7 +267,6 @@ const restaurarPagina = (event: Event) => {
 .tabla th,
 .tabla td {
   padding: 0.25rem 0.5rem;
-  white-space: nowrap;
   height: 1%;
 }
 
@@ -272,11 +274,7 @@ const restaurarPagina = (event: Event) => {
   border-bottom: 1px solid var(--color-gray-200);
 }
 
-.tabla td>div {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 
 .contenedor-tabla {
   scrollbar-width: thin;
@@ -305,7 +303,8 @@ const restaurarPagina = (event: Event) => {
 .input-pagina {
   max-width: calc(var(--ancho) * 1.5ch);
 }
-.boton-paginacion{
+
+.boton-paginacion {
   border: 1px solid var(--color-gray-200);
   border-radius: 0.25rem;
   cursor: pointer;
@@ -314,11 +313,13 @@ const restaurarPagina = (event: Event) => {
   justify-content: center;
   background-color: white;
 }
-.boton-paginacion:disabled{
+
+.boton-paginacion:disabled {
   opacity: 0.45;
   background-color: white !important;
 }
-.boton-paginacion:hover{
+
+.boton-paginacion:hover {
   background-color: var(--color-gray-200);
 }
 </style>

@@ -10,14 +10,16 @@ const mun_options = ref<SelectOption[]>([]);
 
 const filtros = inject<Ref<Filtros>>("filtros")!;
 onMounted(async () => {
-  ef_options.value = (await obtenerEF()).map((item) => {
+  ef_options.value = (await obtenerEF({
+    id_ef:undefined
+  })).map((item) => {
     return {
       value: item.ID_EF,
       label: item.EF
     }
   });
   if(filtros.value.id_ef){
-    listarMun(filtros.value.id_ef)
+    await listarMun(filtros.value.id_ef)
   }
 })
 onUnmounted(()=>{
@@ -26,7 +28,9 @@ onUnmounted(()=>{
   regresarMapa();
 })
 async function listarMun(id: string) {
-  mun_options.value = (await obtenerMunicipios(id)).map((item) => {
+  mun_options.value = (await obtenerMunicipios({
+    id_ef:id
+  })).map((item) => {
     return {
       value: item.ID_MUN,
       label: item.MUN
@@ -34,8 +38,13 @@ async function listarMun(id: string) {
   })
 }
 watch(() => filtros.value.id_ef, async (nvo) => {
+      filtros.value.id_municipio=undefined;
+
   if (nvo !== undefined && nvo !== null) {
     await listarMun(nvo);
+  }
+  else{
+    mun_options.value=[]
   }
 }, {
   deep:true
@@ -44,7 +53,7 @@ watch(() => filtros.value.id_ef, async (nvo) => {
 </script>
 <template>
   <div class="flex flex-col gap-2 relative">
-    <SelectInputBusqueda id="ef" label="Estado" :options="ef_options" :bloquear-deseleccionar="true"
+    <SelectInputBusqueda id="ef" label="Estado" :options="ef_options" :bloquear-deseleccionar="false"
       v-model="filtros.id_ef" />
     <SelectInputBusqueda v-if="mun_options.length > 0" id="mun" label="Municipio" :options="mun_options" :bloquear-deseleccionar="false"
       v-model="filtros.id_municipio" />

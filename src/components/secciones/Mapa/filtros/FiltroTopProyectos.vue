@@ -7,7 +7,6 @@ import { PPI } from '../utils/duckdb';
 const filtros = inject<Ref<Filtros>>("filtros")!;
 const proyectosPPI = inject<Ref<PPI[]>>("datos")!;
 
-const total = ref<number>();
 const top3 = ref<CalcularTop3[]>([]);
 const estatus = ref<ListaEstatus[]>([])
 onMounted(async () => {
@@ -16,13 +15,13 @@ onMounted(async () => {
   await obtenerListasEstatus();
 
 })
-watch(filtros, (nvo) => {
-  actualizarTop(nvo);
+watch(proyectosPPI, () => {
+
+  actualizarTop(filtros.value);
 }, {
   deep: true
 })
 async function actualizarTop(filtros: Filtros) {
-  total.value = (await contarTotal(filtros)).total;
   top3.value = await calcularTop3(filtros);
 }
 async function obtenerListasEstatus() {
@@ -38,12 +37,6 @@ function handleCLickEstatus(id: string) {
   }
 }
 
-watch(
-  () => filtros.value.estatus,
-  (nvo) => {
-    console.log("cambia", nvo);
-  }
-);
 </script>
 <template>
   <div class="rounded-lg border border-gray-100 shadow p-2 bg-white  max-h-[100%] overflow-auto w-full">
@@ -51,7 +44,7 @@ watch(
       <div>
         <div class="flex items-center justify-between border-b border-gray-300">
           <h5 class="font-bold">Proyectos</h5>
-          <h5 class="font-bold">{{ total }}</h5>
+          <h5 class="font-bold">{{ proyectosPPI.length }}</h5>
         </div>
         <div class="flex gap-0">
           <div v-for="top in top3" :key="top.CLASIFICACION"

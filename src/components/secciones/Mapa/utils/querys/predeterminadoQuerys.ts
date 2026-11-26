@@ -55,14 +55,17 @@ export async function obtenerEstatus(): Promise<ListaEstatus[]> {
   return respuesta;
 }
 
-export async function obtenerEF(): Promise<ListaEF[]> {
-  const querySql: string = `SELECT DISTINCT ID_EF, EF FROM PPI ORDER BY ID_EF ASC`;
-  const respuesta = await query<ListaEF>(querySql);
+export async function obtenerEF(filtros:Filtros): Promise<ListaEF[]> {
+  const filtrar = generarFiltros(filtros);
+  const querySql: string = `SELECT DISTINCT ID_EF, EF FROM PPI WHERE 1 = 1 ${filtrar.where} ORDER BY ID_EF ASC`;
+  const respuesta = await query<ListaEF>(querySql, filtrar.params);
   return respuesta;
 }
-export async function obtenerMunicipios(id:string): Promise<ListaMunicipio[]> {
-  const querySql: string = `SELECT DISTINCT  ID_EF, ID_MUN, MUN  FROM PPI WHERE ID_EF = ? ORDER BY MUN ASC `;
-  const respuesta = await query<ListaMunicipio>(querySql, [id]);
+export async function obtenerMunicipios(filtros:Filtros): Promise<ListaMunicipio[]> {
+    const filtrar = generarFiltros(filtros);
+
+  const querySql: string = `SELECT DISTINCT  ID_EF, ID_MUN, MUN  FROM PPI WHERE 1 = 1 ${filtrar.where} ORDER BY MUN ASC `;
+  const respuesta = await query<ListaMunicipio>(querySql, filtrar.params);
   return respuesta;
 }
 export async function obtenerRegiones(): Promise<ListaRegiones[]> {
@@ -73,6 +76,19 @@ export async function obtenerRegiones(): Promise<ListaRegiones[]> {
 export async function obtenerMertropolis(): Promise<ListaMetropolis[]> {
   const querySql: string = `SELECT DISTINCT METROPOLI FROM PPI ORDER BY METROPOLI ASC`;
   const respuesta = await query<ListaMetropolis>(querySql);
+  return respuesta;
+}
+
+export async function obtenerRamos(filtros:Filtros): Promise<ListaRamo[]> {
+  const filtrar = generarFiltros(filtros);
+  const querySql: string = `SELECT DISTINCT RAMO FROM PPI WHERE 1 = 1 ${filtrar.where} ORDER BY RAMO ASC`;
+  const respuesta = await query<ListaRamo>(querySql, filtrar.params);
+  return respuesta;
+}
+export async function obtenerUnidades(filtros:Filtros): Promise<ListaUnidad[]> {
+  const filtrar = generarFiltros(filtros);
+  const querySql: string = `SELECT DISTINCT UNIDAD FROM PPI WHERE 1 = 1 ${filtrar.where} ORDER BY UNIDAD ASC`;
+  const respuesta = await query<ListaUnidad>(querySql, filtrar.params);
   return respuesta;
 }
 
@@ -99,4 +115,10 @@ export interface ListaRegiones {
 }
 export interface ListaMetropolis {
   METROPOLI: string;
+}
+export interface ListaRamo {
+  RAMO: string;
+}
+export interface ListaUnidad {
+  UNIDAD: string;
 }

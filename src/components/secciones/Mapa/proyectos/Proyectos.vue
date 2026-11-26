@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { inject, Ref } from 'vue';
+import { h, inject, Ref } from 'vue';
 import { PPI } from '../utils/duckdb';
 import Tabla, { Columna } from './Tabla/Tabla.vue';
 import { label } from 'three/tsl';
+import { formatearMoneda } from '../utils/querys/generales';
 
 const proyectosPPI = inject<Ref<PPI[]>>("datos")!;
 const columnas: Columna[] = [
@@ -10,8 +11,9 @@ const columnas: Columna[] = [
     key: 'CC',
     label: 'CC',
     sortable: true,
-    width:"10rem"
+    width:"2rem"
   },
+  /*
   {
     key: "EF",
     label: "Estado",
@@ -49,17 +51,72 @@ const columnas: Columna[] = [
     width:"10rem"
   },
   {
-    key: "LATITUD",
-    label: "Latitud",
-    sortable: false,
+    key: "RAMO",
+    label: "Ramo",
+    sortable: true,
     width:"10rem"
   },
   {
-    key: "LONGITUD",
-    label: "Longitud",
-    sortable: false,
+    key: "UNIDAD",
+    label: "Unidad",
+    sortable: true,
     width:"10rem"
   },
+  {
+    key: "CLASIFICACION",
+    label: "Clasificacion",
+    sortable: true,
+    width:"10rem"
+  },*/
+  {
+    key: "FECHA_INICIO_CAL_FF",
+    label: "Fecha inicio",
+    sortable: true,
+    width:"10rem",
+    render: (fila) =>
+      h(
+        'span',
+        {
+          class: 'max-w-full overflow-auto max-h-[5rem]'
+        },
+        new Date(fila.FECHA_INICIO_CAL_FF).toLocaleDateString()
+      )
+  },
+  {
+    key: "FECHA_FIN_CAL_FF",
+    label: "Fecha final",
+    sortable: true,
+    width:"10rem",
+    render: (fila) =>
+      h(
+        'span',
+        {
+          class: 'max-w-full overflow-auto max-h-[5rem]'
+        },
+        new Date(fila.FECHA_FIN_CAL_FF).toLocaleDateString()
+      )
+  },
+  {
+    key: "MONTO_TOTAL_INVERSION",
+    label: "Monto total de inversión",
+    sortable: true,
+    width:"10rem",
+    render: (fila) =>
+      h(
+        'span',
+        {
+          class: 'max-w-full overflow-auto max-h-[5rem]'
+        },
+        formatearMoneda(fila.MONTO_TOTAL_INVERSION)
+      )
+  },
+  {
+    key: "BENEFICIOS_ESPERADOS",
+    label: "Beneficios esperados",
+    sortable: true,
+    width:"20rem"
+  },
+
 ];
 
 

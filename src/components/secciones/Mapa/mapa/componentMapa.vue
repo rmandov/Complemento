@@ -11,7 +11,8 @@ import {
   volarABounds,
   capaMunicipios,
   removeGeoJsonFromMap,
-  capaProyectos
+  capaProyectos,
+  regresarMapa
 } from '../utils/mapController';
 
 import L from 'leaflet';
@@ -28,12 +29,11 @@ import {
   estiloMun,
   estiloMunHover,
   estiloMunSeleccionado,
-  estilosTooltip
 } from '../utils/estilosCapas';
 import { useMunicipiosCache } from '../utils/useMunicipiosCache';
-import { ExtendedFeatureCollection } from 'd3-geo';
 import { PPI } from '../utils/duckdb';
 import { obtenerPPIFIltro } from '../utils/querys/predeterminadoQuerys';
+import { formatearMoneda } from '../utils/querys/generales';
 
 const mapa = ref<L.Map | null>(null);
 const mapaContainer = ref<HTMLElement | null>(null);
@@ -168,6 +168,7 @@ watch(
     }
     else {
       filtros.value.id_municipio = undefined;
+      regresarMapa();
     }
   }
 );
@@ -247,8 +248,12 @@ function eliminarLimitesMunicipios() {
 }
 
 watch(filtros , async (nvo) => {
-  console.log("llega aqui", nvo);
-
+  if(nvo.id_municipio && !nvo.id_ef){
+    nvo.id_municipio=undefined;
+  }
+  if(nvo.unidad && !nvo.ramo){
+    nvo.unidad=undefined;
+  }
   proyectosPPI.value = await obtenerPPIFIltro(nvo);
 }, {
   deep:true
@@ -261,10 +266,7 @@ watch(
   },
   { deep: true }
 );
-const renderer = L.canvas({
-  pane: "proyectos",
-  padding: 0.5
-});
+
 const estiloBase = {
   radius: 6,
   weight: 1,
@@ -302,19 +304,28 @@ function dibujarProyectos(): L.FeatureGroup {
 
     // Popup
     marcador.bindTooltip(proyecto.CC,{});
-
+    marcador.bindPopup(`
+      <div>
+        <strong>${proyecto.CC}</strong>
+        <br>
+        <b>Fecha inicial:</b> ${new Date(proyecto.FECHA_INICIO_CAL_FF).toLocaleDateString()}
+        <br>
+        <b>Fecha final:</b> ${new Date(proyecto.FECHA_FIN_CAL_FF).toLocaleDateString()}
+        <br>
+        <b>Monto total:</b> ${formatearMoneda(proyecto.MONTO_TOTAL_INVERSION)}
+      </div>
+    `);
     // Agregar marcador al grupo
     capa.addLayer(marcador)
   });
   capa.setZIndex(400);
-  console.log("capa", capa);
 
   return capa
 }
 </script>
 
 <template>
-  <div class="w-full h-full rounded-lg overflow-hidden relative">
+  <div class="w-full h-[80dvh] lg:h-full rounded-lg overflow-hidden relative">
     <div ref="mapaContainer" class="w-full h-full"></div>
     <BotonRegresar @on-click="filtros.id_ef = undefined" />
   </div>

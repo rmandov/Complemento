@@ -289,4 +289,10 @@ export interface PPI {
   REGION: string;
   METROPOLI: string;
   ESTATUS_OPERACION: string;
+
+
+  FECHA_INICIO_CAL_FF:Date;
+  FECHA_FIN_CAL_FF:Date;
+  MONTO_TOTAL_INVERSION:number;
+  BENEFICIOS_ESPERADOS:string;
 }
