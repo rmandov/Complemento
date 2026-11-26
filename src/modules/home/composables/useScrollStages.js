@@ -47,19 +47,6 @@ export function useScrollStages(sectionRef, stageCount) {
     })
   }
 
-  function goToMap() {
-    scrollTween?.kill()
-    const target = document.querySelector(JOURNEY_CONFIG.layout.mapTarget)
-    if (!target) {
-      console.warn(`No existe la sección de destino: ${JOURNEY_CONFIG.layout.mapTarget}`)
-      return
-    }
-    target.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'start',
-    })
-  }
-
   function refresh() {
     cancelAnimationFrame(refreshFrame)
     refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh())
@@ -92,5 +79,5 @@ export function useScrollStages(sectionRef, stageCount) {
     window.removeEventListener('load', refresh)
   })
 
-  return { progress, activeIndex, goToStage, goToMap }
+  return { progress, activeIndex, goToStage }
 }

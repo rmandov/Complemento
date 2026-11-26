@@ -14,7 +14,7 @@ function handleClickTab(id: number) {
 
   if (id === activeTab.value) {
     activeTab.value = null
-      filtros.value.tipo_filtro = undefined;
+    filtros.value.tipo_filtro = undefined;
 
     return
   }
@@ -23,16 +23,16 @@ function handleClickTab(id: number) {
 
 }
 watch(() => filtros.value.tipo_filtro, (nvo) => {
-  const tipo3=["Proyecto","Programa"]
-  if( nvo !== undefined){
-    const ind=tipo3[nvo];
+  const tipo3 = ["Proyecto", "Programa"]
+  if (nvo !== undefined) {
+    const ind = tipo3[nvo];
 
-    filtros.value.tipo3_PPI =  ind ?? undefined
+    filtros.value.tipo3_PPI = ind ?? undefined
 
   }
-  else{
+  else {
     filtros.value.tipo3_PPI = undefined
-    activeTab.value=null;
+    activeTab.value = null;
   }
 
 })
@@ -95,7 +95,7 @@ const tabs = [
         </button>
       </div>
       <div class=" flex-1 flex flex-col gap-2 items-end h-full overflow-hidden relative max-h-full">
-        <Predeterminado/>
+        <Predeterminado />
         <button type="button" class=" rounded py-0 px-2 bg-sky-600 hover:bg-sky-800 text-white
            cursor-pointer transition-all ease duration-300" @click="limpiarFiltros">
           Limpiar

@@ -22,11 +22,12 @@ import {
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 import { useGltfModel, disposeModel } from "./useGltfModel";
+import { createBlueSphere } from "../utils/createBlueSphere";
 import { createJourneyPath, journeyCurveProgress } from "../utils/journeyPath";
 import { JOURNEY_CONFIG } from "../config/journeyConfig";
 
 /**
- * Una escena, un renderer y un GLB durante toda la experiencia.
+ * Una escena, un renderer y una esfera azul (o GLB opcional) durante el recorrido.
  * scrollProgress es la única fuente de verdad; el render lo interpola visualmente.
  */
 export function useJourneyScene(containerRef, scrollProgress, stageCount) {
@@ -89,45 +90,6 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     }
   }
 
-  // ==========================================
-  // MATERIAL METÁLICO PERSONALIZADO
-  // ==========================================
-  function applyMetalPreset(root) {
-    // Permite desactivar el efecto cuando
-    // sustituyamos la esfera por un tren.
-    if (config.model.materialPreset !== "studio-metal") {
-      return;
-    }
-
-    root.traverse((object) => {
-      if (!object.isMesh) return;
-
-      const materials = Array.isArray(object.material) ? object.material : [object.material];
-
-      materials.filter(Boolean).forEach((material) => {
-        if (!material.isMeshStandardMaterial && !material.isMeshPhysicalMaterial) {
-          return;
-        }
-
-        // Identificar partes plateadas del GLB
-        const silver = /platead|silver|detail|contorno/i.test(material.name || "");
-
-        // Intensidad de metal
-        material.metalness = config.material.metalness;
-
-        // Control de rugosidad por material
-        material.roughness = silver
-          ? config.material.silverRoughness
-          : config.material.champagneRoughness;
-
-        // Intensidad de reflejos
-        material.envMapIntensity = config.material.envMapIntensity;
-
-        material.needsUpdate = true;
-      });
-    });
-  }
-
   function createScene() {
     scene = new Scene();
 
@@ -163,8 +125,8 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     fill.position.set(5, -2, 3);
     scene.add(fill);
 
-    // Contraluz cálido
-    const rim = new DirectionalLight(0xffdab3, config.lighting.rimIntensity);
+    // Contraluz azulada
+    const rim = new DirectionalLight(0xa9caff, config.lighting.rimIntensity);
 
     rim.position.set(1, 3, -5);
     scene.add(rim);
@@ -344,7 +306,7 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     // ANIMACIÓN CINEMATOGRÁFICA
     // ==========================================
 
-    const isAnimating = config.model.rotate && !reducedMotion && Boolean(modelRoot);
+    const isAnimating = config.model.rotate && config.model.rotationMode === "time" && !reducedMotion && Boolean(modelRoot);
 
     if (isAnimating) {
       elapsedSeconds += deltaSeconds;
@@ -366,7 +328,8 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     } else {
       // Sin movimientos propios para el futuro tren
       // o cuando se solicita movimiento reducido.
-      spin.rotation.set(0, config.model.rotate ? spinningAngle : 0, 0);
+      const p = config.model.rotate && !reducedMotion ? currentProgress : 0;
+      spin.rotation.set(p * Math.PI * 2, p * Math.PI * 3, p * 0.8);
 
       spin.position.set(0, 0, 0);
     }
@@ -403,7 +366,7 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     if (!containerRef.value) return;
     try {
       createScene();
-      // Cargar primero la escena; el texto funciona incluso si el GLB falla.
+      // El texto y la navegación funcionan incluso si WebGL falla.
       resizeObserver = new ResizeObserver(resize);
       resizeObserver.observe(containerRef.value);
       intersectionObserver = new IntersectionObserver(
@@ -419,14 +382,14 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
       intersectionObserver.observe(containerRef.value);
       resize();
 
-      const { root } = await loadModel(config.model.path);
+      const root = config.model.type === "glb"
+        ? (await loadModel(config.model.path)).root
+        : createBlueSphere(config);
       if (destroyed) {
         disposeModel(root);
         return;
       }
       modelRoot = root;
-      // Aplicar materiales metálicos al GLB cargado
-      applyMetalPreset(root);
       spin.add(root);
       modelRoot.scale.setScalar(getSizeFactor(containerRef.value.clientWidth));
       updateObjectPosition();
@@ -434,7 +397,9 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     } catch (loadError) {
       if (destroyed) return;
       console.error("SphereJourney: no se pudo inicializar el modelo 3D", loadError);
-      error.value = `No fue posible cargar el modelo 3D (${config.model.path}). Revisa el archivo en public/models/.`;
+      error.value = config.model.type === "glb"
+        ? `No fue posible cargar el modelo 3D (${config.model.path}). Revisa el archivo en public/models/.`
+        : "No fue posible iniciar la esfera 3D. Revisa que el navegador tenga WebGL y aceleración gráfica activados.";
     }
   });
 

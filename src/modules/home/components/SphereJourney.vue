@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import StageContent from './StageContent.vue'
 import StageNavigation from './StageNavigation.vue'
 import { useScrollStages } from '../composables/useScrollStages'
@@ -7,13 +7,12 @@ import { useJourneyScene } from '../composables/useJourneyScene'
 import stagesJson from '../data/stages.json'
 import { JOURNEY_CONFIG } from '../config/journeyConfig'
 
-// Todas las etapas vienen de stages.json; NO duplicar etapas en los componentes.
 const stages = stagesJson.filter((item) => item && item.id && item.titulo)
 const sectionRef = ref(null)
 const canvasRef = ref(null)
-const { progress, activeIndex, goToStage, goToMap } = useScrollStages(sectionRef, stages.length)
+const { progress, activeIndex, goToStage } = useScrollStages(sectionRef, stages.length)
 const { error } = useJourneyScene(canvasRef, progress, stages.length)
-const stage = computed(() => stages[activeIndex.value] || null)
+/* const stage = computed(() => stages[activeIndex.value] || null) */
 
 const journeyStyle = {
   '--journey-navbar-desktop': `${JOURNEY_CONFIG.layout.navbarDesktopPx}px`,
@@ -26,51 +25,25 @@ const journeyStyle = {
 <template>
   <section ref="sectionRef" class="sphere-journey" :style="journeyStyle" aria-label="Recorrido interactivo 3D">
     <div class="sphere-journey__sticky">
-
-      <!-- Título fijo durante el recorrido -->
-      <h1 class="title">
+      <!-- <h1 class="title">
         Complementariedades y sinergias de los
         Programas y Proyectos de Inversión (PPI)
-      </h1>
+      </h1> -->
 
-      <div ref="canvasRef" class="sphere-journey__canvas" aria-hidden="true"></div>
+      <div class="sphere-journey__stage">
+        <div ref="canvasRef" class="sphere-journey__canvas" aria-hidden="true"></div>
+        <StageNavigation :stages="stages" :active-index="activeIndex" :map-route="JOURNEY_CONFIG.layout.mapRoute"
+          @navigate="goToStage" />
+        <StageContent :stages="stages" :progress="progress" />
 
-      <StageNavigation v-if="stages.length" :stages="stages" :active-index="activeIndex" @navigate="goToStage"
-        @map="goToMap" />
-
-      <StageContent :stage="stage" :number="activeIndex + 1" :total="stages.length" />
-
-      <p v-if="error" class="sphere-journey__error" role="alert">
-        {{ error }}
-      </p>
-
-      <p v-if="!stages.length" class="sphere-journey__error">
-        Agrega etapas en data/stages.json.
-      </p>
-
+        <p v-if="error" class="sphere-journey__error" role="alert">{{ error }}</p>
+        <p v-if="!stages.length" class="sphere-journey__error">Agrega etapas en data/stages.json.</p>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.title {
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  width: 100%;
-  margin: 0;
-  padding: 18px 24px;
-
-  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
-  font-family: NotoSans-ExtraBold, sans-serif;
-  text-align: center;
-  color: #000;
-
-  z-index: 10;
-  pointer-events: none;
-}
-
 .sphere-journey {
   --journey-navbar-offset: var(--journey-navbar-desktop);
   position: relative;
@@ -78,19 +51,39 @@ const journeyStyle = {
   min-height: calc(100svh - var(--journey-navbar-offset));
   width: 100%;
   isolation: isolate;
-  margin-bottom: 45px;
-  /* No poner overflow:hidden/auto: desactiva el sticky del hijo. */
+  background: #fff;
+  /* Mantener overflow visible en los ancestros para que funcione sticky. */
 }
 
 .sphere-journey__sticky {
   position: sticky;
   top: var(--journey-navbar-offset);
   height: calc(100svh - var(--journey-navbar-offset));
-  min-height: 270px;
   width: 100%;
-  border-radius: 26px;
   overflow: hidden;
-  background: transparent;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  flex: none;
+  position: relative;
+  z-index: 4;
+  margin: 0;
+  padding: 18px 24px 12px;
+  font-size: clamp(1.35rem, 2.3vw, 2.35rem);
+  font-family: NotoSans-ExtraBold, NotoSans, sans-serif;
+  line-height: 1.25;
+  text-align: center;
+  color: #000000;
+  background: #fff;
+}
+
+.sphere-journey__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .sphere-journey__canvas {
@@ -109,14 +102,14 @@ const journeyStyle = {
 .sphere-journey__error {
   z-index: 4;
   position: absolute;
-  top: 70px;
+  top: 10px;
   right: 15px;
   max-width: 430px;
   padding: 12px 16px;
   border-radius: 10px;
-  background: #ffffff;
+  background: #fff;
   color: #9c2a30;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1023px) {
@@ -130,12 +123,22 @@ const journeyStyle = {
     --journey-navbar-offset: var(--journey-navbar-mobile);
   }
 
-  .sphere-journey__sticky {
-    border-radius: 16px;
+  .title {
+    font-size: clamp(1rem, 4.2vw, 1.3rem);
+    padding: 12px 12px 8px;
   }
 
   .sphere-journey__error {
-    top: 58px;
+    left: 75px;
+    right: 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .title {
+    font-size: 1rem;
+    padding: 8px 12px;
   }
 }
 </style>
