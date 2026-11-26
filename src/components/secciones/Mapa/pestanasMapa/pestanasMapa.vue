@@ -28,7 +28,7 @@ export interface Tab {
 }
 </script>
 <template>
-  <section class="flex flex-col gap-2 lg:max-w-[70%] w-full min-h-[80dvh] lg:min-h-[70%] border rounded-xl shadow-xl border-gray-100 px-3 py-3 bg-white">
+  <section class="flex flex-col gap-2 lg:max-w-[70%] w-full min-h-[80dvh] lg:min-h-[70%] border rounded-xl shadow-xl border-gray-100 px-4 py-4 bg-white">
     <div>
       <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
         class="boton-tab" :class="{

@@ -1,8 +1,7 @@
 export const estiloEF: L.PathOptions = {
   weight: 1.2,
-  fillColor: "rgb(61, 1, 226)",
-  fillOpacity: 0.1,
-  color: "rgb(116, 92, 254)",
+  fillOpacity: 1,
+  color: '#004D2B',
   opacity: 1,
   dashArray: "10, 5",
   lineCap: "round",
@@ -13,7 +12,7 @@ export const estiloEFSeleccionado: L.PathOptions = {
   opacity: 0,
 };
 export const estiloEFHover: L.PathOptions = {
-  fillOpacity: 0.8,
+  fillOpacity: 0.5,
 };
 
 export const estiloMun: L.PathOptions = {
@@ -37,4 +36,24 @@ export const estilosTooltip:L.TooltipOptions = {
   opacity: 0.9,
   sticky: false,
   interactive: false,
+};
+
+export interface ChoroplethColors {
+  color: string;
+  hover: string;
+}
+
+export const getChoroplethColor = (value: number): ChoroplethColors => {
+  const scales: { max: number; color: string; hover: string }[] = [
+    {max:1, color:"#fafafa",hover:"#ffffff"},
+    { max: 10, color: '#E5F5E0', hover: '#C3D0BE' },
+    { max: 20, color: '#C7E9C0', hover: '#A9C6A3' },
+    { max: 50, color: '#A1D99B', hover: '#89B883' },
+    { max: 100, color: '#74C476', hover: '#63A764' },
+    { max: 200, color: '#41AB5D', hover: '#37914F' },
+    { max: 500, color: '#238B45', hover: '#1E763B' },
+    { max: Infinity, color: '#005A32', hover: '#004D2B' }
+  ];
+
+  return scales.find(scale => value < scale.max) ?? scales[6];
 };

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { icon } from 'leaflet';
-import { ref } from 'vue';
+import { inject, Ref, ref } from 'vue';
 import FiltroRegion from './filtrosAreasInteres/FiltroRegion.vue';
 import FiltroEstado from './filtrosAreasInteres/FiltroEstado.vue';
 import FiltroMetropoli from './filtrosAreasInteres/FiltroMetropoli.vue';
 import { handleMouseLeave, handleMouseMove } from '@/modules/map/composables/gsap/magenticButton.js';
+import { Filtros } from '../ViewMapa.vue';
+const filtros = inject<Ref<Filtros>>("filtros")!;
 
 const areas = [{
   id: 0,
@@ -22,26 +24,25 @@ const areas = [{
   icon: "location_city",
   component: FiltroMetropoli
 }]
-const areaActiva = ref<number | null>(null)
 function handleClickArea(id: number) {
-  if (id === areaActiva.value) {
-    areaActiva.value = null;
+  if (id === filtros.value.tipo_area) {
+    filtros.value.tipo_area=undefined;
     return
   }
-  areaActiva.value = id;
+  filtros.value.tipo_area=id;
 }
 
 </script>
 <template>
-  <div class="rounded-lg border border-gray-100 shadow p-2 bg-white  max-h-[100%] overflow-visible w-full">
-    <div class="rounded border border-gray-100 shadow p-2 bg-sky-50 max-h-[100%] overflow-visble h-full flex flex-col gap-2">
+  <div class="rounded-lg border border-gray-100 shadow p-2 bg-white  w-full">
+    <div class="rounded border border-gray-100 shadow p-2 bg-sky-50 flex flex-col gap-2 w-full">
       <div class="flex items-center justify-between border-b border-gray-300">
         <h5 class="font-bold">Área de interés</h5>
       </div>
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-start gap-4 flex-wrap">
           <button type="button" class="btn-area flex flex-col items-center gap-2 cursor-pointer" :class="{
-            'activo': areaActiva === area.id
+            'activo': filtros.tipo_area === area.id
           }" v-for="area in areas" :key="area.id" @click="handleClickArea(area.id)" @mousemove="handleMouseMove" @mouseleave="handleMouseLeave">
             <div
               class="circulo rounded-full w-12 h-12 shadow-xl bg-white flex items-center justify-center border border-gray-200">
@@ -54,8 +55,8 @@ function handleClickArea(id: number) {
             </h6>
           </button>
         </div>
-        <div v-if="areaActiva !== null">
-            <component :is="areas.find(tab => tab.id === areaActiva)?.component" />
+        <div v-if=" filtros.tipo_area !== null">
+            <component :is="areas.find(tab => tab.id ===  filtros.tipo_area)?.component" />
         </div>
       </div>
     </div>

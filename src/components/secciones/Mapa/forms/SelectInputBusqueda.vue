@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
   bloquearDeseleccionar: true,
 })
 
-const model = defineModel<number | string | null>({
+const model = defineModel<number | string | null | undefined>({
   default: null,
 })
 
@@ -130,7 +130,7 @@ function cerrar() {
 
 // Limpiar selección
 function limpiar() {
-  model.value = null
+  model.value = undefined
   busqueda.value = ''
   emit('limpiar')
 }

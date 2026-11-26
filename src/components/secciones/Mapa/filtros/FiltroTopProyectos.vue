@@ -39,16 +39,16 @@ function handleCLickEstatus(id: string) {
 
 </script>
 <template>
-  <div class="rounded-lg border border-gray-100 shadow p-2 bg-white  max-h-[100%] overflow-auto w-full">
-    <div class="rounded border border-gray-100 shadow p-2 bg-sky-50 flex flex-col gap-2">
+  <div class="rounded-lg border border-gray-100 shadow p-2 bg-white  w-full">
+    <div class="rounded border border-gray-100 shadow p-2 bg-sky-50 flex flex-col gap-2 w-full">
       <div>
         <div class="flex items-center justify-between border-b border-gray-300">
           <h5 class="font-bold">Proyectos</h5>
           <h5 class="font-bold">{{ proyectosPPI.length }}</h5>
         </div>
-        <div class="flex gap-0">
+        <div class="flex gap-0 w-full max-w-full ">
           <div v-for="top in top3" :key="top.CLASIFICACION"
-            class="flex-1 border-e border-gray-200 px-1 max-w-1/3 last:border-e-0">
+            class="flex-1 border-e border-gray-200 px-1  last:border-e-0 min-w-0">
             <h5 class="text-xs truncate font-semibold text-center" :title="top.CLASIFICACION">{{ top.CLASIFICACION }}
             </h5>
             <h5 class="text-xs truncate font-semibold text-center">{{ top.total }}</h5>

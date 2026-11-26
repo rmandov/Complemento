@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, VNode } from 'vue';
+import { descargarCSV } from '../../utils/querys/generales';
 
 export interface Columna {
   key: string;
@@ -13,6 +14,7 @@ export interface Columna {
 interface Props {
   datos: Record<string, any>[];
   columnas: Columna[];
+  descarga?:boolean;
 }
 
 const props = defineProps<Props>();
@@ -144,10 +146,14 @@ const restaurarPagina = (event: Event) => {
 
   input.value = String(totalPaginas.value > 0 ? pagActiva.value + 1 : 0);
 };
+
+function descargar(){
+  descargarCSV(props.datos,"Complementariedades.csv" );
+}
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 h-full max-h-[80dvh] lg:max-h-full overflow-hidden">
+  <div class="flex flex-col gap-2 h-full max-h-[80dvh] lg:max-h-full overflow-hidden">
 
     <div class="contenedor-tabla flex-1 overflow-auto border border-gray-300 rounded-lg shadow">
       <table class="tabla">
@@ -201,7 +207,15 @@ const restaurarPagina = (event: Event) => {
       </table>
     </div>
 
-    <div class="flex flex-wrap items-center justify-center md:justify-end gap-4">
+    <div class="flex items-center justify-between">
+      <div v-if="descarga">
+        <button
+        type="button"
+        @click="descargar"
+        class="rounded py-0 px-2 bg-gray-200 hover:bg-gray-600 hover:text-white cursor-pointer transition-all ease duration-300"
+        >Descargar</button>
+      </div>
+      <div class="flex flex-wrap items-center justify-center md:justify-end gap-4">
       <div class="flex gap-2 items-center">
         <label for="rpp">Registros por página:</label>
 
@@ -251,6 +265,7 @@ const restaurarPagina = (event: Event) => {
           </span>
         </button>
       </div>
+    </div>
     </div>
 
   </div>

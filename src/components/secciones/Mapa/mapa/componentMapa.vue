@@ -29,6 +29,7 @@ import {
   estiloMun,
   estiloMunHover,
   estiloMunSeleccionado,
+  getChoroplethColor,
 } from '../utils/estilosCapas';
 import { useMunicipiosCache } from '../utils/useMunicipiosCache';
 import { PPI } from '../utils/duckdb';
@@ -247,22 +248,46 @@ function eliminarLimitesMunicipios() {
   }
 }
 
-watch(filtros , async (nvo) => {
-  if(nvo.id_municipio && !nvo.id_ef){
-    nvo.id_municipio=undefined;
+watch(filtros, async (nvo) => {
+  if (nvo.id_municipio && !nvo.id_ef) {
+    nvo.id_municipio = undefined;
   }
-  if(nvo.unidad && !nvo.ramo){
-    nvo.unidad=undefined;
+  if (nvo.unidad && !nvo.ramo) {
+    nvo.unidad = undefined;
   }
+  if(nvo.id_ef && !nvo.region && !nvo.metropoli && (nvo.tipo_area !== undefined && nvo.tipo_area !==1 )){
+    nvo.id_ef=undefined;
+  }
+
   proyectosPPI.value = await obtenerPPIFIltro(nvo);
 }, {
-  deep:true
+  deep: true
 })
 watch(
   proyectosPPI,
-  () => {
+  (nvo) => {
     capaProyectos.value = dibujarProyectos();
     mapa.value?.addLayer(capaProyectos.value);
+    if (!capaEstados.value) return
+    capaEstados.value.eachLayer((layer) => {
+      if (!(layer instanceof L.Path)) return;
+
+      const feature = (layer as L.Path & {
+        feature?: GeoJSON.Feature;
+      }).feature;
+      const fid=feature?.properties?.CVE_ENT;
+      const np = nvo.filter((pr) => pr.ID_EF === fid ).length;
+      const colorFil = getChoroplethColor(np).color;
+      const selec=filtros.value.id_ef===fid;
+
+      layer.setStyle({
+        ...estiloEF,
+        fillColor:colorFil,
+        fillOpacity:selec?estiloEFSeleccionado.fillOpacity:estiloEF.fillOpacity,
+      })
+
+
+    })
   },
   { deep: true }
 );
@@ -303,10 +328,10 @@ function dibujarProyectos(): L.FeatureGroup {
     });
 
     // Popup
-    marcador.bindTooltip(proyecto.CC,{});
+    marcador.bindTooltip(proyecto.NOMBRE_PPI, {});
     marcador.bindPopup(`
       <div>
-        <strong>${proyecto.CC}</strong>
+        <strong>${proyecto.NOMBRE_PPI}</strong>
         <br>
         <b>Fecha inicial:</b> ${new Date(proyecto.FECHA_INICIO_CAL_FF).toLocaleDateString()}
         <br>

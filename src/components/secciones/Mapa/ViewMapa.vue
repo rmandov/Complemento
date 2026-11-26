@@ -26,6 +26,7 @@ export interface Filtros {
   fecha_inicio?:Date;
   fecha_final?:Date;
   monto_total?:number;
+  tipo_area?:number;
 }
 const limpiarFiltros = () => {
   filtros.value = {
@@ -41,8 +42,8 @@ const limpiarFiltros = () => {
     tipo_filtro:undefined,
     fecha_final:undefined,
     fecha_inicio:undefined,
-    monto_total:undefined
-
+    monto_total:undefined,
+    tipo_area:undefined,
   }
   regresarMapa();
 }

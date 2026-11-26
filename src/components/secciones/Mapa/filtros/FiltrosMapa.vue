@@ -49,11 +49,6 @@ const tabs = [
   },
   {
     id: 2,
-    label: "Categorías",
-    icono: "list_alt"
-  },
-  {
-    id: 3,
     label: "Ramo",
     icono: "dashboard_customize"
   }
@@ -95,7 +90,9 @@ const tabs = [
         </button>
       </div>
       <div class=" flex-1 flex flex-col gap-2 items-end h-full overflow-hidden relative max-h-full">
-        <Predeterminado/>
+        <div class="flex-1 max-h-full h-full w-full overflow-auto">
+          <Predeterminado/>
+        </div>
         <button type="button" class=" rounded py-0 px-2 bg-sky-600 hover:bg-sky-800 text-white
            cursor-pointer transition-all ease duration-300" @click="limpiarFiltros">
           Limpiar

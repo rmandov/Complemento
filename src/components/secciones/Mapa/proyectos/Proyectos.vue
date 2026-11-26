@@ -13,6 +13,12 @@ const columnas: Columna[] = [
     sortable: true,
     width:"2rem"
   },
+  {
+    key: 'NOMBRE_PPI',
+    label: 'Nombre',
+    sortable: true,
+    width:"10rem"
+  },
   /*
   {
     key: "EF",
@@ -123,7 +129,7 @@ const columnas: Columna[] = [
 </script>
 <template>
   <section class="w-full h-full overflow-auto max-h-full">
-    <Tabla :datos="proyectosPPI" :columnas="columnas" />
+    <Tabla :datos="proyectosPPI" :columnas="columnas" descarga/>
   </section>
 </template>
 <style scoped>

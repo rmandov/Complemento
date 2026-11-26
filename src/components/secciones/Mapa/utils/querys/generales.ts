@@ -67,3 +67,46 @@ export const formatearMoneda = (valor: number) => {
     currency: 'MXN'
   }).format(valor);
 };
+export function descargarCSV<T extends Record<string, any>>(
+  data: T[],
+  filename: string = 'export.csv'
+): void {
+  if (!data || data.length === 0) return;
+
+  const headers = Object.keys(data[0]);
+
+  const escapeCSV = (value: any): string => {
+    if (value === null || value === undefined) return '';
+
+    const stringValue = String(value);
+
+    // Escapar comillas y envolver valores que lo necesiten
+    if (/[",\n\r]/.test(stringValue)) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+
+    return stringValue;
+  };
+
+  const csvContent = [
+    headers.map(escapeCSV).join(','),
+    ...data.map(row =>
+      headers.map(header => escapeCSV(row[header])).join(',')
+    )
+  ].join('\r\n');
+
+  // BOM para compatibilidad con Excel
+  const blob = new Blob(
+    ['\uFEFF' + csvContent],
+    { type: 'text/csv;charset=utf-8;' }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}

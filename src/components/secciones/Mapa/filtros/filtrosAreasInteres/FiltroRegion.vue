@@ -32,6 +32,7 @@ async function listarMun(id: string) {
   })
 }
 async function listarEF(reg:string){
+
     ef_options.value = (await obtenerEF({
     region:reg
   })).map((item) => {
@@ -45,6 +46,11 @@ watch(()=>filtros.value.region,async (reg)=>{
   if(reg){
     await listarEF(reg)
   }
+  else{
+    ef_options.value=[]
+  }
+    filtros.value.id_ef=undefined;
+    filtros.value.id_municipio=undefined;
 
 },{
   deep:true
@@ -52,6 +58,10 @@ watch(()=>filtros.value.region,async (reg)=>{
 watch(() => filtros.value.id_ef, async (nvo) => {
   if (nvo !== undefined && nvo !== null) {
     await listarMun(nvo);
+  }
+  else{
+    filtros.value.id_municipio=undefined
+    mun_options.value=[]
   }
 }, {
   deep:true
@@ -62,7 +72,7 @@ watch(() => filtros.value.id_ef, async (nvo) => {
 </script>
 <template>
   <div class="flex flex-col gap-2 relative">
-    <SelectInputBusqueda id="region" label="Región" :options="regiones" :bloquear-deseleccionar="true"
+    <SelectInputBusqueda id="region" label="Región" :options="regiones" :bloquear-deseleccionar="false"
       v-model="filtros.region" />
     <SelectInputBusqueda v-if="ef_options.length > 0" id="ef" label="Estado" :options="ef_options" :bloquear-deseleccionar="false"
       v-model="filtros.id_ef" />

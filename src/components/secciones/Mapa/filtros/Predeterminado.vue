@@ -9,7 +9,7 @@ const filtros = inject<Ref<Filtros>>("filtros")!;
 </script>
 <template>
   <div class="rounded-lg flex flex-col gap-4 border border-gray-100 shadow p-2 bg-white relative  max-h-[100%] overflow-visible w-full h-full">
-    <FiltroRamo v-if="filtros.tipo_filtro === 3"/>
+    <FiltroRamo v-if="filtros.tipo_filtro === 2"/>
     <FiltroTopProyectos />
     <FiltroAreaInteres />
 
