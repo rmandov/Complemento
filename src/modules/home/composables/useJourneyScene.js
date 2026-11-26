@@ -1,5 +1,7 @@
 import { onMounted, onBeforeUnmount, ref, watch } from "vue";
+
 import {
+  ACESFilmicToneMapping,
   AmbientLight,
   BufferGeometry,
   Color,
@@ -8,12 +10,17 @@ import {
   Line,
   LineBasicMaterial,
   PerspectiveCamera,
+  PMREMGenerator,
   Quaternion,
   Scene,
   SRGBColorSpace,
   Vector3,
   WebGLRenderer,
 } from "three";
+
+// Entorno de estudio que produce reflejos metálicos
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
 import { useGltfModel, disposeModel } from "./useGltfModel";
 import { createJourneyPath, journeyCurveProgress } from "../utils/journeyPath";
 import { JOURNEY_CONFIG } from "../config/journeyConfig";
@@ -45,6 +52,8 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
   let spinningAngle = 0;
   let currentProgress = 0;
   let targetProgress = 0;
+  let environmentTarget;
+  let elapsedSeconds = 0;
   const point = new Vector3();
   const tangent = new Vector3();
   const forward = new Vector3(...config.model.forwardAxis).normalize();
@@ -56,6 +65,67 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     if (width < 768) return config.model.mobileScale;
     if (width < 1024) return config.model.tabletScale;
     return config.model.scale;
+  }
+
+  // ==========================================
+  // REFLEJOS METÁLICOS DE ESTUDIO
+  // ==========================================
+  function makeReflectionEnvironment() {
+    const pmrem = new PMREMGenerator(renderer);
+    const room = new RoomEnvironment();
+
+    try {
+      // Genera un entorno de iluminación de estudio
+      environmentTarget = pmrem.fromScene(room, 0.04);
+
+      // El entorno se refleja en los materiales
+      scene.environment = environmentTarget.texture;
+
+      // Controla la iluminación ambiental de reflejos
+      scene.environmentIntensity = config.lighting.environmentIntensity;
+    } finally {
+      room.dispose();
+      pmrem.dispose();
+    }
+  }
+
+  // ==========================================
+  // MATERIAL METÁLICO PERSONALIZADO
+  // ==========================================
+  function applyMetalPreset(root) {
+    // Permite desactivar el efecto cuando
+    // sustituyamos la esfera por un tren.
+    if (config.model.materialPreset !== "studio-metal") {
+      return;
+    }
+
+    root.traverse((object) => {
+      if (!object.isMesh) return;
+
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+
+      materials.filter(Boolean).forEach((material) => {
+        if (!material.isMeshStandardMaterial && !material.isMeshPhysicalMaterial) {
+          return;
+        }
+
+        // Identificar partes plateadas del GLB
+        const silver = /platead|silver|detail|contorno/i.test(material.name || "");
+
+        // Intensidad de metal
+        material.metalness = config.material.metalness;
+
+        // Control de rugosidad por material
+        material.roughness = silver
+          ? config.material.silverRoughness
+          : config.material.champagneRoughness;
+
+        // Intensidad de reflejos
+        material.envMapIntensity = config.material.envMapIntensity;
+
+        material.needsUpdate = true;
+      });
+    });
   }
 
   function createScene() {
@@ -74,13 +144,30 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     facing.add(spin);
     scene.add(track);
 
-    scene.add(new AmbientLight("#ffffff", 1.25));
-    const key = new DirectionalLight("#ffffff", 2.35);
-    key.position.set(-3, 5, 6);
+    // ==========================================
+    // ILUMINACIÓN CINEMATOGRÁFICA
+    // ==========================================
+
+    // Luz ambiental tenue
+    scene.add(new AmbientLight(0xffffff, 0.35));
+
+    // Luz principal frontal
+    const key = new DirectionalLight(0xffffff, config.lighting.keyIntensity);
+
+    key.position.set(-4, 5, 7);
     scene.add(key);
-    const fill = new DirectionalLight("#84a9fd", 1.35);
-    fill.position.set(4, -3, 3);
+
+    // Luz secundaria azulada
+    const fill = new DirectionalLight(0xc9ddff, config.lighting.fillIntensity);
+
+    fill.position.set(5, -2, 3);
     scene.add(fill);
+
+    // Contraluz cálido
+    const rim = new DirectionalLight(0xffdab3, config.lighting.rimIntensity);
+
+    rim.position.set(1, 3, -5);
+    scene.add(rim);
 
     route = new Line(
       new BufferGeometry(),
@@ -89,17 +176,36 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     route.visible = config.journey.showPath;
     scene.add(route);
 
+    // ==========================================
+    // RENDERER DE ALTA CALIDAD
+    // ==========================================
+
     renderer = new WebGLRenderer({
       antialias: true,
       alpha: true,
-      powerPreference: "low-power",
+      powerPreference: "high-performance",
     });
 
+    // Canvas transparente
     renderer.setClearColor(0x000000, 0);
+
+    // Espacio de color
     renderer.outputColorSpace = SRGBColorSpace;
+
+    // Tone mapping cinematográfico
+    renderer.toneMapping = ACESFilmicToneMapping;
+
+    renderer.toneMappingExposure = config.lighting.toneMappingExposure;
+
     renderer.domElement.setAttribute("aria-hidden", "true");
+
     containerRef.value.appendChild(renderer.domElement);
+
     renderer.domElement.addEventListener("webglcontextlost", onContextLost);
+
+    // Crear reflejos después de inicializar renderer
+    makeReflectionEnvironment();
+
     motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     motionQuery.addEventListener("change", onPreferenceChange);
 
@@ -150,6 +256,7 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     route.geometry = new BufferGeometry().setFromPoints(path.getSpacedPoints(180));
     if (modelRoot) modelRoot.scale.setScalar(getSizeFactor(width));
     updateObjectPosition();
+    updateCamera();
     renderOnce();
   }
 
@@ -165,6 +272,33 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
     } else {
       facing.quaternion.copy(rotationCorrection);
     }
+  }
+
+  // ==========================================
+  // MOVIMIENTO CINEMATOGRÁFICO DE CÁMARA
+  // ==========================================
+  function updateCamera() {
+    if (!camera) return;
+
+    const reducedMotion = Boolean(motionQuery?.matches);
+
+    const cameraMovement = !reducedMotion && config.model.rotate ? config.motion.cameraDrift : 0;
+
+    const cameraDepth = !reducedMotion && config.model.rotate ? config.motion.cameraDepth : 0;
+
+    const p = currentProgress * Math.PI * 2;
+
+    // Movimiento lateral y vertical
+    const x = Math.sin(p) * cameraMovement;
+
+    const y = Math.sin(p * 0.65) * cameraMovement * 0.45;
+
+    // Acercamiento y alejamiento suaves
+    const z = config.camera.distance + Math.sin(p * 1.25) * cameraDepth;
+
+    camera.position.set(x, y, z);
+
+    camera.lookAt(0, 0, 0);
   }
 
   function renderOnce() {
@@ -183,28 +317,72 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
 
   function frame(now) {
     rafId = 0;
+
     if (!visible || destroyed || !renderer) return;
+
+    // Tiempo transcurrido entre fotogramas
     const deltaSeconds = lastFrameTime ? Math.min(0.05, (now - lastFrameTime) / 1000) : 0.016;
+
     lastFrameTime = now;
-    const reducedMotion = motionQuery?.matches;
-    const remaining = Math.abs(targetProgress - currentProgress);
-    if (reducedMotion || remaining < 0.00005) {
+
+    const reducedMotion = Boolean(motionQuery?.matches);
+
+    // ==========================================
+    // SUAVIZADO DEL SCROLL
+    // ==========================================
+
+    if (reducedMotion || Math.abs(targetProgress - currentProgress) < 0.00005) {
       currentProgress = targetProgress;
     } else {
       const seconds = Math.max(0.001, config.journey.smoothingSeconds);
+
       currentProgress +=
         (targetProgress - currentProgress) * (1 - Math.exp(-deltaSeconds / seconds));
     }
-    if (config.model.rotate && !reducedMotion && modelRoot) {
+
+    // ==========================================
+    // ANIMACIÓN CINEMATOGRÁFICA
+    // ==========================================
+
+    const isAnimating = config.model.rotate && !reducedMotion && Boolean(modelRoot);
+
+    if (isAnimating) {
+      elapsedSeconds += deltaSeconds;
+
+      // Rotación principal
       spinningAngle += deltaSeconds * config.model.rotationSpeed;
+
       spin.rotation.y = spinningAngle;
+
+      // Inclinación suave en X
+      spin.rotation.x = Math.sin(elapsedSeconds * 0.52) * config.motion.tiltAmplitude;
+
+      // Inclinación suave en Z
+      spin.rotation.z = Math.sin(elapsedSeconds * 0.43) * config.motion.tiltAmplitude * 0.6;
+
+      // Flotación vertical
+      spin.position.y =
+        Math.sin(elapsedSeconds * config.motion.floatSpeed) * config.motion.floatAmplitude;
+    } else {
+      // Sin movimientos propios para el futuro tren
+      // o cuando se solicita movimiento reducido.
+      spin.rotation.set(0, config.model.rotate ? spinningAngle : 0, 0);
+
+      spin.position.set(0, 0, 0);
     }
+
+    // ==========================================
+    // ACTUALIZAR RECORRIDO Y CÁMARA
+    // ==========================================
+
     updateObjectPosition();
+    updateCamera();
+
+    // Renderizar escena
     renderer.render(scene, camera);
-    if (
-      Math.abs(targetProgress - currentProgress) > 0.00001 ||
-      (config.model.rotate && !reducedMotion && modelRoot)
-    ) {
+
+    // Mantener animación solo cuando sea necesario
+    if (Math.abs(targetProgress - currentProgress) > 0.00001 || isAnimating) {
       requestLoop();
     } else {
       lastFrameTime = 0;
@@ -247,6 +425,8 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
         return;
       }
       modelRoot = root;
+      // Aplicar materiales metálicos al GLB cargado
+      applyMetalPreset(root);
       spin.add(root);
       modelRoot.scale.setScalar(getSizeFactor(containerRef.value.clientWidth));
       updateObjectPosition();
@@ -260,25 +440,46 @@ export function useJourneyScene(containerRef, scrollProgress, stageCount) {
 
   onBeforeUnmount(() => {
     destroyed = true;
+
+    // Detener animaciones
     stopLoop();
+
+    // Desconectar observadores
     resizeObserver?.disconnect();
     intersectionObserver?.disconnect();
+
     motionQuery?.removeEventListener("change", onPreferenceChange);
-    if (renderer) {
-      renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
-      renderer.dispose();
-      renderer.domElement.remove();
-      renderer = null;
-    }
+
+    // Liberar modelo 3D
     if (modelRoot) {
       disposeModel(modelRoot);
       modelRoot = null;
     }
+
+    // Liberar línea del recorrido
     if (route) {
       route.geometry.dispose();
       route.material.dispose();
     }
-    scene?.clear();
+
+    // Limpiar escena
+    if (scene) {
+      scene.environment = null;
+      scene.clear();
+    }
+
+    // Liberar entorno metálico
+    environmentTarget?.dispose();
+    environmentTarget = null;
+
+    // Liberar renderer
+    if (renderer) {
+      renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
+
+      renderer.dispose();
+      renderer.domElement.remove();
+      renderer = null;
+    }
   });
 
   return { error };

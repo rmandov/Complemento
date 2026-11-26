@@ -1,56 +1,120 @@
-/**
- * Configuración central de la experiencia 3D.
- * El modelo GLB vive en public/models/, no en src/assets/.
- * BASE_URL permite desplegar Vite en una subruta de producción.
- */
 export const JOURNEY_CONFIG = {
   model: {
-    // MODIFICAR AQUÍ PARA CAMBIAR EL MODELO: sphere.glb -> train.glb
+    // MODELO 3D
+    // Debe existir en public/models/
     path: `${import.meta.env.BASE_URL}models/esfera_ornamental_calada.glb`,
-    // MODIFICAR AQUÍ PARA CAMBIAR EL TAMAÑO (escala tras normalizar el GLB)
-    scale: 0.5,
+
+    // TAMAÑO DEL MODELO
+    scale: 1,
     mobileScale: 0.77,
     tabletScale: 0.88,
-    // MODIFICAR AQUÍ PARA DESACTIVAR LA ROTACIÓN PROPIA DE LA ESFERA
-    rotate: false,
-    rotationSpeed: 0.42, // radianes / segundo; independiente del scroll
-    // Al usar un tren, poner true (y rotate: false).
+
+    // ROTACIÓN AUTOMÁTICA
+    rotate: true,
+    rotationSpeed: 0.26,
+
+    // Preparación para sustituir la esfera por un tren
     followTangent: false,
-    // El eje frontal del GLB: por defecto, +Z. Ajustar para otro modelo.
     forwardAxis: [0, 0, 1],
-    // Si el GLB apunta en otra dirección, corregir los grados aquí.
     rotationOffsetDegrees: [0, 0, 0],
+
+    // Material metálico de estudio
+    // Cambiar a 'original' al utilizar otro modelo
+    materialPreset: "studio-metal",
   },
 
-  // MODIFICAR AQUÍ PARA CAMBIAR LA CÁMARA
+  // ==========================================
+  // MATERIAL METÁLICO
+  // ==========================================
+  material: {
+    // 1 = metal completamente metálico
+    metalness: 0.88,
+
+    // Menor roughness = reflejos más definidos
+    champagneRoughness: 0.59,
+    silverRoughness: 0.54,
+
+    // Intensidad de los reflejos del material
+    envMapIntensity: 0.5,
+  },
+
+  // ==========================================
+  // ILUMINACIÓN CINEMATOGRÁFICA
+  // ==========================================
+  lighting: {
+    // Reflejos generados por RoomEnvironment
+    environmentIntensity: 0.4,
+
+    // Exposición de la escena
+    toneMappingExposure: 1.25,
+
+    // Luz principal
+    keyIntensity: 2.1,
+
+    // Luz secundaria azulada
+    fillIntensity: 1.15,
+
+    // Contraluz cálido
+    rimIntensity: 2.6,
+  },
+
+  // ==========================================
+  // MOVIMIENTO CINEMATOGRÁFICO
+  // ==========================================
+  motion: {
+    // Movimiento vertical sutil
+    floatAmplitude: 0.045,
+    floatSpeed: 0.8,
+
+    // Inclinación durante el giro
+    tiltAmplitude: 0.045,
+
+    // Desplazamiento suave de cámara
+    cameraDrift: 0.17,
+
+    // Variación de profundidad
+    cameraDepth: 0.16,
+  },
+
+  // ==========================================
+  // CÁMARA
+  // ==========================================
   camera: {
     fov: 42,
     distance: 9,
     near: 0.1,
     far: 100,
+
+    // Canvas completamente transparente
     background: null,
   },
 
-  // MODIFICAR AQUÍ PARA CAMBIAR EL RECORRIDO y la experiencia de scroll
+  // ==========================================
+  // RECORRIDO Y SCROLL
+  // ==========================================
   journey: {
     closed: true,
-    scrollVhPerStage: 115, // altura de scroll entre etapas, en svh
-    smoothingSeconds: 0.3, // suavizado del modelo; no retrasa el texto
-    jumpDurationSeconds: 1.1, // salto desde la navegación lateral
-    showPath: true, // útil para pruebas; false oculta la curva
+    scrollVhPerStage: 170,
+    smoothingSeconds: 0.25,
+    jumpDurationSeconds: 1.35,
+    showPath: false,
   },
 
+  // ==========================================
+  // DISTRIBUCIÓN
+  // ==========================================
   layout: {
-    // MODIFICAR AQUÍ SI CAMBIA LA ALTURA DEL NAVBAR DE TU SITIO
     navbarDesktopPx: 80,
     navbarTabletPx: 72,
     navbarMobilePx: 64,
-    // ID de la sección que YA contiene el botón hacia el mapa.
     mapTarget: "#map-section",
   },
 
+  // ==========================================
+  // RENDIMIENTO
+  // ==========================================
   performance: {
-    maxPixelRatio: 1.6,
-    maxPixelRatioMobile: 1.25,
+    maxPixelRatio: 1.5,
+    maxPixelRatioMobile: 1.1,
   },
 };
