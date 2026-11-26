@@ -1,0 +1,28 @@
+.seccion {
+  padding: 0 1rem;
+  overflow: hidden;
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  .seccion {
+    padding: 2rem 3rem;
+  }
+}
+.input-form{
+   width: 100%;
+  border: 1px solid var(--color-borde-cards);
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: white;
+  max-width: 100%;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.leaflet-container .leaflet-interactive:focus {
+  outline: none !important;
+}
+
+.leaflet-container .leaflet-tooltip {
+  pointer-events: none;
+}

@@ -44,12 +44,10 @@ export function useMap(containerRef) {
 
     // 1. Capa de fondo (SIN ETIQUETAS)
     const callesFondo = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
       {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 20,
+        attribution: "Tiles &copy; Esri",
+        maxZoom: 16,
       },
     );
 
@@ -65,7 +63,7 @@ export function useMap(containerRef) {
     );
 
     // 3. Agrupamos ambas en una sola capa lógica para que el usuario las active juntas
-    const calles = L.layerGroup([callesFondo, callesLabels]);
+    const calles = L.layerGroup([callesFondo]);
 
     calles.addTo(map.value);
   };
