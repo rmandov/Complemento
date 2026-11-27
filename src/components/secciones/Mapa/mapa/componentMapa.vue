@@ -23,6 +23,7 @@ import { Feature, FeatureCollection } from "geojson";
 import BotonRegresar from './BotonRegresar.vue';
 import { Filtros } from '../ViewMapa.vue';
 import {
+  clasificacionColores,
   estiloEF,
   estiloEFHover,
   estiloEFSeleccionado,
@@ -35,6 +36,8 @@ import { useMunicipiosCache } from '../utils/useMunicipiosCache';
 import { PPI } from '../utils/duckdb';
 import { obtenerPPIFIltro } from '../utils/querys/predeterminadoQuerys';
 import { formatearMoneda } from '../utils/querys/generales';
+import FiltroClasificaciones from '../filtros/FiltroClasificaciones.vue';
+import BotonActivarProyectos from './BotonActivarProyectos.vue';
 
 const mapa = ref<L.Map | null>(null);
 const mapaContainer = ref<HTMLElement | null>(null);
@@ -255,19 +258,35 @@ watch(filtros, async (nvo) => {
   if (nvo.unidad && !nvo.ramo) {
     nvo.unidad = undefined;
   }
-  if(nvo.id_ef && !nvo.region && !nvo.metropoli && (nvo.tipo_area !== undefined && nvo.tipo_area !==1 )){
-    nvo.id_ef=undefined;
+  if (nvo.id_ef && !nvo.region && !nvo.metropoli && (nvo.tipo_area !== undefined && nvo.tipo_area !== 1)) {
+    nvo.id_ef = undefined;
   }
 
   proyectosPPI.value = await obtenerPPIFIltro(nvo);
 }, {
   deep: true
 })
+const habilitarCapaProyectos = ref(false);
+function handleChangeCapaProyectos() {
+  habilitarCapaProyectos.value = !habilitarCapaProyectos.value;
+  if (habilitarCapaProyectos.value) {
+    activarCapaProyectos();
+  }
+  else {
+    capaProyectos.value?.clearLayers();
+    if (capaProyectos.value){
+          mapa.value?.addLayer(capaProyectos.value);
+
+    }
+
+  }
+}
 watch(
   proyectosPPI,
   (nvo) => {
-    capaProyectos.value = dibujarProyectos();
-    mapa.value?.addLayer(capaProyectos.value);
+    if (habilitarCapaProyectos.value) {
+      activarCapaProyectos();
+    }
     if (!capaEstados.value) return
     capaEstados.value.eachLayer((layer) => {
       if (!(layer instanceof L.Path)) return;
@@ -275,22 +294,25 @@ watch(
       const feature = (layer as L.Path & {
         feature?: GeoJSON.Feature;
       }).feature;
-      const fid=feature?.properties?.CVE_ENT;
-      const np = nvo.filter((pr) => pr.ID_EF === fid ).length;
+      const fid = feature?.properties?.CVE_ENT;
+      const np = nvo.filter((pr) => pr.ID_EF === fid).length;
       const colorFil = getChoroplethColor(np).color;
-      const selec=filtros.value.id_ef===fid;
+      const selec = filtros.value.id_ef === fid;
 
       layer.setStyle({
         ...estiloEF,
-        fillColor:colorFil,
-        fillOpacity:selec?estiloEFSeleccionado.fillOpacity:estiloEF.fillOpacity,
+        fillColor: colorFil,
+        fillOpacity: selec ? estiloEFSeleccionado.fillOpacity : estiloEF.fillOpacity,
       })
-
-
     })
   },
   { deep: true }
 );
+function activarCapaProyectos() {
+  capaProyectos.value = dibujarProyectos();
+  mapa.value?.addLayer(capaProyectos.value);
+
+}
 
 const estiloBase = {
   radius: 6,
@@ -324,7 +346,8 @@ function dibujarProyectos(): L.FeatureGroup {
 
     // Crear marcador
     const marcador = L.circleMarker([lat, lon], {
-      ...estiloBase
+      ...estiloBase,
+      fillColor: clasificacionColores[proyecto.CLASIFICACION].normal ?? estiloBase.fillColor
     });
 
     // Popup
@@ -353,6 +376,8 @@ function dibujarProyectos(): L.FeatureGroup {
   <div class="w-full h-[80dvh] lg:h-full rounded-lg overflow-hidden relative">
     <div ref="mapaContainer" class="w-full h-full"></div>
     <BotonRegresar @on-click="filtros.id_ef = undefined" />
+    <BotonActivarProyectos :habilitado="habilitarCapaProyectos" @on-click="handleChangeCapaProyectos" />
+    <FiltroClasificaciones />
   </div>
 </template>
 <style scoped></style>

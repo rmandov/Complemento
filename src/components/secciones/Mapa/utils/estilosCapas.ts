@@ -57,3 +57,85 @@ export const getChoroplethColor = (value: number): ChoroplethColors => {
 
   return scales.find(scale => value < scale.max) ?? scales[6];
 };
+export const clasificacionColores: Record<string, ClassificationStyle> = {
+  "Agropecuaria": {
+    normal: "#DD7A2C",
+    hover: "#F6A65C",
+    icon: "agriculture",
+  },
+  "Agua": {
+    normal: "#2563EB",
+    hover: "#60A5FA",
+    icon: "water_drop",
+  },
+  "Cultura": {
+    normal: "#8846B7",
+    hover: "#B47BE0",
+    icon: "theater_comedy",
+  },
+  "Economía": {
+    normal: "#B9850B",
+    hover: "#E6B335",
+    icon: "payments",
+  },
+  "Educación y ciencia": {
+    normal: "#5F54C7",
+    hover: "#948AEB",
+    icon: "school",
+  },
+  "Energía": {
+    normal: "#D63E3E",
+    hover: "#F36F69",
+    icon: "bolt",
+  },
+  "Gobierno y seguridad": {
+    normal: "#5D647A",
+    hover: "#939DB6",
+    icon: "account_balance",
+  },
+  "Infraestructura vial": {
+    normal: "#2B73A7",
+    hover: "#67A5D5",
+    icon: "road",
+  },
+  "Medio ambiente": {
+    normal: "#B24BA0",
+    hover: "#D77DC6",
+    icon: "eco",
+  },
+  "Salud": {
+    normal: "#D73382",
+    hover: "#F173B3",
+    icon: "health_and_safety",
+  },
+  "Servicios": {
+    normal: "#C85C3E",
+    hover: "#ED8C6C",
+    icon: "volunteer_activism",
+  },
+  "Telecomunicaciones": {
+    normal: "#4A82C1",
+    hover: "#79B2EB",
+    icon: "cell_tower",
+  },
+  "Territorio": {
+    normal: "#926044",
+    hover: "#C38F6F",
+    icon: "map",
+  },
+  "Transporte público y comercial": {
+    normal: "#3F4EA4",
+    hover: "#7987DC",
+    icon: "local_shipping",
+  },
+  "Turismo": {
+    normal: "#E26589",
+    hover: "#F598B2",
+    icon: "travel",
+  },
+};
+export interface ClassificationStyle  {
+  normal: string;
+  hover: string;
+  icon: string;
+};

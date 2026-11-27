@@ -15,8 +15,20 @@ const tabs:Tab[] = [
   },
   {
     id:1,
-    label:"Proyectos",
+    label:"Tabla",
     component:Proyectos
+  },
+  {
+    id:2,
+    label:"Estadísticas",
+    component:Proyectos,
+    disabled:true
+  },
+  {
+    id:3,
+    label:"Gráficas",
+    component:Proyectos,
+    disabled:true
   }
 ]
 
@@ -25,12 +37,13 @@ export interface Tab {
   label: string,
   component: Component,
   icono?:string
+  disabled?:boolean
 }
 </script>
 <template>
   <section class="flex flex-col gap-2 lg:max-w-[70%] w-full min-h-[80dvh] lg:min-h-[70%] border rounded-xl shadow-xl border-gray-100 px-4 py-4 bg-white">
     <div>
-      <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+      <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :disabled="tab.disabled"
         class="boton-tab" :class="{
           'activo':tab.id === activeTab
         }"
@@ -59,11 +72,14 @@ export interface Tab {
   text-underline-offset: 1rem;
   font-weight: bold;
 }
-.boton-tab:hover{
+.boton-tab:not(:disabled):hover{
   color: #111827;
   text-decoration: underline #111827 2px;
   text-underline-offset: 1rem;
   font-weight: bold;
+}
+.boton-tab:disabled{
+  opacity: 0.5;
 }
 
 </style>

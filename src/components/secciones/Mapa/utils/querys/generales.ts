@@ -59,6 +59,7 @@ const columnas: Partial<Record<keyof Filtros, string>> = {
   fecha_inicio:"FECHA_INICIO_CAL_FF",
   fecha_final:"FECHA_FIN_CAL_FF",
   monto_total:"MONTO_TOTAL_INVERSION",
+  clasificacion:"CLASIFICACION",
 
 };
 export const formatearMoneda = (valor: number) => {

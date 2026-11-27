@@ -91,7 +91,11 @@ export async function obtenerUnidades(filtros:Filtros): Promise<ListaUnidad[]> {
   const respuesta = await query<ListaUnidad>(querySql, filtrar.params);
   return respuesta;
 }
-
+export async function obtenerClasificaciones(): Promise<ListaClasificaciones[]> {
+  const querySql: string = `SELECT DISTINCT CLASIFICACION FROM PPI WHERE CLASIFICACION NOT NULL ORDER BY CLASIFICACION ASC`;
+  const respuesta = await query<ListaClasificaciones>(querySql);
+  return respuesta;
+}
 export interface ContarTotal {
   total: number;
 }
@@ -121,4 +125,7 @@ export interface ListaRamo {
 }
 export interface ListaUnidad {
   UNIDAD: string;
+}
+export interface ListaClasificaciones {
+  CLASIFICACION: string;
 }
