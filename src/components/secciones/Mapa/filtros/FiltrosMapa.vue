@@ -14,7 +14,7 @@ function handleClickTab(id: number) {
 
   if (id === activeTab.value) {
     activeTab.value = null
-      filtros.value.tipo_filtro = undefined;
+    filtros.value.tipo_filtro = undefined;
 
     return
   }
@@ -23,16 +23,16 @@ function handleClickTab(id: number) {
 
 }
 watch(() => filtros.value.tipo_filtro, (nvo) => {
-  const tipo3=["Proyecto","Programa"]
-  if( nvo !== undefined){
-    const ind=tipo3[nvo];
+  const tipo3 = ["Proyecto", "Programa"]
+  if (nvo !== undefined) {
+    const ind = tipo3[nvo];
 
-    filtros.value.tipo3_PPI =  ind ?? undefined
+    filtros.value.tipo3_PPI = ind ?? undefined
 
   }
-  else{
+  else {
     filtros.value.tipo3_PPI = undefined
-    activeTab.value=null;
+    activeTab.value = null;
   }
 
 })

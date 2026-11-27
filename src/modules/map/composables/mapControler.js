@@ -44,12 +44,12 @@ export function useMap(containerRef) {
 
     // 1. Capa de fondo (SIN ETIQUETAS)
     const callesFondo = L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-  {
-    attribution: "Tiles &copy; Esri",
-    maxZoom: 16,
-  }
-);
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution: "Tiles &copy; Esri",
+        maxZoom: 16,
+      },
+    );
 
     // 2. Capa de etiquetas (SOLO TEXTO TRANSPARENTE) forzada en un pane superior
     const callesLabels = L.tileLayer(

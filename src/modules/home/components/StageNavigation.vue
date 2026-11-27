@@ -1,31 +1,32 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   stages: { type: Array, required: true },
   activeIndex: { type: Number, default: 0 },
+  mapRoute: { type: String, default: '/mapa' },
 })
-const emit = defineEmits(['navigate', 'map'])
+const emit = defineEmits(['navigate'])
 </script>
 
 <template>
   <nav class="stage-navigation" aria-label="Navegación del recorrido">
     <ol class="stage-navigation__list">
       <li v-for="(stage, index) in stages" :key="stage.id">
-        <button
-          type="button"
-          class="stage-navigation__button"
-          :class="{ 'is-active': index === activeIndex }"
-          :aria-current="index === activeIndex ? 'step' : undefined"
-          @click="emit('navigate', index)"
-        >
-          <span class="stage-navigation__dot" aria-hidden="true"></span>
-          <span class="stage-navigation__label">{{ stage.titulo }}</span>
+        <button type="button" class="stage-navigation__button" :class="{ 'is-active': index === activeIndex }"
+          :aria-label="`Etapa ${index + 1}: ${stage.titulo}`" :title="stage.titulo"
+          :aria-current="index === activeIndex ? 'step' : undefined" @click="emit('navigate', index)">
+          <span class="stage-navigation__number" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
+
         </button>
       </li>
     </ol>
-    <button type="button" class="stage-navigation__map" @click="emit('map')">
+
+    <!-- Siempre accesible durante el recorrido; navega a /mapa directamente. -->
+    <RouterLink :to="mapRoute" class="stage-navigation__map" aria-label="Ir al mapa" title="Ir al mapa">
       <span class="stage-navigation__map-icon" aria-hidden="true">⌖</span>
-      <span>Ir al mapa</span>
-    </button>
+      <span class="stage-navigation__map-label">Ir al mapa</span>
+    </RouterLink>
   </nav>
 </template>
 
@@ -33,78 +34,153 @@ const emit = defineEmits(['navigate', 'map'])
 .stage-navigation {
   position: absolute;
   z-index: 3;
-  top: 50%; left: clamp(15px, 3%, 46px);
-  transform: translateY(-50%);
-  width: min(180px, 18%);
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100% - 36px);
-  gap: 14px;
+  top: 0;
+  bottom: 0;
+  left: clamp(8px, 2%, 28px);
+  width: clamp(150px, 17%, 210px);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 18px 4px 24px;
+  box-sizing: border-box;
 }
+
 .stage-navigation__list {
+  align-self: center;
+  max-height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 0;
+  gap: 8px;
+  padding: 4px;
   margin: 0;
   list-style: none;
   overflow-y: auto;
   scrollbar-width: thin;
+  scrollbar-color: #9bb7e7 #fff;
 }
-.stage-navigation__button, .stage-navigation__map {
-  appearance: none; border: 0; background: none; cursor: pointer;
-  display: inline-flex; align-items: center;
-  gap: 12px; min-height: 40px;
+
+.stage-navigation__button,
+.stage-navigation__map {
+  box-sizing: border-box;
+  appearance: none;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
   font-family: NotoSans, sans-serif;
-  font-size: 0.94rem;
-  color: #627592;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #61718b;
   text-align: left;
-  padding: 8px 5px;
+  text-decoration: none;
+  padding: 8px 4px;
   width: 100%;
 }
-.stage-navigation__button:hover, .stage-navigation__map:hover { color: #245baf; }
-.stage-navigation__button:focus-visible, .stage-navigation__map:focus-visible {
-  outline: 2px solid #2563eb; outline-offset: 3px; border-radius: 6px;
-}
-.stage-navigation__button.is-active { color: #163b7a; font-weight: 700; }
-.stage-navigation__dot {
-  width: 11px; height: 11px; border-radius: 50%; flex: none;
-  border: 2px solid #90a4c2; background: #fff;
-  transition: background 180ms ease, border-color 180ms ease;
-}
-.is-active .stage-navigation__dot { border-color: #2563eb; background: #2563eb; }
-.stage-navigation__label { overflow-wrap: anywhere; }
-.stage-navigation__map {
-  border-top: 1px solid #cbd5e1;
-  padding-top: 16px;
-  font-weight: 700;
+
+.stage-navigation__button:hover,
+.stage-navigation__map:hover {
   color: #245baf;
 }
-.stage-navigation__map-icon { font-size: 1.3rem; }
+
+.stage-navigation__button:focus-visible,
+.stage-navigation__map:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.stage-navigation__button.is-active {
+  color: #163b7a;
+  font-weight: 700;
+}
+
+.stage-navigation__number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7e1f0;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.is-active .stage-navigation__number {
+  border-color: #3075ed;
+  background: #3075ed;
+  color: #fff;
+}
+
+.stage-navigation__label {
+  overflow-wrap: anywhere;
+}
+
+.stage-navigation__map {
+  flex: none;
+  border: 1px solid #9ab7e7;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: #245baf;
+  justify-content: center;
+}
+
+.stage-navigation__map-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
 @media (max-width: 767px) {
+
+  /* En móvil también se conserva el lateral izquierdo, con etapas numeradas. */
   .stage-navigation {
-    top: 8px; left: 10px; right: 10px; width: auto;
-    transform: none;
-    max-height: none;
-    flex-direction: row; align-items: stretch; gap: 8px;
-    border-radius: 14px; padding: 5px 7px;
-    background: rgb(255 255 255 / 86%);
-    box-shadow: 0 4px 25px rgb(53 77 115 / 8%);
+    left: 4px;
+    width: 58px;
+    padding: 8px 3px 16px;
+    gap: 12px;
   }
+
   .stage-navigation__list {
-    flex-direction: row; flex: 1; overflow-x: auto; overflow-y: hidden;
-    gap: 5px; min-width: 0; white-space: nowrap;
+    padding: 3px;
+    gap: 8px;
   }
-  .stage-navigation__button, .stage-navigation__map {
-    min-height: 37px; width: auto; padding: 5px 8px;
-    font-size: 0.8rem; gap: 6px;
+
+  .stage-navigation__button {
+    justify-content: center;
+    padding: 4px 0;
+    min-height: 44px;
   }
-  .stage-navigation__dot { width: 9px; height: 9px; }
-  .stage-navigation__map {
-    border-top: none; border-left: 1px solid #cbd5e1;
-    padding: 4px 6px 4px 10px;
+
+  .stage-navigation__number {
+    width: 34px;
+    height: 34px;
+  }
+
+  .stage-navigation__label,
+  .stage-navigation__map-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
   }
-  .stage-navigation__map-icon { display: none; }
+
+  .stage-navigation__map {
+    padding: 10px 0;
+    min-height: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-navigation__number {
+    transition: none;
+  }
 }
 </style>

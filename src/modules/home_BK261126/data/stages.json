@@ -1,0 +1,17 @@
+[
+  {
+    "id": "etapa-1",
+    "titulo": "Planeación y Priorización",
+    "texto1": "Se identifican las necesidades de infraestructura y se priorizan los proyectos conforme a los instrumentos nacionales de planeación, considerando su contribución al desarrollo regional, la generación de empleo y el bienestar de la población."
+  },
+  {
+    "id": "etapa-2",
+    "titulo": "Formulación del proyecto",
+    "texto1": "Se desarrolla la propuesta definiendo alcance, objetivos, población beneficiada, beneficios esperados, costos y requerimientos técnicos, integrando los estudios que sustentan su viabilidad"
+  },
+  {
+    "id": "etapa-3",
+    "titulo": "Evaluación y Registro",
+    "texto1": "Los proyectos se presentan mediante la Ficha de Valoración Estratégica (FIVE o FIVE-S) para su análisis y, una vez cumplidos los requisitos, se registran en la Cartera de Programas y Proyectos de Inversión."
+  }
+]

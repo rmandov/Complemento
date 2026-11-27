@@ -1,56 +1,67 @@
-/**
- * Configuración central de la experiencia 3D.
- * El modelo GLB vive en public/models/, no en src/assets/.
- * BASE_URL permite desplegar Vite en una subruta de producción.
- */
 export const JOURNEY_CONFIG = {
   model: {
-    // MODIFICAR AQUÍ PARA CAMBIAR EL MODELO: sphere.glb -> train.glb
+    // La esfera azul se genera en código: no requiere descargar un GLB.
+    // Para un modelo propio cambia type a 'glb' y configura path.
+    type: 'sphere',
     path: `${import.meta.env.BASE_URL}models/esfera_ornamental_calada.glb`,
-    // MODIFICAR AQUÍ PARA CAMBIAR EL TAMAÑO (escala tras normalizar el GLB)
-    scale: 0.5,
-    mobileScale: 0.77,
+    color: '#3075ed',
+    radius: 0.70,
+    scale: 1,
+    mobileScale: 0.67,
     tabletScale: 0.88,
-    // MODIFICAR AQUÍ PARA DESACTIVAR LA ROTACIÓN PROPIA DE LA ESFERA
-    rotate: false,
-    rotationSpeed: 0.42, // radianes / segundo; independiente del scroll
-    // Al usar un tren, poner true (y rotate: false).
+    rotate: true,
+    rotationMode: 'scroll', // 'scroll' o 'time'; rotate: false para un tren.
+    rotationSpeed: 0.26,
     followTangent: false,
-    // El eje frontal del GLB: por defecto, +Z. Ajustar para otro modelo.
     forwardAxis: [0, 0, 1],
-    // Si el GLB apunta en otra dirección, corregir los grados aquí.
     rotationOffsetDegrees: [0, 0, 0],
+    materialPreset: 'original',
   },
-
-  // MODIFICAR AQUÍ PARA CAMBIAR LA CÁMARA
+  material: {
+    metalness: 0.82,
+    roughness: 0.23,
+    clearcoat: 1,
+    clearcoatRoughness: 0.10,
+    envMapIntensity: 1.4,
+  },
+  lighting: {
+    environmentIntensity: 1,
+    toneMappingExposure: 1.05,
+    keyIntensity: 3,
+    fillIntensity: 1.15,
+    rimIntensity: 2,
+  },
+  motion: {
+    floatAmplitude: 0,
+    floatSpeed: 0.8,
+    tiltAmplitude: 0,
+    cameraDrift: 0,
+    cameraDepth: 0,
+  },
   camera: {
     fov: 42,
     distance: 9,
     near: 0.1,
     far: 100,
+    // El canvas permanece transparente y la sección HTML tiene fondo blanco.
     background: null,
   },
-
-  // MODIFICAR AQUÍ PARA CAMBIAR EL RECORRIDO y la experiencia de scroll
   journey: {
     closed: true,
-    scrollVhPerStage: 115, // altura de scroll entre etapas, en svh
-    smoothingSeconds: 0.3, // suavizado del modelo; no retrasa el texto
-    jumpDurationSeconds: 1.1, // salto desde la navegación lateral
-    showPath: true, // útil para pruebas; false oculta la curva
+    scrollVhPerStage: 170,
+    smoothingSeconds: 0.25,
+    jumpDurationSeconds: 1.1,
+    showPath: true,
   },
-
   layout: {
-    // MODIFICAR AQUÍ SI CAMBIA LA ALTURA DEL NAVBAR DE TU SITIO
     navbarDesktopPx: 80,
     navbarTabletPx: 72,
     navbarMobilePx: 64,
-    // ID de la sección que YA contiene el botón hacia el mapa.
-    mapTarget: "#map-section",
+    // RouterLink respeta el base del router del proyecto.
+    mapRoute: '/mapa',
   },
-
   performance: {
-    maxPixelRatio: 1.6,
+    maxPixelRatio: 1.5,
     maxPixelRatioMobile: 1.25,
   },
-};
+}
